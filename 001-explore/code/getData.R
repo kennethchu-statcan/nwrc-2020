@@ -38,7 +38,7 @@ getData <- function(
 	DF.swamp <- as.data.frame(DF.swamp);
 
 	DF.marsh <- DF.marsh[,setdiff(colnames(DF.marsh),"X1")];
-	DF.swamp <- DF.marsh[,setdiff(colnames(DF.swamp),"X1")];
+	DF.swamp <- DF.swamp[,setdiff(colnames(DF.swamp),"X1")];
 
         list.data_raw <- list(
 	    marsh = DF.marsh,

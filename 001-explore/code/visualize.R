@@ -44,11 +44,13 @@ visualize_scatter3D <- function(
     require(plot3D);
     png(filename = PNG.output, height = 6, width = 6, units = "in", res = 300);
     plot3D::scatter3D(
-        x      = DF.input[,"Band_1"],
-        y      = DF.input[,"Band_2"],
-        z      = DF.input[,"Band_3"],
-	colvar = DF.input[,"plot.colour"],
-	col    = c("red","blue")
+        x       = DF.input[,"Band_1"],
+        y       = DF.input[,"Band_2"],
+        z       = DF.input[,"Band_3"],
+	col.var = as.integer(DF.input[,"type"]), 
+	col     = c("red","blue"),
+	pch     = 19,
+	cex     = 0.1
         );
     dev.off();
     }
