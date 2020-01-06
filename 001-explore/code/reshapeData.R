@@ -70,7 +70,11 @@ reshapeData_long <- function(DF.input = NULL) {
 	replacement = ""
 	);
 
-    DF.output <- DF.temp[,c("X","Y","date","band","value")];
+    DF.temp <- DF.temp[,c("X","Y","date","band","value")];
+
+    DF.output <- DF.temp %>%
+        dplyr::select(X,Y,date,band,value) %>%
+	tidyr::spread(key=band,value=value);
 
     return(DF.output);
 
