@@ -19,7 +19,8 @@ setwd( output.directory );
 # source supporting R code
 code.files <- c(
     "getData.R",
-    "reshapeData.R"
+    "reshapeData.R",
+    "visualize.R"
     );
 
 for ( code.file in code.files ) {
@@ -49,6 +50,10 @@ list.data_reshaped <- reshapeData(
 
 cat("\nstr(list.data_reshaped)\n" );
 print( str(list.data_reshaped)    );
+
+visualize(
+    list_input = list.data_reshaped
+    );
 
 ##################################################
 print( warnings() );
