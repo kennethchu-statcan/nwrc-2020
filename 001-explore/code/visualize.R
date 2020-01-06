@@ -26,7 +26,13 @@ visualize <- function(
     print( summary(DF.temp)   );
 
     visualize_scatter3D(
-        DF.input = DF.temp
+        DF.input = DF.temp[DF.temp[,"type"] == "marsh",],
+	PNG.output = 'tmp-scatter3D-marsh.png'
+        );
+
+    visualize_scatter3D(
+        DF.input = DF.temp[DF.temp[,"type"] == "swamp",],
+	PNG.output = 'tmp-scatter3D-swamp.png'
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
