@@ -76,6 +76,8 @@ reshapeData_long <- function(DF.input = NULL) {
         dplyr::select(X,Y,date,band,value) %>%
 	tidyr::spread(key=band,value=value);
 
+    DF.output[,"date"] <- as.Date(x = DF.output[,"date"], tryFormats = c("%Y%m%d"));
+
     return(DF.output);
 
     }
