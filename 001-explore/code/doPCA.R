@@ -26,6 +26,8 @@ doPCA <- function(
         results.princomp[['scores']]
         );
 
+    DF.temp[,"X_Y"] <- paste(DF.temp[,"X"],DF.temp[,"Y"],sep="_");
+
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
 
@@ -33,6 +35,12 @@ doPCA <- function(
     print( summary(DF.temp)   );
 
     saveRDS(object = DF.temp, file = "tmp-PCA.RData");    
+
+    for (i in seq(1,50)) {
+        doPCA_ggplot2_Comp1(
+            DF.input = DF.temp
+            );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
@@ -42,53 +50,73 @@ doPCA <- function(
     }
 
 ###################################################
-doPCA_plotly_scatter3d <- function(
+doPCA_ggplot2_scatter <- function(
     DF.input   = NULL,
-    PNG.output = 'tmp-scatter3D.png'
+    PNG.output = 'tmp-ggplot2-PC.png'
     ) {
-    plotly::plot_ly(
-        x       = DF.temp[,"Band_1"],
-        y       = DF.temp[,"Band_2"],
-        z       = DF.temp[,"Band_3"],
-        type    = "scatter3d",
-        mode    = "markers",
-        size    = 0.75,
-        color   = DF.temp[,"plot.colour"],
-        colors  = c("red","blue"),
-        opacity = 0.3
+
+    require(ggplot2);
+
+    DF.input[,"X_Y"] <- paste(DF.input[,"X"],DF.input[,"Y"],sep="_");
+
+    my.ggplot <- initializePlot();
+    my.ggplot <- my.ggplot + geom_line(
+        data    = DF.input,
+        mapping = aes(x = Comp.1, y = Comp.2, group = X_Y, colour = type)
         );
+
+    ggsave(
+        file   = PNG.output,
+        plot   = my.ggplot,
+        dpi    = 300,
+        height =   8,
+        width  =   8,
+        units  = 'in'
+        );
+
+    return( NULL );
+
     }
 
-doPCA_scatter3D <- function(
+doPCA_ggplot2_Comp1 <- function(
     DF.input   = NULL,
-    PNG.output = 'tmp-scatter3D.png'
+    PNG.output = 'tmp-ggplot2-Comp1.png'
     ) {
-    #require(plotly);
-    #my.plot <- plotly::plot_ly(
-    #    x      = DF.input[,"Band_1"],
-    #    y      = DF.input[,"Band_2"],
-    #    z      = DF.input[,"Band_3"],
-    #    type   = "scatter3d",
-    #    mode   = "markers"#,
-    #    #color = as.integer(DF.input[,"type"])
-    #    #width  = NULL,
-    #    #height = NULL
-    #    );
-    #plotly::orca(
-    #    p    = my.plot,
-    #    file = PNG.output
-    #    );
-    require(plot3D);
-    png(filename = PNG.output, height = 6, width = 6, units = "in", res = 300);
-    plot3D::scatter3D(
-        x       = DF.input[,"Band_1"],
-        y       = DF.input[,"Band_2"],
-        z       = DF.input[,"Band_3"],
-	col.var = as.integer(DF.input[,"type"]), 
-	col     = c("red","blue"),
-	pch     = 19,
-	cex     = 0.1
+
+    require(ggplot2);
+
+
+    my.ggplot <- initializePlot();
+    my.ggplot <- my.ggplot + geom_line(
+        data    = DF.input,
+        mapping = aes(x = Comp.1, y = Comp.2, group = X_Y, colour = type)
         );
-    dev.off();
+
+    selected.pixel <- base::sample(x=unique(DF.input[,"X_Y"]),size=1);
+    DF.temp <- DF.input[DF.input[,"X_Y"] %in% selected.pixel,];
+
+    my.ggplot <- initializePlot(
+        title    = selected.pixel,
+        subtitle = paste0("(",DF.temp[,"type"],")")
+        );
+
+    my.ggplot <- my.ggplot + geom_path(
+        data    = DF.temp,
+        mapping = aes(x=date,y=Comp.1,group=X_Y,color=type),
+        alpha   = 0.5
+        );
+
+    PNG.output <- paste0('tmp-ggplot2-Comp1',selected.pixel,'.png');
+    ggsave(
+        file   = PNG.output,
+        plot   = my.ggplot,
+        dpi    = 300,
+        height =   8,
+        width  =  16,
+        units  = 'in'
+        );
+
+    return( NULL );
+
     }
 

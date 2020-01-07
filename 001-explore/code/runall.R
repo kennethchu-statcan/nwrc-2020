@@ -20,6 +20,7 @@ setwd( output.directory );
 code.files <- c(
     "doPCA.R",
     "getData.R",
+    "initializePlot.R",
     "reshapeData.R",
     "visualize.R"
     );
