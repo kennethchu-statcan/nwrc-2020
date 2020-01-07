@@ -25,8 +25,6 @@ visualize <- function(
     cat("\nsummary(DF.temp)\n");
     print( summary(DF.temp)   );
 
-    saveRDS(object = DF.temp, file = "temp.RData");    
-
     visualize_scatter3D(
         DF.input = DF.temp[DF.temp[,"type"] == "marsh",],
 	    PNG.output = 'tmp-scatter3D-marsh.png'
