@@ -107,8 +107,8 @@ doPCA_ggplot2_Comp1 <- function(
     print("A-3");
 
     my.ggplot <- my.ggplot + scale_y_continuous(
-        limits = c(  -1.6,1.6),
-        breaks = seq(-1.6,1.6,0.2)
+        limits = c(  -0.3,1.6),
+        breaks = seq(-0.2,1.6,0.2)
         );
 
     print("A-4");
@@ -150,8 +150,8 @@ doPCA_ggplot2_Comp1_single <- function(
         );
 
     my.ggplot <- my.ggplot + scale_y_continuous(
-        limits = c(  -1.6,1.6),
-        breaks = seq(-1.6,1.6,0.2)
+        limits = c(  -0.3,1.6),
+        breaks = seq(-0.2,1.6,0.2)
         );
 
     PNG.output <- paste0('tmp-ggplot2-Comp1-',selected.pixel,'.png');
