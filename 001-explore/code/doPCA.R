@@ -106,7 +106,7 @@ doPCA_ggplot2_Comp1 <- function(
         alpha   = 0.5
         );
 
-    PNG.output <- paste0('tmp-ggplot2-Comp1',selected.pixel,'.png');
+    PNG.output <- paste0('tmp-ggplot2-Comp1-',selected.pixel,'.png');
     ggsave(
         file   = PNG.output,
         plot   = my.ggplot,
