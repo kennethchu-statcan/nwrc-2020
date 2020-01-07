@@ -36,8 +36,12 @@ doPCA <- function(
 
     saveRDS(object = DF.temp, file = "tmp-PCA.RData");    
 
+    doPCA_ggplot2_Comp1(
+        DF.input = DF.temp
+        );
+
     for (i in seq(1,50)) {
-        doPCA_ggplot2_Comp1(
+        doPCA_ggplot2_Comp1_single(
             DF.input = DF.temp
             );
         }
@@ -85,12 +89,51 @@ doPCA_ggplot2_Comp1 <- function(
 
     require(ggplot2);
 
+    print("A-1");
 
-    my.ggplot <- initializePlot();
+    my.ggplot <- initializePlot(
+        title    = NULL,
+        subtitle = NULL 
+        );
+
+    print("A-2");
+
     my.ggplot <- my.ggplot + geom_line(
         data    = DF.input,
-        mapping = aes(x = Comp.1, y = Comp.2, group = X_Y, colour = type)
+        mapping = aes(x=date,y=Comp.1,group=X_Y,color=type),
+        alpha   = 0.3
         );
+
+    print("A-3");
+
+    my.ggplot <- my.ggplot + scale_y_continuous(
+        limits = c(  -1.6,1.6),
+        breaks = seq(-1.6,1.6,0.2)
+        );
+
+    print("A-4");
+
+    ggsave(
+        file   = PNG.output,
+        plot   = my.ggplot,
+        dpi    = 300,
+        height =   8,
+        width  =  16,
+        units  = 'in'
+        );
+
+    print("A-5");
+
+    return( NULL );
+
+    }
+
+doPCA_ggplot2_Comp1_single <- function(
+    DF.input   = NULL,
+    PNG.output = 'tmp-ggplot2-Comp1.png'
+    ) {
+
+    require(ggplot2);
 
     selected.pixel <- base::sample(x=unique(DF.input[,"X_Y"]),size=1);
     DF.temp <- DF.input[DF.input[,"X_Y"] %in% selected.pixel,];
@@ -100,10 +143,15 @@ doPCA_ggplot2_Comp1 <- function(
         subtitle = paste0("(",DF.temp[,"type"],")")
         );
 
-    my.ggplot <- my.ggplot + geom_path(
+    my.ggplot <- my.ggplot + geom_line(
         data    = DF.temp,
         mapping = aes(x=date,y=Comp.1,group=X_Y,color=type),
         alpha   = 0.5
+        );
+
+    my.ggplot <- my.ggplot + scale_y_continuous(
+        limits = c(  -1.6,1.6),
+        breaks = seq(-1.6,1.6,0.2)
         );
 
     PNG.output <- paste0('tmp-ggplot2-Comp1-',selected.pixel,'.png');
