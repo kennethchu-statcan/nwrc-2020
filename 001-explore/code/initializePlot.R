@@ -16,6 +16,7 @@ initializePlot <- function(
         axis.title.y     = element_blank(),
         axis.text.x      = element_text(size = textsize.axis,  face = "bold"),
         axis.text.y      = element_text(size = textsize.axis,  face = "bold"),
+        legend.text      = element_text(size = textsize.axis),
         panel.grid.major = element_line(colour="gray", linetype=2, size=0.25),
         panel.grid.minor = element_line(colour="gray", linetype=2, size=0.25)
         );
