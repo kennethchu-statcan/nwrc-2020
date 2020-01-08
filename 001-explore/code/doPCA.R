@@ -28,6 +28,14 @@ doPCA <- function(
 
     DF.temp[,"X_Y"] <- paste(DF.temp[,"X"],DF.temp[,"Y"],sep="_");
 
+    for ( temp.variable in c("Comp.1","Comp.2","Comp.3") ) {
+        DF.temp <- doPCA_attach_scaled_variable(
+            DF.input        = DF.temp,
+            target.variable = temp.variable,
+            by.variable     = "X_Y"
+            );
+        }
+
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
 
@@ -36,12 +44,80 @@ doPCA <- function(
 
     saveRDS(object = DF.temp, file = "tmp-PCA.RData");    
 
-    doPCA_ggplot2_Comp1(
-        DF.input = DF.temp
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Band_1",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Band1.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Band_2",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Band2.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Band_3",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Band3.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Comp.1",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Comp1.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.1",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-scaled-Comp1.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Comp.2",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Comp2.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.2",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-scaled-Comp2.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "Comp.3",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-Comp3.png'
+        );
+
+    doPCA_grouped_time_series(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.3",
+        limits          = c(  -3.0,3.0),
+        breaks          = seq(-3.0,3.0,0.5),
+        PNG.output      = 'tmp-ggplot2-scaled-Comp3.png'
         );
 
     for (i in seq(1,50)) {
-        doPCA_ggplot2_Comp1_single(
+        doPCA_single_time_series(
             DF.input = DF.temp
             );
         }
@@ -54,6 +130,62 @@ doPCA <- function(
     }
 
 ###################################################
+doPCA_attach_scaled_variable <- function(
+    DF.input        = NULL,
+    target.variable = NULL,
+    by.variable     = NULL
+    ) {
+
+    require(dplyr);
+
+    my.formula <- as.formula(paste0(target.variable," ~ ",by.variable));
+
+    DF.means <- aggregate(formula = my.formula, data = DF.input, FUN = mean);
+    colnames(DF.means) <- gsub(
+        x           = colnames(DF.means),
+        pattern     = target.variable,
+        replacement = "mean_target"
+        );
+
+    DF.sds <- aggregate(formula = my.formula, data = DF.input, FUN = sd  );
+    colnames(DF.sds) <- gsub(
+        x           = colnames(DF.sds),
+        pattern     = target.variable,
+        replacement = "sd_target"
+        );
+
+    DF.output <- dplyr::left_join(
+        x  = DF.input,
+        y  = DF.means,
+        by = by.variable
+        );
+
+    DF.output <- dplyr::left_join(
+        x  = DF.output,
+        y  = DF.sds,
+        by = by.variable
+        );
+
+    DF.output <- as.data.frame(DF.output);
+
+    DF.output[,"scaled_variable"] <- DF.output[, target.variable ] - DF.output[,"mean_target"];
+    DF.output[,"scaled_variable"] <- DF.output[,"scaled_variable"] / DF.output[,  "sd_target"];
+
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "scaled_variable",
+        replacement = paste0("scaled_",target.variable)
+        );
+
+    DF.output <- DF.output[,setdiff(colnames(DF.output),c("mean_target","sd_target"))];
+
+    cat("\nstr(DF.output)\n");
+    print( str(DF.output)   );
+
+    return( DF.output );
+
+    }
+
 doPCA_ggplot2_scatter <- function(
     DF.input   = NULL,
     PNG.output = 'tmp-ggplot2-PC.png'
@@ -82,36 +214,49 @@ doPCA_ggplot2_scatter <- function(
 
     }
 
-doPCA_ggplot2_Comp1 <- function(
-    DF.input   = NULL,
-    PNG.output = 'tmp-ggplot2-Comp1.png'
+doPCA_grouped_time_series <- function(
+    DF.input        = NULL,
+    target.variable = NULL,
+    limits          = c(  -3.0,3.0),
+    breaks          = seq(-3.0,3.0,0.5),
+    PNG.output      = 'tmp-ggplot2-Comp1.png'
     ) {
 
     require(ggplot2);
 
-    print("A-1");
+    DF.temp <- DF.input[,c("X_Y","date","type",target.variable)];
+    colnames(DF.temp) <- gsub(
+        x           = colnames(DF.temp),
+        pattern     = target.variable,
+        replacement = "target.variable"
+        );
 
     my.ggplot <- initializePlot(
         title    = NULL,
-        subtitle = NULL 
+        subtitle = target.variable
         );
 
-    print("A-2");
-
     my.ggplot <- my.ggplot + geom_line(
-        data    = DF.input,
-        mapping = aes(x=date,y=Comp.1,group=X_Y,color=type),
+        data    = DF.temp,
+        mapping = aes(x=date,y=target.variable,group=X_Y,color=type),
         alpha   = 0.3
         );
 
-    print("A-3");
-
-    my.ggplot <- my.ggplot + scale_y_continuous(
-        limits = c(  -0.3,1.6),
-        breaks = seq(-0.2,1.6,0.2)
+    my.ggplot <- my.ggplot + scale_x_date(
+        breaks       = sort(unique(DF.temp[,"date"])),
+        minor_breaks = NULL
         );
 
-    print("A-4");
+    my.ggplot <- my.ggplot + theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5)
+        );
+
+    my.ggplot <- my.ggplot + scale_y_continuous(
+        #limits = c(  -0.3,1.6),
+        #breaks = seq(-0.2,1.6,0.2)
+        limits = c(  -3.0,3.0),
+        breaks = seq(-3.0,3.0,0.5)
+        );
 
     ggsave(
         file   = PNG.output,
@@ -122,13 +267,11 @@ doPCA_ggplot2_Comp1 <- function(
         units  = 'in'
         );
 
-    print("A-5");
-
     return( NULL );
 
     }
 
-doPCA_ggplot2_Comp1_single <- function(
+doPCA_single_time_series <- function(
     DF.input   = NULL,
     PNG.output = 'tmp-ggplot2-Comp1.png'
     ) {
@@ -145,13 +288,22 @@ doPCA_ggplot2_Comp1_single <- function(
 
     my.ggplot <- my.ggplot + geom_line(
         data    = DF.temp,
-        mapping = aes(x=date,y=Comp.1,group=X_Y,color=type),
+        mapping = aes(x=date,y=scaled_Comp.1,group=X_Y,color=type),
         alpha   = 0.5
         );
 
+    my.ggplot <- my.ggplot + scale_x_date(
+        breaks       = sort(unique(DF.temp[,"date"])),
+        minor_breaks = NULL
+        );
+
+    my.ggplot <- my.ggplot + theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5)
+        );
+
     my.ggplot <- my.ggplot + scale_y_continuous(
-        limits = c(  -0.3,1.6),
-        breaks = seq(-0.2,1.6,0.2)
+        limits = c(  -3.0,3.0),
+        breaks = seq(-3.0,3.0,0.5)
         );
 
     PNG.output <- paste0('tmp-ggplot2-Comp1-',selected.pixel,'.png');
