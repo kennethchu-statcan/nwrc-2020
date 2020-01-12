@@ -1,6 +1,7 @@
 
 doPCA <- function(
-    list_input = NULL
+    list_input  = NULL,
+    output_file = "tmp-PCA.RData"
     ) {
 
     thisFunctionName <- "doPCA";
@@ -8,42 +9,114 @@ doPCA <- function(
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
 
+    require(ComplexHeatmap);
+    require(circlize);
+
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.temp <- data.frame();
-    for ( temp.name in names(list_input) ) {
-        DF.temp.1 <- list_input[[temp.name]];
-        DF.temp.1[,"type"] <- temp.name;
-        DF.temp <- rbind(DF.temp,DF.temp.1);
-        }
+    if ( file.exists(output_file) ) {
 
-    results.princomp <- princomp(
-        formula = ~ Band_1 + Band_2 + Band_3,
-        data    = DF.temp
-        );
+        cat(paste0("\n### ",output_file," already exists; loading this file ...\n"));
 
-    DF.temp <- cbind(
-        DF.temp,
-        results.princomp[['scores']]
-        );
+        DF.temp <- readRDS(file = output_file);
 
-    DF.temp[,"X_Y"] <- paste(DF.temp[,"X"],DF.temp[,"Y"],sep="_");
+        cat(paste0("\n### Finished loading raw data.\n"));
 
-    for ( temp.variable in c("Comp.1","Comp.2","Comp.3") ) {
-        DF.temp <- doPCA_attach_scaled_variable(
-            DF.input        = DF.temp,
-            target.variable = temp.variable,
-            by.variable     = "X_Y"
+    } else {
+
+        DF.temp <- data.frame();
+        for ( temp.name in names(list_input) ) {
+            DF.temp.1 <- list_input[[temp.name]];
+            DF.temp.1[,"type"] <- temp.name;
+            DF.temp <- rbind(DF.temp,DF.temp.1);
+            }
+
+        results.princomp <- princomp(
+            formula = ~ Band_1 + Band_2 + Band_3,
+            data    = DF.temp
             );
+
+        DF.temp <- cbind(
+            DF.temp,
+            results.princomp[['scores']]
+            );
+
+        DF.temp[,"X_Y"] <- paste(DF.temp[,"X"],DF.temp[,"Y"],sep="_");
+
+        for ( temp.variable in c("Comp.1","Comp.2","Comp.3") ) {
+            DF.temp <- doPCA_attach_scaled_variable(
+                DF.input        = DF.temp,
+                target.variable = temp.variable,
+                by.variable     = "X_Y"
+                );
+            }
+
+        saveRDS(object = DF.temp, file = output_file);    
+
         }
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
 
     cat("\nsummary(DF.temp)\n");
     print( summary(DF.temp)   );
 
-    saveRDS(object = DF.temp, file = "tmp-PCA.RData");    
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.1",
+        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp1.png'
+        );
 
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Comp.1",
+        PNG.output      = 'tmp-clustered-heatmap-Comp1.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Band_1",
+        PNG.output      = 'tmp-clustered-heatmap-Band1.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.2",
+        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp2.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Comp.2",
+        PNG.output      = 'tmp-clustered-heatmap-Comp2.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Band_2",
+        PNG.output      = 'tmp-clustered-heatmap-Band2.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "scaled_Comp.3",
+        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp3.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Comp.3",
+        PNG.output      = 'tmp-clustered-heatmap-Comp3.png'
+        );
+
+    doPCA_clustered_heatmap(
+        DF.input        = DF.temp,
+        target.variable = "Band_3",
+        PNG.output      = 'tmp-clustered-heatmap-Band3.png'
+        );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doPCA_grouped_time_series(
         DF.input        = DF.temp,
         target.variable = "Band_1",
@@ -116,11 +189,12 @@ doPCA <- function(
         PNG.output      = 'tmp-scaled-Comp3.png'
         );
 
-    for (i in seq(1,50)) {
-        doPCA_single_time_series(
-            DF.input = DF.temp
-            );
-        }
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    #for (i in seq(1,50)) {
+    #    doPCA_single_time_series(
+    #        DF.input = DF.temp
+    #        );
+    #    }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
@@ -130,6 +204,72 @@ doPCA <- function(
     }
 
 ###################################################
+doPCA_clustered_heatmap <- function(
+    DF.input        = NULL,
+    target.variable = NULL,
+    heatmap_palette = circlize::colorRamp2(c(-3,0,3), c("blue","white","red")),
+    PNG.output      = 'tmp-clustered-heatmap-Comp1.png'
+    ) {
+
+    if (!is.null(heatmap_palette)) {
+
+        require(ComplexHeatmap);
+        require(dplyr);
+        require(tidyr);
+
+        cat("\nstr(DF.input) -- doPCA_cluster_heatmap()\n");
+        print( str(DF.input)   );
+
+        DF.temp <- DF.input[,c("X_Y","type","date",target.variable)];
+        colnames(DF.temp) <- gsub(
+            x           = colnames(DF.temp),
+            pattern     = target.variable,
+            replacement = "target_variable"
+            );
+
+        DF.temp <- DF.temp %>%
+            tidyr::spread(key = date, value = target_variable);
+
+        cat("\nstr(DF.temp) -- doPCA_cluster_heatmap()\n");
+        print( str(DF.temp) );
+
+        rownames(DF.temp) <- DF.temp[,"X_Y"];
+        DF.temp <- DF.temp[,setdiff(colnames(DF.temp),"X_Y")];
+
+        png(filename = PNG.output, height = 5, width = 4, units = "in", res = 300);
+        my.Annotation <- ComplexHeatmap::HeatmapAnnotation(
+            type  = DF.temp[,"type"],
+            col   = list(type = c("swamp" = "yellow", "marsh" = "green")),
+            which = "row"
+            );
+        my.Heatmap <- ComplexHeatmap::Heatmap(
+            matrix           = as.matrix(DF.temp[,setdiff(colnames(DF.temp),"type")]),
+            name             = target.variable,
+            clustering_distance_rows = "pearson",
+            col              = heatmap_palette,
+            show_row_names   = FALSE,
+            row_names_side   = "left",
+            row_title        = target.variable,
+            row_title_side   = "left", #c("left", "right"),
+            row_title_gp     = gpar(fontsize = 14),
+            cluster_columns  = FALSE,
+            show_column_dend = FALSE,
+            column_names_gp  = gpar(fontsize = 8),
+            right_annotation = my.Annotation
+            );
+        ComplexHeatmap::draw(
+            object                  = my.Heatmap,
+            legend_labels_gp        = grid::gpar(fontsize = 10, fontface = "bold"),
+            heatmap_row_names_gp    = grid::gpar(fontsize = 10, fontface = "bold"),
+            heatmap_column_names_gp = grid::gpar(fontsize = 10, fontface = "bold")
+            );
+        dev.off();
+        }
+
+    return( NULL );
+
+    }
+
 doPCA_attach_scaled_variable <- function(
     DF.input        = NULL,
     target.variable = NULL,
