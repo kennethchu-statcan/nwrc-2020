@@ -113,7 +113,7 @@ doPCA <- function(
         target.variable = "scaled_Comp.3",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-ggplot2-scaled-Comp3.png'
+        PNG.output      = 'tmp-scaled-Comp3.png'
         );
 
     for (i in seq(1,50)) {
