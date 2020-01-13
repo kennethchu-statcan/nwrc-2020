@@ -18,10 +18,12 @@ setwd( output.directory );
 ##################################################
 # source supporting R code
 code.files <- c(
+    "doFPCA.R",
     "doPCA.R",
     "getData.R",
     "initializePlot.R",
     "reshapeData.R",
+    "utils-fpca.R",
     "visualize.R"
     );
 
@@ -42,24 +44,43 @@ list.data_raw <- getData(
     output_file = RData.raw
     );
 
-cat("\nstr(list.data_raw)\n" );
-print( str(list.data_raw)    );
+cat("\nstr(list.data_raw)\n");
+print( str(list.data_raw)   );
 
 list.data_reshaped <- reshapeData(
     list_input  = list.data_raw,
     output_file = RData.reshaped
     );
 
-cat("\nstr(list.data_reshaped)\n" );
-print( str(list.data_reshaped)    );
+cat("\nstr(list.data_reshaped)\n");
+print( str(list.data_reshaped)   );
 
 visualize(
     list_input = list.data_reshaped
     );
 
-doPCA(
-    list_input = list.data_reshaped
+DF.pca <- doPCA(
+    list_input = list.data_reshaped,
+    make_plots = TRUE
     );
+
+cat("\nstr(DF.pca)\n");
+print( str(DF.pca)   );
+
+DF.fpca <- doFPCA(
+    DF.input            = DF.pca,
+    target.variable     = "scaled_Comp.1",
+    spline.grid         = NULL,
+    n.order             = 3,
+    n.basis             = 9,
+    smoothing.parameter = 0.1,
+    n.harmonics         = 7,
+    FILE.output.RData   = "tmp-FPCA-scaled-Comp1.RData",
+    FILE.output.csv     = "tmp-FPCA-scaled-Comp1.csv"
+    );
+
+cat("\nstr(DF.fpca)\n");
+print( str(DF.fpca)   );
 
 ##################################################
 print( warnings() );

@@ -1,6 +1,7 @@
 
 doPCA <- function(
     list_input  = NULL,
+    make_plots  = TRUE,
     output_file = "tmp-PCA.RData"
     ) {
 
@@ -17,108 +18,115 @@ doPCA <- function(
 
         cat(paste0("\n### ",output_file," already exists; loading this file ...\n"));
 
-        DF.temp <- readRDS(file = output_file);
+        DF.PCA <- readRDS(file = output_file);
 
         cat(paste0("\n### Finished loading raw data.\n"));
 
     } else {
 
-        DF.temp <- data.frame();
+        DF.PCA <- data.frame();
         for ( temp.name in names(list_input) ) {
             DF.temp.1 <- list_input[[temp.name]];
             DF.temp.1[,"type"] <- temp.name;
-            DF.temp <- rbind(DF.temp,DF.temp.1);
+            DF.PCA <- rbind(DF.PCA,DF.temp.1);
             }
 
         results.princomp <- princomp(
             formula = ~ Band_1 + Band_2 + Band_3,
-            data    = DF.temp
+            data    = DF.PCA
             );
 
-        DF.temp <- cbind(
-            DF.temp,
+        DF.PCA <- cbind(
+            DF.PCA,
             results.princomp[['scores']]
             );
 
-        DF.temp[,"X_Y"] <- paste(DF.temp[,"X"],DF.temp[,"Y"],sep="_");
+        DF.PCA[,"X_Y"] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
 
         for ( temp.variable in c("Comp.1","Comp.2","Comp.3") ) {
-            DF.temp <- doPCA_attach_scaled_variable(
-                DF.input        = DF.temp,
+            DF.PCA <- doPCA_attach_scaled_variable(
+                DF.input        = DF.PCA,
                 target.variable = temp.variable,
                 by.variable     = "X_Y"
                 );
             }
 
-        saveRDS(object = DF.temp, file = output_file);    
+        saveRDS(object = DF.PCA, file = output_file);    
 
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat("\nstr(DF.temp)\n");
-    print( str(DF.temp)   );
+    cat("\nstr(DF.PCA)\n");
+    print( str(DF.PCA)   );
 
-    cat("\nsummary(DF.temp)\n");
-    print( summary(DF.temp)   );
+    cat("\nsummary(DF.PCA)\n");
+    print( summary(DF.PCA)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    if ( !make_plots ) {
+        cat(paste0("\n",thisFunctionName,"() quits."));
+        cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
+        return( DF.PCA );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.1",
         PNG.output      = 'tmp-clustered-heatmap-scaled-Comp1.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.1",
         PNG.output      = 'tmp-clustered-heatmap-Comp1.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_1",
         PNG.output      = 'tmp-clustered-heatmap-Band1.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.2",
         PNG.output      = 'tmp-clustered-heatmap-scaled-Comp2.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.2",
         PNG.output      = 'tmp-clustered-heatmap-Comp2.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_2",
         PNG.output      = 'tmp-clustered-heatmap-Band2.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.3",
         PNG.output      = 'tmp-clustered-heatmap-scaled-Comp3.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.3",
         PNG.output      = 'tmp-clustered-heatmap-Comp3.png'
         );
 
     doPCA_clustered_heatmap(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_3",
         PNG.output      = 'tmp-clustered-heatmap-Band3.png'
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_1",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -126,7 +134,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_2",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -134,7 +142,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Band_3",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -142,7 +150,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.1",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -150,7 +158,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.1",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -158,7 +166,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.2",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -166,7 +174,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.2",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -174,7 +182,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "Comp.3",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -182,7 +190,7 @@ doPCA <- function(
         );
 
     doPCA_grouped_time_series(
-        DF.input        = DF.temp,
+        DF.input        = DF.PCA,
         target.variable = "scaled_Comp.3",
         limits          = c(  -3.0,3.0),
         breaks          = seq(-3.0,3.0,0.5),
@@ -192,14 +200,14 @@ doPCA <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     #for (i in seq(1,50)) {
     #    doPCA_single_time_series(
-    #        DF.input = DF.temp
+    #        DF.input = DF.PCA
     #        );
     #    }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
-    return( NULL );
+    return( DF.PCA );
 
     }
 
