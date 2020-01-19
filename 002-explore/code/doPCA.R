@@ -1,8 +1,10 @@
 
 doPCA <- function(
-    list_input  = NULL,
-    make_plots  = TRUE,
-    output_file = "tmp-PCA.RData"
+    list.input  = NULL,
+    make.plots  = TRUE,
+    beam.swath  = NULL,
+    year        = NULL,
+    output.file = paste0("tmp-",beam.swath,"-",year,"-PCA.RData")
     ) {
 
     thisFunctionName <- "doPCA";
@@ -14,36 +16,57 @@ doPCA <- function(
     require(circlize);
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if ( file.exists(output_file) ) {
+    if ( file.exists(output.file) ) {
 
-        cat(paste0("\n### ",output_file," already exists; loading this file ...\n"));
+        cat(paste0("\n### ",output.file," already exists; loading this file ...\n"));
 
-        DF.PCA <- readRDS(file = output_file);
+        DF.PCA <- readRDS(file = output.file);
 
         cat(paste0("\n### Finished loading raw data.\n"));
 
     } else {
 
         DF.PCA <- data.frame();
-        for ( temp.name in names(list_input) ) {
-            DF.temp.1 <- list_input[[temp.name]];
+        for ( temp.name in names(list.input) ) {
+            DF.temp.1 <- list.input[[temp.name]];
             DF.temp.1[,"type"] <- temp.name;
             DF.PCA <- rbind(DF.PCA,DF.temp.1);
             }
 
+        rownames(DF.PCA) <- paste0("row_",seq(1,nrow(DF.PCA)));
+
+        temp.colnames <- grep(
+            x       = colnames(DF.PCA),
+            pattern = "_cov_matrix_real_comp_",
+            value   = TRUE
+            );
+
+        temp.formula <- paste0("~ ",paste(x = temp.colnames, collapse = " + "));
+        temp.formula <- as.formula( temp.formula );
+
         results.princomp <- princomp(
-            formula = ~ Band_1 + Band_2 + Band_3,
+            formula = temp.formula,
             data    = DF.PCA
             );
 
-        DF.PCA <- cbind(
-            DF.PCA,
-            results.princomp[['scores']]
+        DF.scores <- results.princomp[['scores']];
+        DF.scores <- as.data.frame(DF.scores);
+
+        DF.PCA[,   "syntheticID"] <- rownames(DF.PCA   );
+        DF.scores[,"syntheticID"] <- rownames(DF.scores);
+
+        DF.PCA <- dplyr::left_join(
+            x  = DF.PCA,
+            y  = DF.scores,
+            by = "syntheticID"
             );
+        DF.PCA <- as.data.frame(DF.PCA);
+
+        DF.PCA <- DF.PCA[,setdiff(colnames(DF.PCA),"syntheticID")];
+        rm(list = c("DF.scores"));
 
         DF.PCA[,"X_Y"] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
-
-        for ( temp.variable in c("Comp.1","Comp.2","Comp.3") ) {
+        for ( temp.variable in paste0("Comp.",seq(1,length(temp.colnames))) ) {
             DF.PCA <- doPCA_attach_scaled_variable(
                 DF.input        = DF.PCA,
                 target.variable = temp.variable,
@@ -51,7 +74,7 @@ doPCA <- function(
                 );
             }
 
-        saveRDS(object = DF.PCA, file = output_file);    
+        saveRDS(object = DF.PCA, file = output.file);    
 
         }
 
@@ -63,7 +86,7 @@ doPCA <- function(
     print( summary(DF.PCA)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if ( !make_plots ) {
+    if ( !make.plots ) {
         cat(paste0("\n",thisFunctionName,"() quits."));
         cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
         return( DF.PCA );
@@ -73,57 +96,59 @@ doPCA <- function(
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "scaled_Comp.1",
-        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp1.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp1.png')
         );
 
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "Comp.1",
-        PNG.output      = 'tmp-clustered-heatmap-Comp1.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp1.png')
         );
 
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Band_1",
-        PNG.output      = 'tmp-clustered-heatmap-Band1.png'
-        );
+#    doPCA_clustered_heatmap(
+#        DF.input        = DF.PCA,
+#        target.variable = "Band_1",
+#        PNG.output      = 'tmp-heatmap-Band1.png'
+#        );
 
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "scaled_Comp.2",
-        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp2.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp2.png')
         );
 
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "Comp.2",
-        PNG.output      = 'tmp-clustered-heatmap-Comp2.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp2.png')
         );
 
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Band_2",
-        PNG.output      = 'tmp-clustered-heatmap-Band2.png'
-        );
+#    doPCA_clustered_heatmap(
+#        DF.input        = DF.PCA,
+#        target.variable = "Band_2",
+#        PNG.output      = 'tmp-heatmap-Band2.png'
+#        );
 
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "scaled_Comp.3",
-        PNG.output      = 'tmp-clustered-heatmap-scaled-Comp3.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp3.png')
         );
 
     doPCA_clustered_heatmap(
         DF.input        = DF.PCA,
         target.variable = "Comp.3",
-        PNG.output      = 'tmp-clustered-heatmap-Comp3.png'
+        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp3.png')
         );
 
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Band_3",
-        PNG.output      = 'tmp-clustered-heatmap-Band3.png'
-        );
+#    doPCA_clustered_heatmap(
+#        DF.input        = DF.PCA,
+#        target.variable = "Band_3",
+#        PNG.output      = 'tmp-heatmap-Band3.png'
+#        );
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    return( NULL );
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doPCA_grouped_time_series(
         DF.input        = DF.PCA,
@@ -216,7 +241,7 @@ doPCA_clustered_heatmap <- function(
     DF.input        = NULL,
     target.variable = NULL,
     heatmap_palette = circlize::colorRamp2(c(-3,0,3), c("blue","white","red")),
-    PNG.output      = 'tmp-clustered-heatmap-Comp1.png'
+    PNG.output      = 'tmp-heatmap-Comp1.png'
     ) {
 
     if (!is.null(heatmap_palette)) {

@@ -59,16 +59,20 @@ beam.swath.diagnostics_processYear <- function(
     cat("\nstr(list.data.reshaped)\n");
     print( str(list.data.reshaped)   );
 
-    return( NULL );
-
-    visualize(
-        list.input = list.data.reshaped
-        );
+    #visualize(
+    #    list.input = list.data.reshaped,
+    #    beam.swath = beam.swath,
+    #    year       = year
+    #    );
 
     DF.pca <- doPCA(
-        list_input = list.data.reshaped,
-        make_plots = TRUE
+        list.input = list.data.reshaped,
+        beam.swath = beam.swath,
+        year       = year,
+        make.plots = TRUE
         );
+
+    return( NULL );
 
     cat("\nstr(DF.pca)\n");
     print( str(DF.pca)   );

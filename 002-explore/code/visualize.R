@@ -1,6 +1,8 @@
 
 visualize <- function(
-    list_input = NULL
+    list.input = NULL,
+    beam.swath = NULL,
+    year       = NULL
     ) {
 
     thisFunctionName <- "visualize";
@@ -10,10 +12,10 @@ visualize <- function(
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.temp <- data.frame();
-    for ( temp.name in names(list_input) ) {
-        DF.temp.1 <- list_input[[temp.name]];
+    for ( temp.name in names(list.input) ) {
+        DF.temp.1 <- list.input[[temp.name]];
         DF.temp.1[,"type"] <- temp.name;
-	DF.temp <- rbind(DF.temp,DF.temp.1);
+        DF.temp <- rbind(DF.temp,DF.temp.1);
         }
 
     DF.temp[                           ,"plot.colour"] <- 0;

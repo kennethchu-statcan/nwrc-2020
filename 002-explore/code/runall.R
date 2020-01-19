@@ -95,8 +95,8 @@ visualize(
     );
 
 DF.pca <- doPCA(
-    list_input = list.data_reshaped,
-    make_plots = TRUE
+    list.input = list.data_reshaped,
+    make.plots = TRUE
     );
 
 cat("\nstr(DF.pca)\n");
