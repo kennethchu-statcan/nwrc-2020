@@ -43,10 +43,53 @@ beam.swath.diagnostics_processYear <- function(
     year        = NULL,
     data.folder = NULL
     ) {
-    list.data_raw <- getData(
+
+    list.data.raw <- getData(
         data.folder  = data.folder,
         year         = year,
-        output.file  = paste0("tmp-",beam.swath,"-",year,".Rdata") 
+        output.file  = paste0("data-",beam.swath,"-",year,"-raw.Rdata") 
         );
+
+    list.data.reshaped <- reshapeData(
+        list.input  = list.data.raw,
+        beam.swath  = beam.swath,
+        output.file = paste0("data-",beam.swath,"-",year,"-reshaped.RData")
+        );
+
+    cat("\nstr(list.data.reshaped)\n");
+    print( str(list.data.reshaped)   );
+
+    return( NULL );
+
+    visualize(
+        list.input = list.data.reshaped
+        );
+
+    DF.pca <- doPCA(
+        list_input = list.data.reshaped,
+        make_plots = TRUE
+        );
+
+    cat("\nstr(DF.pca)\n");
+    print( str(DF.pca)   );
+
+    DF.fpca <- doFPCA(
+        DF.input            = DF.pca,
+        target.variable     = "scaled_Comp.1",
+        spline.grid         = NULL,
+        n.order             = 3,
+        n.basis             = 9,
+        smoothing.parameter = 0.1,
+        n.harmonics         = 7,
+        FILE.output.RData   = "tmp-FPCA-scaled-Comp1.RData",
+        FILE.output.csv     = "tmp-FPCA-scaled-Comp1.csv"
+        );
+
+    cat("\nstr(DF.fpca)\n");
+    print( str(DF.fpca)   );
+
+    return( NULL );
+
+
     }
 
