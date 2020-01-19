@@ -161,6 +161,7 @@ doFPCA <- function(
             },
         error = function(e) {
             my.message <- paste0("Error: fda::pca.fd(), ",beam.swath,", ",year,", ",target.variable);
+            message("\n");
             message(my.message);
             message(e);
             message("\n");
