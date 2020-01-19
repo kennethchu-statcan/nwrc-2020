@@ -1,10 +1,11 @@
 
 doPCA <- function(
-    list.input  = NULL,
-    make.plots  = TRUE,
-    beam.swath  = NULL,
-    year        = NULL,
-    output.file = paste0("tmp-",beam.swath,"-",year,"-PCA.RData")
+    list.input      = NULL,
+    make.plots      = TRUE,
+    beam.swath      = NULL,
+    year            = NULL,
+    colname.pattern = NULL,
+    output.file     = paste0("tmp-",beam.swath,"-",year,"-PCA.RData")
     ) {
 
     thisFunctionName <- "doPCA";
@@ -37,7 +38,7 @@ doPCA <- function(
 
         temp.colnames <- grep(
             x       = colnames(DF.PCA),
-            pattern = "_cov_matrix_real_comp_",
+            pattern = colname.pattern,
             value   = TRUE
             );
 
@@ -51,6 +52,11 @@ doPCA <- function(
 
         DF.scores <- results.princomp[['scores']];
         DF.scores <- as.data.frame(DF.scores);
+        colnames(DF.scores) <- gsub(
+            x           = colnames(DF.scores),
+            pattern     = "Comp\\.",
+            replacement = "Comp"
+            );
 
         DF.PCA[,   "syntheticID"] <- rownames(DF.PCA   );
         DF.scores[,"syntheticID"] <- rownames(DF.scores);
@@ -66,7 +72,7 @@ doPCA <- function(
         rm(list = c("DF.scores"));
 
         DF.PCA[,"X_Y"] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
-        for ( temp.variable in paste0("Comp.",seq(1,length(temp.colnames))) ) {
+        for ( temp.variable in paste0("Comp",seq(1,length(temp.colnames))) ) {
             DF.PCA <- doPCA_attach_scaled_variable(
                 DF.input        = DF.PCA,
                 target.variable = temp.variable,
@@ -93,134 +99,70 @@ doPCA <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.1",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp1.png')
-        );
+    temp.colnames <- grep(x = colnames(DF.PCA), pattern = colname.pattern, value = TRUE);
+    for ( temp.colname in temp.colnames ) {
 
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.1",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp1.png')
-        );
+        doPCA_grouped_time_series(
+            DF.input        = DF.PCA,
+            target.variable = temp.colname,
+            beam.swath      = beam.swath,
+            year            = year,
+            limits          = c(  -3.0,3.0),
+            breaks          = seq(-3.0,3.0,0.5),
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',temp.colname,'.png')
+            );
 
-#    doPCA_clustered_heatmap(
-#        DF.input        = DF.PCA,
-#        target.variable = "Band_1",
-#        PNG.output      = 'tmp-heatmap-Band1.png'
-#        );
+        doPCA_clustered_heatmap(
+            DF.input        = DF.PCA,
+            target.variable = temp.colname,
+            beam.swath      = beam.swath,
+            year            = year,
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
+            );
 
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.2",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp2.png')
-        );
-
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.2",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp2.png')
-        );
-
-#    doPCA_clustered_heatmap(
-#        DF.input        = DF.PCA,
-#        target.variable = "Band_2",
-#        PNG.output      = 'tmp-heatmap-Band2.png'
-#        );
-
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.3",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-Comp3.png')
-        );
-
-    doPCA_clustered_heatmap(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.3",
-        PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-Comp3.png')
-        );
-
-#    doPCA_clustered_heatmap(
-#        DF.input        = DF.PCA,
-#        target.variable = "Band_3",
-#        PNG.output      = 'tmp-heatmap-Band3.png'
-#        );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    return( NULL );
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Band_1",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Band1.png'
-        );
+    colnames.Comp <- grep(x = colnames(DF.PCA), pattern = "Comp[0-9]+", value = TRUE);
+    for ( colname.Comp in colnames.Comp ) {
 
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Band_2",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Band2.png'
-        );
+        doPCA_grouped_time_series(
+            DF.input        = DF.PCA,
+            target.variable = colname.Comp,
+            beam.swath      = beam.swath,
+            year            = year,
+            limits          = c(  -3.0,3.0),
+            breaks          = seq(-3.0,3.0,0.5),
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
+            );
 
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Band_3",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Band3.png'
-        );
+        doPCA_grouped_time_series(
+            DF.input        = DF.PCA,
+            target.variable = paste0("scaled_",colname.Comp),
+            beam.swath      = beam.swath,
+            year            = year,
+            limits          = c(  -3.0,3.0),
+            breaks          = seq(-3.0,3.0,0.5),
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-scaled-',colname.Comp,'.png')
+            );
 
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.1",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Comp1.png'
-        );
+        doPCA_clustered_heatmap(
+            DF.input        = DF.PCA,
+            target.variable = colname.Comp,
+            beam.swath      = beam.swath,
+            year            = year,
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
+            );
 
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.1",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-scaled-Comp1.png'
-        );
+        doPCA_clustered_heatmap(
+            DF.input        = DF.PCA,
+            target.variable = paste0("scaled_",colname.Comp),
+            beam.swath      = beam.swath,
+            year            = year,
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-',colname.Comp,'.png')
+            );
 
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.2",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Comp2.png'
-        );
-
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.2",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-scaled-Comp2.png'
-        );
-
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "Comp.3",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-Comp3.png'
-        );
-
-    doPCA_grouped_time_series(
-        DF.input        = DF.PCA,
-        target.variable = "scaled_Comp.3",
-        limits          = c(  -3.0,3.0),
-        breaks          = seq(-3.0,3.0,0.5),
-        PNG.output      = 'tmp-scaled-Comp3.png'
-        );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     #for (i in seq(1,50)) {
@@ -240,6 +182,8 @@ doPCA <- function(
 doPCA_clustered_heatmap <- function(
     DF.input        = NULL,
     target.variable = NULL,
+    beam.swath      = NULL,
+    year            = NULL,
     heatmap_palette = circlize::colorRamp2(c(-3,0,3), c("blue","white","red")),
     PNG.output      = 'tmp-heatmap-Comp1.png'
     ) {
@@ -276,19 +220,22 @@ doPCA_clustered_heatmap <- function(
             which = "row"
             );
         my.Heatmap <- ComplexHeatmap::Heatmap(
-            matrix           = as.matrix(DF.temp[,setdiff(colnames(DF.temp),"type")]),
-            name             = target.variable,
+            matrix            = as.matrix(DF.temp[,setdiff(colnames(DF.temp),"type")]),
+            name              = "pearson", #target.variable,
             clustering_distance_rows = "pearson",
-            col              = heatmap_palette,
-            show_row_names   = FALSE,
-            row_names_side   = "left",
-            row_title        = target.variable,
-            row_title_side   = "left", #c("left", "right"),
-            row_title_gp     = gpar(fontsize = 14),
-            cluster_columns  = FALSE,
-            show_column_dend = FALSE,
-            column_names_gp  = gpar(fontsize = 8),
-            right_annotation = my.Annotation
+            col               = heatmap_palette,
+            show_row_names    = FALSE,
+            row_names_side    = "left",
+            row_title         = target.variable,
+            row_title_side    = "left", #c("left", "right"),
+            row_title_gp      = gpar(fontsize = 14),
+            column_title      = paste0(beam.swath,", ",year),
+            column_title_side = "top", #c("top", "bottom"),
+            column_title_gp   = gpar(fontsize = 14),
+            cluster_columns   = FALSE,
+            show_column_dend  = FALSE,
+            column_names_gp   = gpar(fontsize = 8),
+            right_annotation  = my.Annotation
             );
         ComplexHeatmap::draw(
             object                  = my.Heatmap,
@@ -371,7 +318,7 @@ doPCA_ggplot2_scatter <- function(
     my.ggplot <- initializePlot();
     my.ggplot <- my.ggplot + geom_line(
         data    = DF.input,
-        mapping = aes(x = Comp.1, y = Comp.2, group = X_Y, colour = type)
+        mapping = aes(x = Comp1, y = Comp2, group = X_Y, colour = type)
         );
 
     ggsave(
@@ -390,6 +337,8 @@ doPCA_ggplot2_scatter <- function(
 doPCA_grouped_time_series <- function(
     DF.input        = NULL,
     target.variable = NULL,
+    beam.swath      = NULL,
+    year            = NULL,
     limits          = c(  -3.0,3.0),
     breaks          = seq(-3.0,3.0,0.5),
     PNG.output      = 'tmp-ggplot2-Comp1.png'
@@ -406,7 +355,7 @@ doPCA_grouped_time_series <- function(
 
     my.ggplot <- initializePlot(
         title    = NULL,
-        subtitle = target.variable
+        subtitle = paste0(beam.swath,", ",year,", ",target.variable)
         );
 
     my.ggplot <- my.ggplot + geom_line(
@@ -461,7 +410,7 @@ doPCA_single_time_series <- function(
 
     my.ggplot <- my.ggplot + geom_line(
         data    = DF.temp,
-        mapping = aes(x=date,y=scaled_Comp.1,group=X_Y,color=type),
+        mapping = aes(x=date,y=scaled_Comp1,group=X_Y,color=type),
         alpha   = 0.5
         );
 

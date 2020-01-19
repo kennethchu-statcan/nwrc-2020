@@ -1,7 +1,8 @@
 
 beam.swath.diagnostics <- function(
-    data.directory = NULL,
-    beam.swath     = NULL
+    data.directory  = NULL,
+    beam.swath      = NULL,
+    colname.pattern = NULL
     ) {
 
     thisFunctionName <- "beam.swath.diagnostics";
@@ -15,9 +16,10 @@ beam.swath.diagnostics <- function(
     years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
     for ( temp.year in years ) {
         beam.swath.diagnostics_processYear(
-            beam.swath  = beam.swath,
-            year        = temp.year,
-            data.folder = beam.swath.directory
+            beam.swath      = beam.swath,
+            year            = temp.year,
+            data.folder     = beam.swath.directory,
+            colname.pattern = colname.pattern
             );
         }
 
@@ -39,9 +41,10 @@ beam.swath.diagnostics_getYears <- function(data.folder = NULL) {
     }
 
 beam.swath.diagnostics_processYear <- function(
-    beam.swath  = NULL,
-    year        = NULL,
-    data.folder = NULL
+    beam.swath      = NULL,
+    year            = NULL,
+    data.folder     = NULL,
+    colname.pattern = NULL
     ) {
 
     list.data.raw <- getData(
@@ -51,9 +54,10 @@ beam.swath.diagnostics_processYear <- function(
         );
 
     list.data.reshaped <- reshapeData(
-        list.input  = list.data.raw,
-        beam.swath  = beam.swath,
-        output.file = paste0("data-",beam.swath,"-",year,"-reshaped.RData")
+        list.input      = list.data.raw,
+        beam.swath      = beam.swath,
+        colname.pattern = colname.pattern,
+        output.file     = paste0("data-",beam.swath,"-",year,"-reshaped.RData")
         );
 
     cat("\nstr(list.data.reshaped)\n");
@@ -66,10 +70,11 @@ beam.swath.diagnostics_processYear <- function(
     #    );
 
     DF.pca <- doPCA(
-        list.input = list.data.reshaped,
-        beam.swath = beam.swath,
-        year       = year,
-        make.plots = TRUE
+        list.input      = list.data.reshaped,
+        beam.swath      = beam.swath,
+        year            = year,
+        colname.pattern = colname.pattern,
+        make.plots      = TRUE
         );
 
     return( NULL );
@@ -79,7 +84,7 @@ beam.swath.diagnostics_processYear <- function(
 
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
-        target.variable     = "scaled_Comp.1",
+        target.variable     = "scaled_Comp1",
         spline.grid         = NULL,
         n.order             = 3,
         n.basis             = 9,
@@ -93,7 +98,6 @@ beam.swath.diagnostics_processYear <- function(
     print( str(DF.fpca)   );
 
     return( NULL );
-
 
     }
 

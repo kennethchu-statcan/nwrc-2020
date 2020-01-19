@@ -40,8 +40,9 @@ print( beam.swaths );
 
 for ( beam.swath in beam.swaths ) {
     beam.swath.diagnostics(
-        data.directory = data.directory,
-        beam.swath     = beam.swath
+        data.directory  = data.directory,
+        beam.swath      = beam.swath,
+        colname.pattern = "_cov_matrix_real_comp_"
         );
     }
 
@@ -104,7 +105,7 @@ print( str(DF.pca)   );
 
 DF.fpca <- doFPCA(
     DF.input            = DF.pca,
-    target.variable     = "scaled_Comp.1",
+    target.variable     = "scaled_Comp1",
     spline.grid         = NULL,
     n.order             = 3,
     n.basis             = 9,
