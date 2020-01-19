@@ -145,13 +145,6 @@ doFPCA <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    #results.pca.fd <- fda::pca.fd(
-    #    fdobj = NDVI.fd[["fd"]],
-    #    nharm = n.harmonics
-    #    );
-
-    print(paste0("A-1, ",beam.swath,", ",year));
-
     return.value.tryCatch <- tryCatch(
         expr = {
             results.pca.fd <- fda::pca.fd(
@@ -169,16 +162,9 @@ doFPCA <- function(
             }
         );
 
-    print("A-2");
-
-    cat("\nstr(return.value.tryCatch)\n");
-    print( str(return.value.tryCatch)   );
-
     if ( "pca.fd" != class(return.value.tryCatch) ) {
         if ( 0 > return.value.tryCatch ) { return(NULL) }
         }
-
-    print("A-3");
 
     cat("\nstr(results.pca.fd):\n");
     print( str(results.pca.fd)    );
