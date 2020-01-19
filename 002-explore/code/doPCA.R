@@ -112,13 +112,13 @@ doPCA <- function(
             PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',temp.colname,'.png')
             );
 
-#        doPCA_clustered_heatmap(
-#            DF.input        = DF.PCA,
-#            target.variable = temp.colname,
-#            beam.swath      = beam.swath,
-#            year            = year,
-#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
-#            );
+        doPCA_clustered_heatmap(
+            DF.input        = DF.PCA,
+            target.variable = temp.colname,
+            beam.swath      = beam.swath,
+            year            = year,
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
+            );
 
         }
 
@@ -136,13 +136,13 @@ doPCA <- function(
             PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
             );
 
-#        doPCA_clustered_heatmap(
-#            DF.input        = DF.PCA,
-#            target.variable = colname.Comp,
-#            beam.swath      = beam.swath,
-#            year            = year,
-#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
-#            );
+        doPCA_clustered_heatmap(
+            DF.input        = DF.PCA,
+            target.variable = colname.Comp,
+            beam.swath      = beam.swath,
+            year            = year,
+            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
+            );
 
         }
 
