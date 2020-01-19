@@ -112,13 +112,13 @@ doPCA <- function(
             PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',temp.colname,'.png')
             );
 
-        doPCA_clustered_heatmap(
-            DF.input        = DF.PCA,
-            target.variable = temp.colname,
-            beam.swath      = beam.swath,
-            year            = year,
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
-            );
+#        doPCA_clustered_heatmap(
+#            DF.input        = DF.PCA,
+#            target.variable = temp.colname,
+#            beam.swath      = beam.swath,
+#            year            = year,
+#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
+#            );
 
         }
 
@@ -136,31 +136,13 @@ doPCA <- function(
             PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
             );
 
-        doPCA_grouped_time_series(
-            DF.input        = DF.PCA,
-            target.variable = paste0("scaled_",colname.Comp),
-            beam.swath      = beam.swath,
-            year            = year,
-            limits          = c(  -3.0,3.0),
-            breaks          = seq(-3.0,3.0,0.5),
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-scaled-',colname.Comp,'.png')
-            );
-
-        doPCA_clustered_heatmap(
-            DF.input        = DF.PCA,
-            target.variable = colname.Comp,
-            beam.swath      = beam.swath,
-            year            = year,
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
-            );
-
-        doPCA_clustered_heatmap(
-            DF.input        = DF.PCA,
-            target.variable = paste0("scaled_",colname.Comp),
-            beam.swath      = beam.swath,
-            year            = year,
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-scaled-',colname.Comp,'.png')
-            );
+#        doPCA_clustered_heatmap(
+#            DF.input        = DF.PCA,
+#            target.variable = colname.Comp,
+#            beam.swath      = beam.swath,
+#            year            = year,
+#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
+#            );
 
         }
 
@@ -189,6 +171,8 @@ doPCA_clustered_heatmap <- function(
     ) {
 
     if (!is.null(heatmap_palette)) {
+
+        cat(paste0("\ndoPCA_clustered_heatmap(): ",beam.swath,", ",year,", ",target.variable,"\n"));
 
         require(ComplexHeatmap);
         require(dplyr);
@@ -343,6 +327,8 @@ doPCA_grouped_time_series <- function(
     breaks          = seq(-3.0,3.0,0.5),
     PNG.output      = 'tmp-ggplot2-Comp1.png'
     ) {
+
+    cat(paste0("\ndoPCA_grouped_time_series(): ",beam.swath,", ",year,", ",target.variable,"\n"));
 
     require(ggplot2);
 
