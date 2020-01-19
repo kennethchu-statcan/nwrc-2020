@@ -2,14 +2,16 @@
 doFPCA <- function(
     DF.input            = NULL,
     target.variable     = NULL,
+    beam.swath          = NULL,
+    year                = NULL,
     week.indices        = NULL,
     spline.grid         = NULL,
     n.order             = NULL,
     n.basis             = NULL,
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
-    FILE.output.RData   = "fpc.RData",
-    FILE.output.csv     = "fpc.csv"
+    FILE.output.RData   = paste0("tmp-",beam.swath,"-",year,"-FPC-",target.variable,".RData"),
+    FILE.output.csv     = paste0("tmp-",beam.swath,"-",year,"-FPC-",target.variable,".csv"  )
     ) {
 
     this.function.name <- "doFPCA";
@@ -139,14 +141,43 @@ doFPCA <- function(
         spline.grid      = spline.grid,
         t.DF.time.series = t.DF.temp,
         time.series.fd   = NDVI.fd,
-        prefix           = target.variable
+        prefix           = paste0(beam.swath,"-",year,"-",target.variable)
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    results.pca.fd <- fda::pca.fd(
-        fdobj = NDVI.fd[["fd"]],
-        nharm = n.harmonics
+    #results.pca.fd <- fda::pca.fd(
+    #    fdobj = NDVI.fd[["fd"]],
+    #    nharm = n.harmonics
+    #    );
+
+    print(paste0("A-1, ",beam.swath,", ",year));
+
+    return.value.tryCatch <- tryCatch(
+        expr = {
+            results.pca.fd <- fda::pca.fd(
+                fdobj = NDVI.fd[["fd"]],
+                nharm = n.harmonics
+                );
+            },
+        error = function(e) {
+            my.message <- paste0("Error: fda::pca.fd(), ",beam.swath,", ",year,", ",target.variable);
+            message(my.message);
+            message(e);
+            message("\n");
+            return( -1 );
+            }
         );
+
+    print("A-2");
+
+    cat("\nstr(return.value.tryCatch)\n");
+    print( str(return.value.tryCatch)   );
+
+    if ( "pca.fd" != class(return.value.tryCatch) ) {
+        if ( 0 > return.value.tryCatch ) { return(NULL) }
+        }
+
+    print("A-3");
 
     cat("\nstr(results.pca.fd):\n");
     print( str(results.pca.fd)    );
@@ -157,7 +188,7 @@ doFPCA <- function(
     cat("\nresults.pca.fd[['values']] / sum(results.pca.fd[['values']]):\n");
     print( results.pca.fd[['values']] / sum(results.pca.fd[['values']])   );
 
-    PNG.output <- paste0("plot-fpca-",target.variable,".png");
+    PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
     png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
     par(mfrow=c(n.harmonics,1));
     plot.pca.fd(x = results.pca.fd);
@@ -170,7 +201,7 @@ doFPCA <- function(
         t.DF.time.series = t.DF.temp,
         time.series.fd   = NDVI.fd,
         results.pca.fd   = results.pca.fd,
-        prefix           = target.variable
+        prefix           = paste0(beam.swath,"-",year,"-",target.variable)
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -218,11 +249,13 @@ doFPCA <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doFPCA_scatter(
         DF.input   = DF.output,
+        beam.swath = beam.swath,
+        year       = year,
         x.var      = "fpc_1",
         y.var      = "fpc_2",
-        title      = 'FPCA',
-        subtitle   = target.variable,
-        PNG.output = paste0('tmp-FPCA-scatter-',target.variable,'.png')
+        title      = NULL,
+        subtitle   = paste0(beam.swath,', ',year,', ',target.variable),
+        PNG.output = paste0('tmp-',beam.swath,'-',year,'-FPCA-scatter-',target.variable,'.png')
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -235,6 +268,8 @@ doFPCA <- function(
 ##################################################
 doFPCA_scatter <- function(
     DF.input   = NULL,
+    beam.swath = NULL,
+    year       = NULL,
     x.var      = NULL,
     y.var      = NULL,
     title      = NULL,

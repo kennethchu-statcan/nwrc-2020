@@ -4,7 +4,7 @@ visualize.bslpine.fit <-  function(
     spline.grid      = NULL,
     t.DF.time.series = NULL,
     time.series.fd   = NULL,
-    prefix           = NULL 
+    prefix           = NULL
     ) {
 
     time.series.bspline <- fda::eval.fd(
@@ -20,7 +20,7 @@ visualize.bslpine.fit <-  function(
         temp.file <- paste0("plot-bspline-",prefix,"-",temp.column,".png");
         png(temp.file, height = 12, width = 18, units = "in", res = 300);
         plot( x = week.indices, y = t.DF.time.series[   ,temp.column], type = "b", col = "black", lwd = 2);
-        lines(x = spline.grid,  y = time.series.bspline[,temp.column], type = "l", col = "red",   lwd = 1);
+        lines(x = spline.grid,  y = time.series.bspline[,temp.column], type = "l", col = "blue",  lwd = 1);
         dev.off();
         }
 
@@ -68,8 +68,8 @@ visualize.fpca.fit <- function(
         temp.file <- paste0("plot-fpca-",prefix,"-",temp.column,".png");
         png(temp.file, height = 12, width = 18, units = "in", res = 300);
         plot( x = week.indices, y = t.DF.time.series[    ,temp.column], type = "b", col = "black",lwd = 2);
-        lines(x = spline.grid,  y = time.series.bspline[ ,temp.column], type = "l", col = "red",  lwd = 1);
-        lines(x = spline.grid,  y = time.series.fpca.fit[,temp.column], type = "l", col = "blue", lwd = 1);
+        lines(x = spline.grid,  y = time.series.bspline[ ,temp.column], type = "l", col = "blue", lwd = 1);
+        lines(x = spline.grid,  y = time.series.fpca.fit[,temp.column], type = "l", col = "red",  lwd = 1);
         dev.off();
         }
 

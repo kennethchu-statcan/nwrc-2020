@@ -47,6 +47,8 @@ beam.swath.diagnostics_processYear <- function(
     colname.pattern = NULL
     ) {
 
+    cat(paste0("\nbeam.swath.diagnostics_processYear(): ",beam.swath,", ",year,"\n"));
+
     list.data.raw <- getData(
         data.folder  = data.folder,
         year         = year,
@@ -77,21 +79,19 @@ beam.swath.diagnostics_processYear <- function(
         make.plots      = TRUE
         );
 
-    return( NULL );
-
     cat("\nstr(DF.pca)\n");
     print( str(DF.pca)   );
 
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
         target.variable     = "scaled_Comp1",
+        beam.swath          = beam.swath,
+        year                = year,
         spline.grid         = NULL,
         n.order             = 3,
         n.basis             = 9,
         smoothing.parameter = 0.1,
-        n.harmonics         = 7,
-        FILE.output.RData   = "tmp-FPCA-scaled-Comp1.RData",
-        FILE.output.csv     = "tmp-FPCA-scaled-Comp1.csv"
+        n.harmonics         = 7
         );
 
     cat("\nstr(DF.fpca)\n");
