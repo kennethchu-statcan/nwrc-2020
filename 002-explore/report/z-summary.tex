@@ -1,0 +1,106 @@
+
+\section{Summary}
+\setcounter{theorem}{0}
+
+%\renewcommand{\theenumi}{\alph{enumi}}
+%\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+\renewcommand{\theenumi}{\roman{enumi}}
+\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+\begin{itemize}
+\item
+	We used radar satellite data retrieved on January 14, 2020.
+
+	There were two beam/swath positions (FQ5W and FQ17W) and
+	four calendar years (2016, 2017, 2018, 2019).
+	However, of the $8$ possible
+	(beam/swath, year) combinations, the previous ``separation'' procedure
+	(based on ordinary and functional principal component analysis) only worked for
+	four. The rest failed due to missing data.
+\item
+	For each beam/swath position, and each calendar year, a transformation
+	based on a combination of ordinary, as well as functional principal component analysis,
+	was applied to the corresponding $4$-dimensional polarimetric time series
+	in order to attempt to separate marshes from swamps.
+	\begin{itemize}
+	\item
+		More precisely, for each beam/swath position, data from 1000 locations of marshes 
+		and 1000 locations of swamps were used.
+	\item
+		Ordinary principal component analysis was applied to this combined data set
+		(here considered a finite subset of $\Re^{4}$).
+	\item
+		For each location and each time point, only the first ordinary principal component score
+		was retained for further analysis.
+		In other words, in downstream analysis, we worked only with the resulting
+		discrete time series of first principal component scores of each location.
+	\item
+		We next individually scale the time series of first principal component scores
+		of each given location, by subtracting the mean and dividing by the standard deviation
+		of the time series.
+	\item
+		Functional principal component analysis was applied to the scaled time series of
+		first ordinary principal component scores.
+	\item
+		A scatter plot of the first and second of the corresponding
+		functional principal component scores was generated for each location. 
+	\end{itemize}
+\item
+	However, of the $8$ possible (beam/swath, year) combinations,
+	the above procedure only worked for four. The rest failed due to missing data.
+\item
+	For the four (beam/swath, year) combinations for which the marsh/swamp "separation" procedure
+	described above worked, marsh and swamp appeared indeed well separated
+	in the $2$-dimensional space spanned by the first two functional principal compoents.
+\item
+	However, this exercise may need to be re-done, due to the several issues that
+	affect the data (retrieved on January 14, 2020).
+	\begin{itemize}
+	\item
+		large number of missing values for some (beam/swath, year) combinations,
+	\item
+		uneven spacing of measurement time points,
+	\item
+		some of the 2017 data files contained data from 2018.
+	\end{itemize}
+\end{itemize}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+\vskip 0.5cm
+\noindent
+\textbf{Questions}
+\begin{itemize}
+\item
+	Why were the FQ20W data ``cleaner'' (e.g. no missing values, equal gap between consecutive measurements) ?
+\end{itemize}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+\vskip 0.5cm
+\noindent
+\textbf{Comments / Next Steps}
+\begin{itemize}
+\item
+	Perhaps need to re-do this exercise on a ``cleaner'' data set.
+\item
+	Include more beam/swath combinations.
+\item
+	Include more types of wetland.
+\item
+	Perform virtual ``historical production runs'': 
+	For each given calendar year, test whether a ``separation model''
+	trained on data strictly prior to the given year can effectively and accurately separate
+	different types of wetland based on data from the current calendar year.
+\end{itemize}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+%\renewcommand{\theenumi}{\alph{enumi}}
+%\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+\renewcommand{\theenumi}{\roman{enumi}}
+\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
