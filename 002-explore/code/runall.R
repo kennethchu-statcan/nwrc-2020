@@ -42,7 +42,9 @@ for ( beam.swath in beam.swaths ) {
     beam.swath.diagnostics(
         data.directory  = data.directory,
         beam.swath      = beam.swath,
-        colname.pattern = "_cov_matrix_real_comp_"
+        colname.pattern = "_cov_matrix_real_comp_",
+        FPCA.variable   = "scaled_Comp2",
+        make.heatmaps   = FALSE
         );
     }
 
