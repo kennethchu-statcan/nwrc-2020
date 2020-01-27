@@ -52,6 +52,9 @@ doFPCA <- function(
     cat("\nstr(DF.temp) -- doFPCA()\n");
     print( str(DF.temp) );
 
+    cat("\nsummary(DF.temp) -- doFPCA()\n");
+    print( summary(DF.temp) );
+
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     date.colnames <- as.Date(grep(
         x       = colnames(DF.temp),
