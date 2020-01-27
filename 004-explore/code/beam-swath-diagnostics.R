@@ -2,7 +2,10 @@
 beam.swath.diagnostics <- function(
     data.directory  = NULL,
     beam.swath      = NULL,
-    colname.pattern = NULL
+    colname.pattern = NULL,
+    fpca.variable   = NULL,
+    make.plots      = TRUE,
+    make.heatmaps   = TRUE
     ) {
 
     thisFunctionName <- "beam.swath.diagnostics";
@@ -13,13 +16,17 @@ beam.swath.diagnostics <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
-    years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
+    #years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
+    years <- c("2019");
     for ( temp.year in years ) {
         beam.swath.diagnostics_processYear(
             beam.swath      = beam.swath,
             year            = temp.year,
             data.folder     = beam.swath.directory,
-            colname.pattern = colname.pattern
+            colname.pattern = colname.pattern,
+            fpca.variable   = fpca.variable,
+	    make.plots      = make.plots,
+	    make.heatmaps   = make.heatmaps
             );
         }
 
@@ -44,7 +51,10 @@ beam.swath.diagnostics_processYear <- function(
     beam.swath      = NULL,
     year            = NULL,
     data.folder     = NULL,
-    colname.pattern = NULL
+    colname.pattern = NULL,
+    fpca.variable   = NULL,
+    make.plots      = TRUE,
+    make.heatmaps   = TRUE
     ) {
 
     cat(paste0("\nbeam.swath.diagnostics_processYear(): ",beam.swath,", ",year,"\n"));
@@ -76,7 +86,8 @@ beam.swath.diagnostics_processYear <- function(
         beam.swath      = beam.swath,
         year            = year,
         colname.pattern = colname.pattern,
-        make.plots      = TRUE
+        make.plots      = make.plots,
+	make.heatmaps   = make.heatmaps
         );
 
     cat("\nstr(DF.pca)\n");
@@ -84,7 +95,7 @@ beam.swath.diagnostics_processYear <- function(
 
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
-        target.variable     = "scaled_Comp1",
+        target.variable     = fpca.variable, # "scaled_Comp1",
         beam.swath          = beam.swath,
         year                = year,
         spline.grid         = NULL,
