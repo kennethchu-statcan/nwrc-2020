@@ -1,4 +1,3 @@
-data
 .Rproj.user
 .Rhistory
 .RData
@@ -18,6 +17,8 @@ data
 *.toc
 *.png
 *.jpg
+data
+000-data
 *DELETEME*
 ARCHIVE
 *BACKUP*
