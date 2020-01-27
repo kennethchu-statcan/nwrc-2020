@@ -49,6 +49,8 @@ doFPCA <- function(
     DF.temp <- as.data.frame(DF.temp);
     rownames(DF.temp) <- DF.temp[,"X_Y"];
 
+    DF.temp <- DF.temp[0 == rowSums(is.na(DF.temp)),];
+
     cat("\nstr(DF.temp) -- doFPCA()\n");
     print( str(DF.temp) );
 
