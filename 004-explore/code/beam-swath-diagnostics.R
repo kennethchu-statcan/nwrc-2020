@@ -95,7 +95,7 @@ beam.swath.diagnostics_processYear <- function(
 
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
-        target.variable     = fpca.variable, # "scaled_Comp1",
+        target.variable     = fpca.variable,
         beam.swath          = beam.swath,
         year                = year,
         spline.grid         = NULL,
