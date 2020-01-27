@@ -6,7 +6,8 @@ doPCA <- function(
     beam.swath      = NULL,
     year            = NULL,
     colname.pattern = NULL,
-    output.file     = paste0("tmp-",beam.swath,"-",year,"-PCA.RData")
+    output.file     = paste0("tmp-",beam.swath,"-",year,"-PCA.RData"),
+    has.NA.file     = paste0("tmp-",beam.swath,"-",year,"-hasNA.csv")
     ) {
 
     thisFunctionName <- "doPCA";
@@ -82,6 +83,12 @@ doPCA <- function(
             }
 
         saveRDS(object = DF.PCA, file = output.file);    
+
+	utils::write.csv(
+            x         = DF.PCA[rowSums(is.na(DF.PCA)) > 0,],
+	    file      = has.NA.file, 
+	    row.names = FALSE
+            );
 
         }
 
