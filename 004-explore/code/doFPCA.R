@@ -180,11 +180,24 @@ doFPCA <- function(
     cat("\nresults.pca.fd[['values']] / sum(results.pca.fd[['values']]):\n");
     print( results.pca.fd[['values']] / sum(results.pca.fd[['values']])   );
 
-    PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
-    png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
-    par(mfrow=c(n.harmonics,1));
-    plot.pca.fd(x = results.pca.fd);
-    dev.off()
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    return.value.tryCatch <- tryCatch(
+        expr = {
+            PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
+            png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
+            par(mfrow=c(n.harmonics,1));
+            plot.pca.fd(x = results.pca.fd);
+            dev.off();
+            },
+	error = function(e) {
+            my.message <- paste0("Error: fda::plot.pca.fd(), ",beam.swath,", ",year,", ",target.variable);
+            message("\n");
+            message(my.message);
+            message(e);
+            message("\n");
+            return( -1 );
+	    }
+        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     visualize.fpca.fit(
