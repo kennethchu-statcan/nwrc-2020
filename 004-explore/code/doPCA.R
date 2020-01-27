@@ -44,10 +44,6 @@ doPCA <- function(
             );
 
         temp.formula <- paste0("~ ",paste(x = temp.colnames, collapse = " + "));
-
-        cat("\ntemp.formula\n");
-        print( temp.formula   );
-
         temp.formula <- as.formula( temp.formula );
 
         results.princomp <- princomp(
@@ -291,9 +287,6 @@ doPCA_attach_scaled_variable <- function(
         );
 
     DF.output <- DF.output[,setdiff(colnames(DF.output),c("mean_target","sd_target"))];
-
-    cat("\nstr(DF.output)\n");
-    print( str(DF.output)   );
 
     return( DF.output );
 
