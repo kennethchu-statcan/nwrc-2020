@@ -38,6 +38,10 @@ getData <- function(
             DF.temp <- as.data.frame(readr::read_csv(
 	            file = file.path(data.folder,temp.file)
                 ));
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "_1_1", replacement = "_1");
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "_2_2", replacement = "_2");
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "_3_3", replacement = "_3");
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "_4_4", replacement = "_4");
             list.data.raw[[ land.type ]] <- DF.temp;
             }
 

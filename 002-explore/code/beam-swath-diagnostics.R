@@ -2,7 +2,9 @@
 beam.swath.diagnostics <- function(
     data.directory  = NULL,
     beam.swath      = NULL,
-    colname.pattern = NULL
+    colname.pattern = NULL,
+    FPCA.variable   = NULL,
+    make.heatmaps   = FALSE
     ) {
 
     thisFunctionName <- "beam.swath.diagnostics";
@@ -19,7 +21,9 @@ beam.swath.diagnostics <- function(
             beam.swath      = beam.swath,
             year            = temp.year,
             data.folder     = beam.swath.directory,
-            colname.pattern = colname.pattern
+            colname.pattern = colname.pattern,
+            FPCA.variable   = FPCA.variable,
+            make.heatmaps   = make.heatmaps
             );
         }
 
@@ -44,7 +48,9 @@ beam.swath.diagnostics_processYear <- function(
     beam.swath      = NULL,
     year            = NULL,
     data.folder     = NULL,
-    colname.pattern = NULL
+    colname.pattern = NULL,
+    FPCA.variable   = NULL,
+    make.heatmaps   = NULL
     ) {
 
     cat(paste0("\nbeam.swath.diagnostics_processYear(): ",beam.swath,", ",year,"\n"));
@@ -76,7 +82,8 @@ beam.swath.diagnostics_processYear <- function(
         beam.swath      = beam.swath,
         year            = year,
         colname.pattern = colname.pattern,
-        make.plots      = TRUE
+        make.plots      = TRUE,
+        make.heatmaps   = make.heatmaps
         );
 
     cat("\nstr(DF.pca)\n");
@@ -84,7 +91,7 @@ beam.swath.diagnostics_processYear <- function(
 
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
-        target.variable     = "scaled_Comp1",
+        target.variable     = FPCA.variable,
         beam.swath          = beam.swath,
         year                = year,
         spline.grid         = NULL,

@@ -174,22 +174,26 @@ doFPCA <- function(
 
     cat("\nresults.pca.fd[['values']] / sum(results.pca.fd[['values']]):\n");
     print( results.pca.fd[['values']] / sum(results.pca.fd[['values']])   );
+ 
+    print("A-1");
 
-    PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
-    png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
-    par(mfrow=c(n.harmonics,1));
-    plot.pca.fd(x = results.pca.fd);
-    dev.off()
+    #PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
+    #png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
+    #par(mfrow=c(n.harmonics,1));
+    #plot.pca.fd(x = results.pca.fd);
+    #dev.off()
+
+    print("A-2");
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    visualize.fpca.fit(
-        week.indices     = DF.dates[,"date_index"],
-        spline.grid      = spline.grid,
-        t.DF.time.series = t.DF.temp,
-        time.series.fd   = NDVI.fd,
-        results.pca.fd   = results.pca.fd,
-        prefix           = paste0(beam.swath,"-",year,"-",target.variable)
-        );
+    #visualize.fpca.fit(
+    #    week.indices     = DF.dates[,"date_index"],
+    #    spline.grid      = spline.grid,
+    #    t.DF.time.series = t.DF.temp,
+    #    time.series.fd   = NDVI.fd,
+    #    results.pca.fd   = results.pca.fd,
+    #    prefix           = paste0(beam.swath,"-",year,"-",target.variable)
+    #    );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ### Recalculating the FPCA scores.
@@ -198,6 +202,8 @@ doFPCA <- function(
     ### extraction into the preprocessing component
     ### of a model training pipeline.
 
+    print("A-3");
+
     reconstruct.fpca.scores(
         week.indices   = DF.dates[,"date_index"],
     	time.series.fd = NDVI.fd,
@@ -205,9 +211,13 @@ doFPCA <- function(
         results.pca.fd = results.pca.fd
         );
 
+    print("A-4");
+
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     fpc.scores <- results.pca.fd[["scores"]];
     colnames(fpc.scores) <- paste0("fpc_",seq(1,ncol(fpc.scores)));
+
+    print("A-5");
 
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
