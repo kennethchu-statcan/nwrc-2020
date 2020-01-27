@@ -47,7 +47,7 @@ for ( beam.swath in beam.swaths ) {
         data.directory  = data.directory,
         beam.swath      = beam.swath,
         colname.pattern = "cov_matrix_real_comp",
-	fpca.variable   = "cov_matrix_real_comp_1",
+	fpca.variable   = "scaled_Comp1", #"cov_matrix_real_comp_1",
 	make.plots      = TRUE,
 	make.heatmaps   = FALSE
         );
