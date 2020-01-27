@@ -36,8 +36,11 @@ getData <- function(
         for ( land.type in land.types ) {
             temp.file <- grep(x = temp.files.given.year, pattern = land.type, value = TRUE);
             DF.temp <- as.data.frame(readr::read_csv(
-	            file = file.path(data.folder,temp.file)
+                file = file.path(data.folder,temp.file)
                 ));
+            colnames(DF.temp) <- getData_fixColnames(
+                input.colnames = colnames(DF.temp)
+		);
             list.data.raw[[ land.type ]] <- DF.temp;
             }
 
@@ -51,6 +54,51 @@ getData <- function(
     cat(paste0("\n",thisFunctionName,"() quits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
     return( list.data.raw );
+
+    }
+
+##################################################
+getData_fixColnames <- function(input.colnames = NULL) {
+
+    output.colnames <- input.colnames;
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "X2",
+        replacement = "X"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "X3",
+        replacement = "Y"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_1_1",
+        replacement = "_1"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_2_2",
+        replacement = "_2"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_3_3",
+        replacement = "_3"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_4_4",
+        replacement = "_4"
+        );
+
+    return( output.colnames );
 
     }
 

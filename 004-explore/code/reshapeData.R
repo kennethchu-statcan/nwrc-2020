@@ -54,18 +54,6 @@ reshapeData_long <- function(
     require(dplyr);
     require(tidyr);
 
-    colnames(DF.input) <- gsub(
-	x           = colnames(DF.input),
-        pattern     = "X2",
-	replacement = "X"
-        );
-
-    colnames(DF.input) <- gsub(
-	x           = colnames(DF.input),
-        pattern     = "X3",
-	replacement = "Y"
-        );
-
     temp.colnames <- grep(
         x       = colnames(DF.input),
         pattern = colname.pattern,
@@ -76,8 +64,11 @@ reshapeData_long <- function(
 
     DF.temp <- DF.temp %>%
         tidyr::gather(column.name,value,-X,-Y);
-
     DF.temp <- as.data.frame(DF.temp);
+
+    print("A-1");
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
 
     DF.temp[,"date"] <- stringr::str_extract(
         string  = DF.temp[,"column.name"],
@@ -91,11 +82,33 @@ reshapeData_long <- function(
 
     DF.temp <- DF.temp[,c("X","Y","date","variable","value")];
 
+    print("A-2");
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
+
     DF.output <- DF.temp %>%
         dplyr::select(X,Y,date,variable,value) %>%
         tidyr::spread(key=variable,value=value);
 
     DF.output[,"date"] <- as.Date(x = DF.output[,"date"], tryFormats = c("%Y%m%d"));
+
+    print("A-3");
+    cat("\nstr(DF.output)\n");
+    print( str(DF.output)   );
+
+    temp.colnames <- grep(
+        x       = colnames(DF.output),
+        pattern = colname.pattern,
+        value   = TRUE
+        );
+
+    for ( temp.colname in temp.colnames ) {
+        DF.output[,temp.colname] <- as.numeric(DF.output[,temp.colname]); 
+        }
+
+    print("A-4");
+    cat("\nstr(DF.output)\n");
+    print( str(DF.output)   );
 
     return(DF.output);
 

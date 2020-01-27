@@ -43,6 +43,10 @@ doPCA <- function(
             );
 
         temp.formula <- paste0("~ ",paste(x = temp.colnames, collapse = " + "));
+
+        cat("\ntemp.formula\n");
+        print( temp.formula   );
+
         temp.formula <- as.formula( temp.formula );
 
         results.princomp <- princomp(
