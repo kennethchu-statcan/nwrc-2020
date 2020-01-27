@@ -43,6 +43,8 @@ doFPCA <- function(
         replacement = "target_variable"
         );
 
+    DF.temp <- na.omit(DF.temp);
+
     DF.temp <- DF.temp %>%
         tidyr::spread(key = date, value = target_variable);
 
