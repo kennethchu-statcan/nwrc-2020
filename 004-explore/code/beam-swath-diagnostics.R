@@ -93,12 +93,6 @@ beam.swath.diagnostics_processYear <- function(
     cat("\nstr(DF.pca)\n");
     print( str(DF.pca)   );
 
-    utils::write.csv(
-        x         = DF.pca[rowSums(is.na(DF.pca)) > 0,],
-	file      = ""
-	row.names = FALSE
-        );
-
     DF.fpca <- doFPCA(
         DF.input            = DF.pca,
         target.variable     = fpca.variable,
