@@ -33,7 +33,7 @@ for ( code.file in code.files ) {
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-01-27";
+data.snapshot  <- "2020-01-27.01";
 data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
