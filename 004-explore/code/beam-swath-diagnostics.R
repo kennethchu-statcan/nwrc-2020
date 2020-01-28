@@ -61,6 +61,7 @@ beam.swath.diagnostics_processYear <- function(
 
     list.data.raw <- getData(
         data.folder  = data.folder,
+        beam.swath   = beam.swath,
         year         = year,
         output.file  = paste0("data-",beam.swath,"-",year,"-raw.Rdata") 
         );

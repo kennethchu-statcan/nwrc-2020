@@ -1,6 +1,7 @@
 
 getData <- function(
     data.folder = NULL,
+    beam.swath  = NULL,
     year        = NULL,
     output.file = NULL
     ) {
@@ -25,6 +26,11 @@ getData <- function(
     } else {
 
         temp.files.given.year <- list.files(path = data.folder, pattern = year);
+        temp.files.given.year <- grep(
+            x       = temp.files.given.year,
+            pattern = beam.swath,
+            value   = TRUE
+            );
 
         land.types <- unique(gsub(
             x           = temp.files.given.year,
