@@ -57,7 +57,7 @@ doPCA <- function(
         colnames(DF.scores) <- gsub(
             x           = colnames(DF.scores),
             pattern     = "Comp\\.",
-            replacement = "Comp"
+            replacement = paste0(colname.pattern,"_opc")
             );
 
         DF.PCA[,   "syntheticID"] <- rownames(DF.PCA   );
@@ -74,7 +74,15 @@ doPCA <- function(
         rm(list = c("DF.scores"));
 
         DF.PCA[,"X_Y"] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
-        for ( temp.variable in paste0("Comp",seq(1,length(temp.colnames))) ) {
+
+        temp.variables <- grep(
+            x       = colnames(DF.PCA),
+            pattern = paste0(colname.pattern,"_opc"),
+            value   = TRUE
+            );
+
+        #for ( temp.variable in paste0("Comp",seq(1,length(temp.colnames))) ) {
+        for ( temp.variable in temp.variables ) {
             DF.PCA <- doPCA_attach_scaled_variable(
                 DF.input        = DF.PCA,
                 target.variable = temp.variable,
@@ -84,10 +92,10 @@ doPCA <- function(
 
         saveRDS(object = DF.PCA, file = output.file);    
 
-	utils::write.csv(
+        utils::write.csv(
             x         = DF.PCA[rowSums(is.na(DF.PCA)) > 0,],
-	    file      = has.NA.file, 
-	    row.names = FALSE
+            file      = has.NA.file, 
+            row.names = FALSE
             );
 
         }
