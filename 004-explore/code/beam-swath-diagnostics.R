@@ -16,8 +16,8 @@ beam.swath.diagnostics <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
-    years <- c("2017");
-    #years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
+    #years <- c("2017");
+    years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
     for ( temp.year in years ) {
         beam.swath.diagnostics_processYear(
             beam.swath      = beam.swath,
