@@ -25,8 +25,8 @@ beam.swath.diagnostics <- function(
             data.folder     = beam.swath.directory,
             colname.pattern = colname.pattern,
             fpca.variable   = fpca.variable,
-	    make.plots      = make.plots,
-	    make.heatmaps   = make.heatmaps
+            make.plots      = make.plots,
+            make.heatmaps   = make.heatmaps
             );
         }
 
@@ -75,38 +75,42 @@ beam.swath.diagnostics_processYear <- function(
     cat("\nstr(list.data.reshaped)\n");
     print( str(list.data.reshaped)   );
 
-    #visualize(
-    #    list.input = list.data.reshaped,
-    #    beam.swath = beam.swath,
-    #    year       = year
-    #    );
+    if ( length(names(list.data.reshaped)) > 0 ) {
 
-    DF.pca <- doPCA(
-        list.input      = list.data.reshaped,
-        beam.swath      = beam.swath,
-        year            = year,
-        colname.pattern = colname.pattern,
-        make.plots      = make.plots,
-	make.heatmaps   = make.heatmaps
-        );
+        #visualize(
+        #    list.input = list.data.reshaped,
+        #    beam.swath = beam.swath,
+        #    year       = year
+        #    );
 
-    cat("\nstr(DF.pca)\n");
-    print( str(DF.pca)   );
+        DF.pca <- doPCA(
+            list.input      = list.data.reshaped,
+            beam.swath      = beam.swath,
+            year            = year,
+            colname.pattern = colname.pattern,
+            make.plots      = make.plots,
+            make.heatmaps   = make.heatmaps
+            );
 
-    DF.fpca <- doFPCA(
-        DF.input            = DF.pca,
-        target.variable     = fpca.variable,
-        beam.swath          = beam.swath,
-        year                = year,
-        spline.grid         = NULL,
-        n.order             = 3,
-        n.basis             = 9,
-        smoothing.parameter = 0.1,
-        n.harmonics         = 7
-        );
+        cat("\nstr(DF.pca)\n");
+        print( str(DF.pca)   );
 
-    cat("\nstr(DF.fpca)\n");
-    print( str(DF.fpca)   );
+        DF.fpca <- doFPCA(
+            DF.input            = DF.pca,
+            target.variable     = fpca.variable,
+            beam.swath          = beam.swath,
+            year                = year,
+            spline.grid         = NULL,
+            n.order             = 3,
+            n.basis             = 9,
+            smoothing.parameter = 0.1,
+            n.harmonics         = 7
+            );
+
+        cat("\nstr(DF.fpca)\n");
+        print( str(DF.fpca)   );
+
+        }
 
     return( NULL );
 
