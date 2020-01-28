@@ -3,7 +3,8 @@ initializePlot <- function(
     textsize.title = 30,
     textsize.axis  = 20,
     title          = 'my-title',
-    subtitle       = 'my-subtitle'
+    subtitle       = 'my-subtitle',
+    my.palette     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
     ) {
 
     require(ggplot2);
@@ -24,6 +25,10 @@ initializePlot <- function(
     my.ggplot <- my.ggplot + labs(
         title    = title,
         subtitle = subtitle
+        );
+
+    my.ggplot <- my.ggplot + scale_colour_manual(
+        values = my.palette
         );
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
