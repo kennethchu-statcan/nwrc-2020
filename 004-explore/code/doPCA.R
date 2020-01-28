@@ -298,7 +298,7 @@ doPCA_attach_scaled_variable <- function(
     colnames(DF.output) <- gsub(
         x           = colnames(DF.output),
         pattern     = "scaled_variable",
-        replacement = paste0("scaled_",target.variable)
+        replacement = paste0(target.variable,"_scaled")
         );
 
     DF.output <- DF.output[,setdiff(colnames(DF.output),c("mean_target","sd_target"))];
