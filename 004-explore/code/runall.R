@@ -42,7 +42,7 @@ set.seed(7654321);
 beam.swaths <- list.files(path = data.directory);
 print( beam.swaths );
 
-#beam.swaths <- c("FQ5W");
+beam.swaths <- c("FQ5W");
 for ( beam.swath in beam.swaths ) {
     beam.swath.diagnostics(
         data.directory  = data.directory,
