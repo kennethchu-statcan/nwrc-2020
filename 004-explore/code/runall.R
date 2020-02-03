@@ -52,7 +52,8 @@ for ( variable.stem in names(variable.stems) ) {
             data.directory  = data.directory,
             beam.swath      = beam.swath,
             colname.pattern = variable.stems[[variable.stem]],
-	    land.types      = c("ag","forest","marsh","shallow","swamp","water"),
+	    #land.types     = c("ag","forest","marsh","shallow","swamp","water"),
+	    land.types      = c("marsh","swamp","water","forest","ag","shallow"),
             make.plots      = TRUE,
             make.heatmaps   = FALSE
             );
