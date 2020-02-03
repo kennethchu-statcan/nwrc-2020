@@ -57,12 +57,12 @@ print( num.cores   );
 
 registerDoParallel(cores = num.cores);
 
-foreach ( variable.stem in names(variable.stems) ) %dopar% {
+foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
     for ( beam.swath in beam.swaths ) {
         beam.swath.diagnostics(
             data.directory  = data.directory,
             beam.swath      = beam.swath,
-            colname.pattern = variable.stems[[variable.stem]],
+            colname.pattern = variable.stems[[temp.index]],
 	    land.types      = c("marsh","swamp","water","forest","ag","shallow"),
             make.plots      = TRUE,
             make.heatmaps   = FALSE
