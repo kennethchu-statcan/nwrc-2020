@@ -4,7 +4,8 @@ initializePlot <- function(
     textsize.axis  = 20,
     title          = 'my-title',
     subtitle       = 'my-subtitle',
-    my.palette     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+    my.palette     = RColorBrewer::brewer.pal(n = 6, name = "Set2")
+    # my.palette   = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
     ) {
 
     require(ggplot2);
