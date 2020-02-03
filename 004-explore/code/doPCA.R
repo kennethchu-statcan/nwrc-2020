@@ -394,7 +394,7 @@ doPCA_grouped_time_series <- function(
     ggsave(
         file   = PNG.output,
         plot   = my.ggplot,
-        dpi    = 300,
+        dpi    = 100,
         height =  48,
         width  =  48,
         units  = 'in'
