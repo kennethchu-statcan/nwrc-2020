@@ -7,6 +7,15 @@ visualize.bslpine.fit <-  function(
     prefix           = NULL
     ) {
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,"diagnostics-fit-bspline");
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     time.series.bspline <- fda::eval.fd(
         evalarg = spline.grid,
         fdobj   = time.series.fd[["fd"]]
@@ -24,6 +33,8 @@ visualize.bslpine.fit <-  function(
         dev.off();
         }
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    setwd( initial.directory );
     return( NULL );
 
     }
@@ -37,6 +48,15 @@ visualize.fpca.fit <- function(
     prefix           = NULL
     ) {
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,"diagnostics-fit-fpca");
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     time.series.bspline <- fda::eval.fd(
         evalarg = spline.grid,
         fdobj   = time.series.fd[["fd"]]
@@ -73,6 +93,8 @@ visualize.fpca.fit <- function(
         dev.off();
         }
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    setwd( initial.directory );
     return( NULL );
 
     }

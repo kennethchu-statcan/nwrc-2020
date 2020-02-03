@@ -34,6 +34,10 @@ for ( code.file in code.files ) {
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+require(foreach);
+require(doParallel);
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 data.snapshot  <- "2020-01-27.01";
 data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 
@@ -46,7 +50,15 @@ print( variable.stems );
 beam.swaths <- list.files(path = data.directory);
 print( beam.swaths );
 
-for ( variable.stem in names(variable.stems) ) {
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+num.cores <- max(1,detectCores() - 1);
+cat("\nnum.cores\n");
+print( num.cores   );
+
+registerDoParallel(cores = num.cores);
+
+#   for ( variable.stem in names(variable.stems) ) {
+foreach ( variable.stem in names(variable.stems) ) %dopar% {
     for ( beam.swath in beam.swaths ) {
         beam.swath.diagnostics(
             data.directory  = data.directory,
