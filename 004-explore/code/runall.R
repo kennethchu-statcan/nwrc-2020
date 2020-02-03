@@ -58,6 +58,7 @@ print( num.cores   );
 registerDoParallel(cores = num.cores);
 
 foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
+    base::Sys.sleep(time = 2);
     for ( beam.swath in beam.swaths ) {
         beam.swath.diagnostics(
             data.directory  = data.directory,
