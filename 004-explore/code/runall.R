@@ -52,9 +52,7 @@ for ( variable.stem in names(variable.stems) ) {
             data.directory  = data.directory,
             beam.swath      = beam.swath,
             colname.pattern = variable.stems[[variable.stem]],
-            #fpca.variable   = "scaled_Comp2", #"scaled_Comp1", #"cov_matrix_real_comp_1",
-            #fpca.variable   = "cov_matrix_real_comp_4",
-            #fpca.variable   = paste0("cov_matrix_real_comp_opc1_scaled"),
+	    land.types      = c("ag","forest","marsh","shallow","swamp","water"),
             make.plots      = TRUE,
             make.heatmaps   = FALSE
             );

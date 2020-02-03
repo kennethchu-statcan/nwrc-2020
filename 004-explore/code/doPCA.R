@@ -6,6 +6,7 @@ doPCA <- function(
     beam.swath      = NULL,
     year            = NULL,
     colname.pattern = NULL,
+    land.types      = c("ag","forest","marsh","shallow","swamp","water"),
     output.file     = paste0("tmp-",beam.swath,"-",year,"-PCA.RData"),
     has.NA.file     = paste0("tmp-",beam.swath,"-",year,"-hasNA.csv")
     ) {
@@ -37,7 +38,13 @@ doPCA <- function(
             }
 
         rownames(DF.PCA) <- paste0("row_",seq(1,nrow(DF.PCA)));
-        DF.PCA[,"X_Y"]   <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
+
+        DF.PCA[,"X_Y" ] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
+	DF.PCA[,"type"] <- factor(
+	    x       = as.character(DF.PCA[,"type"]),
+	    levels  = land.types,
+	    ordered = FALSE
+	    );
 
 	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 	# add scaled variables
@@ -103,6 +110,15 @@ doPCA <- function(
             }
 
 	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+	leading.colnames   <- c("X","Y","X_Y","type","date");
+	reordered.colnames <- c(
+	    leading.colnames,
+	    setdiff(colnames(DF.PCA),leading.colnames)
+	    );
+
+        DF.PCA <- DF.PCA[,reordered.colnames];
+
+	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         saveRDS(object = DF.PCA, file = output.file);    
 
         utils::write.csv(
@@ -121,70 +137,41 @@ doPCA <- function(
     print( summary(DF.PCA)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if ( !make.plots ) {
-        cat(paste0("\n",thisFunctionName,"() quits."));
-        cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
-        return( DF.PCA );
-        }
+    if ( make.plots ) {
 
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    temp.colnames <- grep(x = colnames(DF.PCA), pattern = colname.pattern, value = TRUE);
-    for ( temp.colname in temp.colnames ) {
+        temp.colnames <- grep(x = colnames(DF.PCA), pattern = colname.pattern, value = TRUE);
+        for ( temp.colname in temp.colnames ) {
 
-        doPCA_grouped_time_series(
-            DF.input        = DF.PCA,
-            target.variable = temp.colname,
-            beam.swath      = beam.swath,
-            year            = year,
-            limits          = c(  -3.0,3.0),
-            breaks          = seq(-3.0,3.0,0.5),
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',temp.colname,'.png')
-            );
-
-        if ( make.heatmaps ) {
-            doPCA_clustered_heatmap(
+            doPCA_grouped_time_series(
                 DF.input        = DF.PCA,
                 target.variable = temp.colname,
                 beam.swath      = beam.swath,
                 year            = year,
-                PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
+                limits          = c(  -3.0,3.0),
+                breaks          = seq(-3.0,3.0,0.5),
+                PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',temp.colname,'.png')
                 );
-	    }
+
+            if ( make.heatmaps ) {
+                doPCA_clustered_heatmap(
+                    DF.input        = DF.PCA,
+                    target.variable = temp.colname,
+                    beam.swath      = beam.swath,
+                    year            = year,
+                    PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',temp.colname,'.png')
+                    );
+	        }
+
+            }
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # for (i in seq(1,50)) {
+        #    doPCA_single_time_series(
+        #        DF.input = DF.PCA
+        #        );
+        #    }
 
         }
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-#    colnames.Comp <- grep(x = colnames(DF.PCA), pattern = "Comp[0-9]+", value = TRUE);
-#    for ( colname.Comp in colnames.Comp ) {
-#
-#        doPCA_grouped_time_series(
-#            DF.input        = DF.PCA,
-#            target.variable = colname.Comp,
-#            beam.swath      = beam.swath,
-#            year            = year,
-#            limits          = c(  -3.0,3.0),
-#            breaks          = seq(-3.0,3.0,0.5),
-#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
-#            );
-#
-#        if ( make.heatmaps ) {
-#            doPCA_clustered_heatmap(
-#                DF.input        = DF.PCA,
-#                target.variable = colname.Comp,
-#                beam.swath      = beam.swath,
-#                year            = year,
-#                PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
-#                );
-#	    }
-#
-#        }
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    #for (i in seq(1,50)) {
-    #    doPCA_single_time_series(
-    #        DF.input = DF.PCA
-    #        );
-    #    }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));

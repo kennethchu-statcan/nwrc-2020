@@ -3,6 +3,7 @@ beam.swath.diagnostics <- function(
     data.directory  = NULL,
     beam.swath      = NULL,
     colname.pattern = NULL,
+    land.types      = c("ag","forest","marsh","shallow","swamp","water"),
     make.plots      = TRUE,
     make.heatmaps   = TRUE
     ) {
@@ -31,6 +32,7 @@ beam.swath.diagnostics <- function(
             year            = temp.year,
             data.folder     = beam.swath.directory,
             colname.pattern = colname.pattern,
+            land.types      = land.types,
             make.plots      = make.plots,
             make.heatmaps   = make.heatmaps
             );
@@ -59,6 +61,7 @@ beam.swath.diagnostics_processYear <- function(
     year            = NULL,
     data.folder     = NULL,
     colname.pattern = NULL,
+    land.types      = NULL,
     make.plots      = TRUE,
     make.heatmaps   = TRUE
     ) {
@@ -95,6 +98,7 @@ beam.swath.diagnostics_processYear <- function(
             beam.swath      = beam.swath,
             year            = year,
             colname.pattern = colname.pattern,
+            land.types      = land.types,
             make.plots      = make.plots,
             make.heatmaps   = make.heatmaps
             );
@@ -102,20 +106,22 @@ beam.swath.diagnostics_processYear <- function(
         cat("\nstr(DF.pca)\n");
         print( str(DF.pca)   );
 
-        #DF.fpca <- doFPCA(
-        #    DF.input            = DF.pca,
-        #    target.variable     = fpca.variable,
-        #    beam.swath          = beam.swath,
-        #    year                = year,
-        #    spline.grid         = NULL,
-        #    n.order             = 3,
-        #    n.basis             = 9,
-        #    smoothing.parameter = 0.1,
-        #    n.harmonics         = 7
-        #    );
-
-        #cat("\nstr(DF.fpca)\n");
-        #print( str(DF.fpca)   );
+	fpca.variables <- grep(x = colnames(DF.pca), pattern = colname.pattern, value = TRUE);
+        for ( fpca.variable in fpca.variables ) {
+            DF.fpca <- doFPCA(
+                DF.input            = DF.pca,
+                target.variable     = fpca.variable,
+                beam.swath          = beam.swath,
+                year                = year,
+                spline.grid         = NULL,
+                n.order             = 3,
+                n.basis             = 9,
+                smoothing.parameter = 0.1,
+                n.harmonics         = 7
+                );
+            cat("\nstr(DF.fpca)\n");
+            print( str(DF.fpca)   );
+	    }
 
         }
 
