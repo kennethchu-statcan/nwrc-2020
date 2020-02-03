@@ -1,6 +1,6 @@
 
 initializePlot <- function(
-    textsize.title = 30,
+    textsize.title = 25,
     textsize.axis  = 20,
     title          = 'my-title',
     subtitle       = 'my-subtitle',
