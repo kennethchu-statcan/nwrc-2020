@@ -38,7 +38,7 @@ require(foreach);
 require(doParallel);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-02-03.01";
+data.snapshot  <- "2020-01-27.01";
 data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
