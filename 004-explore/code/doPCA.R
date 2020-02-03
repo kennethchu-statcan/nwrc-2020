@@ -396,7 +396,7 @@ doPCA_grouped_time_series <- function(
         plot   = my.ggplot,
         dpi    = 300,
         height =  48,
-        width  =   8,
+        width  =  48,
         units  = 'in'
         );
 
