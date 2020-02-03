@@ -361,11 +361,11 @@ doPCA_grouped_time_series <- function(
         subtitle = paste0(beam.swath,", ",year,", ",target.variable)
         );
 
-    my.ggplot <- my.ggplot + geom_line(
-        data    = DF.temp,
-        mapping = aes(x=date,y=target.variable,group=X_Y,color=type),
-        alpha   = 0.3
-        );
+    #my.ggplot <- my.ggplot + geom_line(
+    #    data    = DF.temp,
+    #    mapping = aes(x=date,y=target.variable,group=X_Y,color=type),
+    #    alpha   = 0.3
+    #    );
 
     my.ggplot <- my.ggplot + scale_x_date(
         breaks       = sort(unique(DF.temp[,"date"])),
@@ -382,6 +382,14 @@ doPCA_grouped_time_series <- function(
         limits = c(  -3.0,3.0),
         breaks = seq(-3.0,3.0,0.5)
         );
+
+    my.ggplot <- my.ggplot + geom_line(
+        data    = DF.temp,
+        mapping = aes(x=date,y=target.variable,group=X_Y,color=type),
+        alpha   = 0.3
+        );
+
+    my.ggplot <- my.ggplot + facet_grid(type ~ .);
 
     ggsave(
         file   = PNG.output,
