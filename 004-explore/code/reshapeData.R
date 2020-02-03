@@ -60,15 +60,12 @@ reshapeData_long <- function(
         value   = TRUE
         );
 
-    cat("\nA-1\n");
-    cat("\ntemp.colnames\n");
-    print( temp.colnames   );
-    cat("\nstr(DF.input)\n");
-    print( str(DF.input)   );
+    #cat("\ntemp.colnames\n");
+    #print( temp.colnames   );
+    #cat("\nstr(DF.input)\n");
+    #print( str(DF.input)   );
 
     DF.temp <- DF.input[,c("X","Y",temp.colnames)];
-
-    cat("\nA-2\n");
 
     DF.temp <- DF.temp %>%
         tidyr::gather(column.name,value,-X,-Y);

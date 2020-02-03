@@ -37,13 +37,26 @@ doPCA <- function(
             }
 
         rownames(DF.PCA) <- paste0("row_",seq(1,nrow(DF.PCA)));
+        DF.PCA[,"X_Y"]   <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
 
+	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+	# add scaled variables
         temp.colnames <- grep(
             x       = colnames(DF.PCA),
             pattern = colname.pattern,
             value   = TRUE
             );
 
+        for ( temp.variable in temp.colnames ) {
+            DF.PCA <- doPCA_attach_scaled_variable(
+                DF.input        = DF.PCA,
+                target.variable = temp.variable,
+                by.variable     = "X_Y"
+                );
+            }
+
+	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+	# add OPC (ordinary principal component) variables
         temp.formula <- paste0("~ ",paste(x = temp.colnames, collapse = " + "));
         temp.formula <- as.formula( temp.formula );
 
@@ -73,15 +86,14 @@ doPCA <- function(
         DF.PCA <- DF.PCA[,setdiff(colnames(DF.PCA),"syntheticID")];
         rm(list = c("DF.scores"));
 
-        DF.PCA[,"X_Y"] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
-
+	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+	# add scaled OPC variables
         temp.variables <- grep(
             x       = colnames(DF.PCA),
             pattern = paste0(colname.pattern,"_opc"),
             value   = TRUE
             );
 
-        #for ( temp.variable in paste0("Comp",seq(1,length(temp.colnames))) ) {
         for ( temp.variable in temp.variables ) {
             DF.PCA <- doPCA_attach_scaled_variable(
                 DF.input        = DF.PCA,
@@ -90,6 +102,7 @@ doPCA <- function(
                 );
             }
 
+	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         saveRDS(object = DF.PCA, file = output.file);    
 
         utils::write.csv(
@@ -141,30 +154,30 @@ doPCA <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    colnames.Comp <- grep(x = colnames(DF.PCA), pattern = "Comp[0-9]+", value = TRUE);
-    for ( colname.Comp in colnames.Comp ) {
-
-        doPCA_grouped_time_series(
-            DF.input        = DF.PCA,
-            target.variable = colname.Comp,
-            beam.swath      = beam.swath,
-            year            = year,
-            limits          = c(  -3.0,3.0),
-            breaks          = seq(-3.0,3.0,0.5),
-            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
-            );
-
-        if ( make.heatmaps ) {
-            doPCA_clustered_heatmap(
-                DF.input        = DF.PCA,
-                target.variable = colname.Comp,
-                beam.swath      = beam.swath,
-                year            = year,
-                PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
-                );
-	    }
-
-        }
+#    colnames.Comp <- grep(x = colnames(DF.PCA), pattern = "Comp[0-9]+", value = TRUE);
+#    for ( colname.Comp in colnames.Comp ) {
+#
+#        doPCA_grouped_time_series(
+#            DF.input        = DF.PCA,
+#            target.variable = colname.Comp,
+#            beam.swath      = beam.swath,
+#            year            = year,
+#            limits          = c(  -3.0,3.0),
+#            breaks          = seq(-3.0,3.0,0.5),
+#            PNG.output      = paste0('tmp-',beam.swath,'-',year,'-timeseries-',colname.Comp,'.png')
+#            );
+#
+#        if ( make.heatmaps ) {
+#            doPCA_clustered_heatmap(
+#                DF.input        = DF.PCA,
+#                target.variable = colname.Comp,
+#                beam.swath      = beam.swath,
+#                year            = year,
+#                PNG.output      = paste0('tmp-',beam.swath,'-',year,'-heatmap-',colname.Comp,'.png')
+#                );
+#	    }
+#
+#        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     #for (i in seq(1,50)) {

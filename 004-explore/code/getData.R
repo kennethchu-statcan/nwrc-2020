@@ -104,6 +104,12 @@ getData_fixColnames <- function(input.colnames = NULL) {
         replacement = "_4"
         );
 
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "Yamaguchi_double_bounc$",
+        replacement = "Yamaguchi_double_bounce"
+        );
+
     return( output.colnames );
 
     }

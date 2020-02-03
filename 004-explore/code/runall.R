@@ -22,6 +22,7 @@ code.files <- c(
     "doFPCA.R",
     "doPCA.R",
     "getData.R",
+    "getVariableStems.R",
     "initializePlot.R",
     "reshapeData.R",
     "utils-fpca.R",
@@ -39,20 +40,25 @@ data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 set.seed(7654321);
 
+variable.stems <- getVariableStems();
+print( variable.stems );
+
 beam.swaths <- list.files(path = data.directory);
 print( beam.swaths );
 
-for ( beam.swath in beam.swaths ) {
-    beam.swath.diagnostics(
-        data.directory  = data.directory,
-        beam.swath      = beam.swath,
-        colname.pattern = "cov_matrix_real_comp",
-        #fpca.variable   = "scaled_Comp2", #"scaled_Comp1", #"cov_matrix_real_comp_1",
-        #fpca.variable   = "cov_matrix_real_comp_4",
-        fpca.variable   = paste0("cov_matrix_real_comp_opc1_scaled"),
-        make.plots      = TRUE,
-        make.heatmaps   = FALSE
-        );
+for ( variable.stem in names(variable.stems) ) {
+    for ( beam.swath in beam.swaths ) {
+        beam.swath.diagnostics(
+            data.directory  = data.directory,
+            beam.swath      = beam.swath,
+            colname.pattern = variable.stems[[variable.stem]],
+            #fpca.variable   = "scaled_Comp2", #"scaled_Comp1", #"cov_matrix_real_comp_1",
+            #fpca.variable   = "cov_matrix_real_comp_4",
+            #fpca.variable   = paste0("cov_matrix_real_comp_opc1_scaled"),
+            make.plots      = TRUE,
+            make.heatmaps   = FALSE
+            );
+        }
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
