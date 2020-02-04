@@ -190,7 +190,7 @@ doFPCA <- function(
             PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
             png(filename = PNG.output, height = 4 * n.plots, width = 12, units = "in", res = 300);
             par(mfrow=c(n.plots,1));
-            plot.pca.fd(x = results.pca.fd, harm = n.plots);
+            plot.pca.fd(x = results.pca.fd, harm = 1:n.plots);
             dev.off();
             },
 	error = function(e) {
