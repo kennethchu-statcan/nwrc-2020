@@ -64,7 +64,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             data.directory  = data.directory,
             beam.swath      = beam.swath,
             colname.pattern = variable.stems[[temp.index]],
-	    land.types      = c("marsh","swamp","water","forest","ag","shallow"),
+            land.types      = c("marsh","swamp","water","forest","ag","shallow"),
             make.plots      = TRUE,
             make.heatmaps   = FALSE
             );
