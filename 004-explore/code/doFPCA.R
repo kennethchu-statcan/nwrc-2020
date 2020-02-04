@@ -181,12 +181,16 @@ doFPCA <- function(
     print( results.pca.fd[['values']] / sum(results.pca.fd[['values']])   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-1" );
+
     return.value.tryCatch <- tryCatch(
         expr = {
+            n.plots    <- min(5,n.harmonics);
             PNG.output <- paste0("tmp-",beam.swath,"-",year,"-FPCA-",target.variable,".png");
-            png(filename = PNG.output, height = 4 * n.harmonics, width = 12, units = "in", res = 300);
-            par(mfrow=c(n.harmonics,1));
-            plot.pca.fd(x = results.pca.fd);
+            png(filename = PNG.output, height = 4 * n.plots, width = 12, units = "in", res = 300);
+            par(mfrow=c(n.plots,1));
+            plot.pca.fd(x = results.pca.fd, harm = n.plots);
             dev.off();
             },
 	error = function(e) {
@@ -195,11 +199,16 @@ doFPCA <- function(
             message(my.message);
             message(e);
             message("\n");
+	    message("\nstr(results.pca.fd)\n");
+	    message(   str(results.pca.fd)   );
             return( -1 );
 	    }
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-2" );
+
     visualize.fpca.fit(
         week.indices     = DF.dates[,"date_index"],
         spline.grid      = spline.grid,
@@ -210,6 +219,9 @@ doFPCA <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-3" );
+
     ### Recalculating the FPCA scores.
     ### It is necessary to know how to do this
     ### in order to incorporate FPCA-based feature
@@ -224,6 +236,9 @@ doFPCA <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-4" );
+
     fpc.scores <- results.pca.fd[["scores"]];
     colnames(fpc.scores) <- paste0("fpc_",seq(1,ncol(fpc.scores)));
 
@@ -239,6 +254,9 @@ doFPCA <- function(
     print( str(DF.output)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-5" );
+
     cat(paste0("\nsaving to file: ",FILE.output.RData,"\n"));
     base::saveRDS(object = DF.output, file = FILE.output.RData);
 
@@ -252,6 +270,9 @@ doFPCA <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-6" );
+
     doFPCA_scatter(
         DF.input   = DF.output,
         beam.swath = beam.swath,
@@ -264,6 +285,9 @@ doFPCA <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+    print( "A-7" );
+
     cat(paste0("\nexiting: ",this.function.name,"()"));
     cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
     return( DF.output );
