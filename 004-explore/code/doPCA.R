@@ -380,7 +380,7 @@ doPCA_grouped_time_series <- function(
         #limits = c(  -0.3,1.6),
         #breaks = seq(-0.2,1.6,0.2)
         limits = c(  -3.0,3.0),
-        breaks = seq(-3.0,3.0,0.5)
+        breaks = seq(-3.0,3.0,1.0)
         );
 
     my.ggplot <- my.ggplot + geom_line(
