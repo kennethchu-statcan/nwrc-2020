@@ -13,57 +13,60 @@
 \item
 	We used \textbf{\color{red}Sentinel-1} data retrieved on \textbf{\color{red}January 27}, 2020.
 
-	There were two beam/swath positions (FQ5W and FQ17W) and
-	four calendar years (2016, 2017, 2018, 2019).
-	However, of the $8$ possible
-	(beam/swath, year) combinations, the previous ``separation'' procedure
-	(based on ordinary and functional principal component analysis) only worked for
-	four. The rest failed due to missing data.
+	There was one beam mode (i.e., IW), two channels (i.e., VH and VV),
+	four calendar years (2016, 2017, 2018, 2019), and
+	five wetland types (i.e., marsh, swamp, water, forest, agricultural).
+
 \item
-	For each beam/swath position, and each calendar year, a transformation
-	based on a combination of ordinary, as well as functional principal component analysis,
-	was applied to the corresponding $4$-dimensional polarimetric time series
-	in order to attempt to separate marshes from swamps.
+	\textbf{Functional Principal Component Analysis (FPCA) I}
 	\begin{itemize}
 	\item
-		More precisely, for each beam/swath position, data from 1000 locations of marshes 
-		and 1000 locations of swamps were used.
+		For each (year, wetland type, channel), we began with 1000 discrete time series,
+		each corresponding to a geographical location.
+		Each time series (location) with one or more missing values was removed.
+		A B-spline approximation was independently fitted through each of the remaining time series
+		(i.e. those free of missing values).
 	\item
-		Ordinary principal component analysis was applied to this combined data set
-		(here considered a finite subset of $\Re^{4}$).
-	\item
-		For each location and each time point, only the first ordinary principal component score
-		was retained for further analysis.
-		In other words, in downstream analysis, we worked only with the resulting
-		discrete time series of first principal component scores of each location.
-	\item
-		We next individually scale the time series of first principal component scores
-		of each given location, by subtracting the mean and dividing by the standard deviation
-		of the time series.
-	\item
-		Functional principal component analysis was applied to the scaled time series of
-		first ordinary principal component scores.
-	\item
-		A scatter plot of the first and second of the corresponding
-		functional principal component scores was generated for each location. 
+		For each (year, channel), functional principal components were computed for the
+		corresponding the (about 6000) B-spline approximations.
+		The first two principal component scores were retained for each such time series
+		in order to visualize the extent of separation in the resulting two-dimensional space
+		of the different wetland types. See Appendix \ref{FPCA-scatter-original}.
 	\end{itemize}
+
 \item
-	However, of the $8$ possible (beam/swath, year) combinations,
-	the above procedure only worked for four. The rest failed due to missing data.
-\item
-	For the four (beam/swath, year) combinations for which the marsh/swamp "separation" procedure
-	described above worked, marsh and swamp appeared indeed well separated
-	in the $2$-dimensional space spanned by the first two functional principal compoents.
-\item
-	However, this exercise may need to be re-done, due to the several issues that
-	affect the data (retrieved on January 14, 2020).
+	\textbf{FPCA II}
 	\begin{itemize}
 	\item
-		large number of missing values for some (beam/swath, year) combinations,
+		We proceeded as in FPCA I, but with each time series replaced
+		with its ``scaled'' counterpart.
+		(More precisely, the scaled time series is obtained from the original time series
+		by subtracting its average of the original time series, followed by
+		dividing by the standard deviation of the original time series.)
+		See Appendix \ref{FPCA-scatter-scaled}.
+	\end{itemize}
+
+\item
+	\textbf{FPCA III}
+	\begin{itemize}
 	\item
-		uneven spacing of measurement time points,
+		For each (year, time point, location), we have its (VH,VV) measurements as a point in $\Re^{2}$.
+		As (year, time point, location) varies, we obtain a collection of data points in $\Re^{2}$.
+		We performed ordinary principal components to this collection of data points,
+		and replaced each data point -- (VH,VV) measurements, given (year, time point, location) --
+		with its resulting OPC scores.
+		We then proceeded as in FPCA I, but with the VH and VV time series replaced
+		with their corresponding OPC time series.
+		See Appendix \ref{FPCA-scatter-opc}.
+	\end{itemize}
+
+\item
+	\textbf{FPCA IV}
+	\begin{itemize}
 	\item
-		some of the 2017 data files contained data from 2018.
+		We then proceeded as in FPCA III, but with each OPC time series replaced
+		with its ``scaled'' counterpart.
+		See Appendix \ref{FPCA-scatter-opc-scaled}.
 	\end{itemize}
 \end{itemize}
 
@@ -71,29 +74,23 @@
 
 \vskip 0.5cm
 \noindent
-\textbf{Questions}
+\textbf{Comments / Observations}
 \begin{itemize}
 \item
-	Why were the FQ20W data ``cleaner'' (e.g. no missing values, equal gap between consecutive measurements) ?
-\end{itemize}
-
-          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
-
-\vskip 0.5cm
-\noindent
-\textbf{Comments / Next Steps}
-\begin{itemize}
+	The results based on Sentinel-1 data appear very promising.
+	Marsh, swamp/forest, water, and agricultural lands appear well separated, consistently across years.
+	See Appendices \ref{FPCA-scatter-original} and \ref{FPCA-scatter-opc}.
 \item
-	Perhaps need to re-do this exercise on a ``cleaner'' data set.
+	The most effective variable appears to be the first ordinary principal component (computed from VH, VV),
+	followed closely by the original channel VV.
+	Compare Appendices \ref{FPCA-scatter-opc} and \ref{FPCA-scatter-original}
+	against \ref{FPCA-scatter-scaled} and \ref{FPCA-scatter-opc-scaled}.
 \item
-	Include more beam/swath combinations.
+	There appear to be some inconsistencies between 2016 and the other years.
+	One obvious possible explanation may be \textbf{\color{red}missing time points} in the 2016 data.
 \item
-	Include more types of wetland.
-\item
-	Perform virtual ``historical production runs'': 
-	For each given calendar year, test whether a ``separation model''
-	trained on data strictly prior to the given year can effectively and accurately separate
-	different types of wetland based on data from the current calendar year.
+	Regrettably, \textbf{\color{red}swamp and forest are not well separated}
+	via the methods examined in this report.
 \end{itemize}
 
           %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
