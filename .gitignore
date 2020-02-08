@@ -18,6 +18,8 @@
 *.png
 *.jpg
 data
+graphics
+*.RData
 000-data
 *DELETEME*
 ARCHIVE
