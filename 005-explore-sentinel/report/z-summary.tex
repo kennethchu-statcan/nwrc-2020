@@ -77,20 +77,27 @@
 \textbf{Comments / Observations}
 \begin{itemize}
 \item
-	The results based on Sentinel-1 data appear very promising.
-	Marsh, swamp/forest, water, and agricultural lands appear well separated, consistently across years.
+	The results based on the January 27, 2020 Sentinel-1 data appear promising.
+	Marsh, swamp/forest, water, and agricultural lands appear \textbf{well separated},
+	\textbf{consistently across years}
+	(except for some slight inconsistencies between 2016 and the other years).
 	See Appendices \ref{FPCA-scatter-original} and \ref{FPCA-scatter-opc}.
+\item
+	However, regrettably, \textbf{\color{red}swamp and forest were not well separated}.
 \item
 	The most effective variable appears to be the first ordinary principal component (computed from VH, VV),
 	followed closely by the original channel VV.
 	Compare Appendices \ref{FPCA-scatter-opc} and \ref{FPCA-scatter-original}
 	against \ref{FPCA-scatter-scaled} and \ref{FPCA-scatter-opc-scaled}.
 \item
-	There appear to be some inconsistencies between 2016 and the other years.
-	One obvious possible explanation may be \textbf{\color{red}missing time points} in the 2016 data.
+	One obvious possible explanation for the inconsistencies between 2016 and the other years
+	may be the \textbf{\color{red}missing time points} in the 2016 data.
 \item
-	Regrettably, \textbf{\color{red}swamp and forest are not well separated}
-	via the methods examined in this report.
+	\textbf{\color{red}Missing measurements}:
+	There were 579 combinations of (time point, location) in the 2016 data with missing (VH,VV) measurements. 
+	All of the 2016 missing data points pertained to forest, water or agricultural lands.
+	There were no missing data for 2017.
+	There were three and one missing data points for 2018 and 2019, respectively, all pertaining to agricultural lands.
 \end{itemize}
 
           %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
