@@ -72,7 +72,7 @@ beam.swath.diagnostics_processYear <- function(
         data.folder  = data.folder,
         beam.swath   = beam.swath,
         year         = year,
-        output.file  = paste0("data-",beam.swath,"-",year,"-raw.Rdata") 
+        output.file  = paste0("data-",beam.swath,"-",year,"-raw.RData") 
         );
 
     list.data.reshaped <- reshapeData(
