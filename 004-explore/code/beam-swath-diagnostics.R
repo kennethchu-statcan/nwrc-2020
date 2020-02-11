@@ -22,6 +22,10 @@ beam.swath.diagnostics <- function(
     setwd( temp.output.directory );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    sink(file = file.path(temp.output.directory,"stdout.R.beam-swath-diagnostics"), type = "output" );
+    sink(file = file.path(temp.output.directory,"stderr.R.beam-swath-diagnostics"), type = "message");
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
     #years <- c("2017");
@@ -37,6 +41,22 @@ beam.swath.diagnostics <- function(
             make.heatmaps   = make.heatmaps
             );
         }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    cat("\nwarnings()\n");
+    print( warnings()   );
+
+    cat("\ngetOption('repos')\n");
+    print( getOption('repos')   );
+
+    cat("\n.libPaths()\n");
+    print( .libPaths()   );
+
+    cat("\nsessionInfo\n");
+    print( sessionInfo() );
+
+    sink();
+    sink();
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     setwd( initial.directory );
