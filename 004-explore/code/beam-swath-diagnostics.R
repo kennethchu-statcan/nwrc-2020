@@ -22,8 +22,11 @@ beam.swath.diagnostics <- function(
     setwd( temp.output.directory );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    sink(file = file.path(temp.output.directory,"stdout.R.beam-swath-diagnostics"), type = "output" );
-    sink(file = file.path(temp.output.directory,"stderr.R.beam-swath-diagnostics"), type = "message");
+    stdout.connection <- file(file.path(temp.output.directory,"stdout.R.beam-swath-diagnostics"), open = "wt");
+    stderr.connection <- file(file.path(temp.output.directory,"stderr.R.beam-swath-diagnostics"), open = "wt");
+
+    sink(file = stdout.connection, type = "output" );
+    sink(file = stderr.connection, type = "message");
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
@@ -55,8 +58,8 @@ beam.swath.diagnostics <- function(
     cat("\nsessionInfo\n");
     print( sessionInfo() );
 
-    sink();
-    sink();
+    sink(file = NULL);
+    sink(file = NULL);
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     setwd( initial.directory );

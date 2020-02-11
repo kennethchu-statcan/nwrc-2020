@@ -110,6 +110,42 @@ getData_fixColnames <- function(input.colnames = NULL) {
         replacement = "Yamaguchi_double_bounce"
         );
 
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_re$",
+        replacement = "_real"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_im$",
+        replacement = "_imag"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "S_par$",
+        replacement = "S_param"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "Helicit$",
+        replacement = "Helicity"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "TouzDisc_diff_maxmin_r$",
+        replacement = "TouzDisc_diff_maxmin_res"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_pol_respo$",
+        replacement = "_pol_respons"
+        );
+
     return( output.colnames );
 
     }

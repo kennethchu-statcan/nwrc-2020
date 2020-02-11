@@ -30,29 +30,49 @@ doPCA <- function(
 
     } else {
 
+        print("A-1");
+
+        cat("\nnames(list.input)\n");
+        print( names(list.input)   );
+
         DF.PCA <- data.frame();
         for ( temp.name in names(list.input) ) {
+            print("B-1");
+            print( temp.name );
             DF.temp.1 <- list.input[[temp.name]];
+            print("B-2");
             DF.temp.1[,"type"] <- temp.name;
+            print("B-3");
+            print( str(DF.PCA   ) );
+            print( str(DF.temp.1) );
             DF.PCA <- rbind(DF.PCA,DF.temp.1);
+            print("B-4");
             }
+
+        print("A-2");
 
         rownames(DF.PCA) <- paste0("row_",seq(1,nrow(DF.PCA)));
 
-        DF.PCA[,"X_Y" ] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
-	DF.PCA[,"type"] <- factor(
-	    x       = as.character(DF.PCA[,"type"]),
-	    levels  = land.types,
-	    ordered = FALSE
-	    );
+        print("A-3");
 
-	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	# add scaled variables
+        DF.PCA[,"X_Y" ] <- paste(DF.PCA[,"X"],DF.PCA[,"Y"],sep="_");
+        DF.PCA[,"type"] <- factor(
+	        x       = as.character(DF.PCA[,"type"]),
+	        levels  = land.types,
+	        ordered = FALSE
+	        );
+
+        print("A-5");
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # add scaled variables
         temp.colnames <- grep(
             x       = colnames(DF.PCA),
             pattern = colname.pattern,
             value   = TRUE
             );
+
+        print("A-6");
 
         for ( temp.variable in temp.colnames ) {
             DF.PCA <- doPCA_attach_scaled_variable(
@@ -62,15 +82,21 @@ doPCA <- function(
                 );
             }
 
-	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	# add OPC (ordinary principal component) variables
+        print("A-7");
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # add OPC (ordinary principal component) variables
         temp.formula <- paste0("~ ",paste(x = temp.colnames, collapse = " + "));
         temp.formula <- as.formula( temp.formula );
+
+        print("A-8");
 
         results.princomp <- princomp(
             formula = temp.formula,
             data    = DF.PCA
             );
+
+        print("A-9");
 
         DF.scores <- results.princomp[['scores']];
         DF.scores <- as.data.frame(DF.scores);
@@ -80,8 +106,12 @@ doPCA <- function(
             replacement = paste0(colname.pattern,"_opc")
             );
 
+        print("A-10");
+
         DF.PCA[,   "syntheticID"] <- rownames(DF.PCA   );
         DF.scores[,"syntheticID"] <- rownames(DF.scores);
+
+        print("A-11");
 
         DF.PCA <- dplyr::left_join(
             x  = DF.PCA,
@@ -90,16 +120,22 @@ doPCA <- function(
             );
         DF.PCA <- as.data.frame(DF.PCA);
 
+        print("A-12");
+
         DF.PCA <- DF.PCA[,setdiff(colnames(DF.PCA),"syntheticID")];
         rm(list = c("DF.scores"));
 
-	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	# add scaled OPC variables
+        print("A-13");
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # add scaled OPC variables
         temp.variables <- grep(
             x       = colnames(DF.PCA),
             pattern = paste0(colname.pattern,"_opc"),
             value   = TRUE
             );
+
+        print("A-14");
 
         for ( temp.variable in temp.variables ) {
             DF.PCA <- doPCA_attach_scaled_variable(
@@ -109,16 +145,20 @@ doPCA <- function(
                 );
             }
 
-	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	leading.colnames   <- c("X","Y","X_Y","type","date");
-	reordered.colnames <- c(
-	    leading.colnames,
-	    setdiff(colnames(DF.PCA),leading.colnames)
-	    );
+        print("A-15");
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        leading.colnames   <- c("X","Y","X_Y","type","date");
+        reordered.colnames <- c(
+            leading.colnames,
+	        setdiff(colnames(DF.PCA),leading.colnames)
+	        );
 
         DF.PCA <- DF.PCA[,reordered.colnames];
 
-	### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        print("A-16");
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         saveRDS(object = DF.PCA, file = output.file);    
 
         utils::write.csv(
@@ -126,6 +166,8 @@ doPCA <- function(
             file      = has.NA.file, 
             row.names = FALSE
             );
+
+        print("A-17");
 
         }
 
