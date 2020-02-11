@@ -255,47 +255,30 @@ doFPCA <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    x.var      <- "fpc_1";
-    y.var      <- "fpc_2";
-    PNG.output <- paste0('tmp-',beam.swath,'-',year,'-FPCA-scatter-',target.variable,'-',x.var,'-',y.var,'.png');
-    doFPCA_scatter(
-        DF.input   = DF.output,
-        beam.swath = beam.swath,
-        year       = year,
-        x.var      = x.var,
-        y.var      = y.var,
-        title      = NULL,
-        subtitle   = paste0(beam.swath,', ',year,', ',target.variable),
-        PNG.output = PNG.output
+    temp.list <- list(
+        list(x.var = "fpc_1", y.var = "fpc_2"),
+        list(x.var = "fpc_1", y.var = "fpc_3"),
+        list(x.var = "fpc_2", y.var = "fpc_3"),
+        list(x.var = "fpc_1", y.var = "fpc_4"),
+        list(x.var = "fpc_2", y.var = "fpc_4"),
+        list(x.var = "fpc_3", y.var = "fpc_4")
         );
 
-    x.var      <- "fpc_1";
-    y.var      <- "fpc_3";
-    PNG.output <- paste0('tmp-',beam.swath,'-',year,'-FPCA-scatter-',target.variable,'-',x.var,'-',y.var,'.png');
-    doFPCA_scatter(
-        DF.input   = DF.output,
-        beam.swath = beam.swath,
-        year       = year,
-        x.var      = x.var,
-        y.var      = y.var,
-        title      = NULL,
-        subtitle   = paste0(beam.swath,', ',year,', ',target.variable),
-        PNG.output = PNG.output
-        );
-
-    x.var      <- "fpc_2";
-    y.var      <- "fpc_3";
-    PNG.output <- paste0('tmp-',beam.swath,'-',year,'-FPCA-scatter-',target.variable,'-',x.var,'-',y.var,'.png');
-    doFPCA_scatter(
-        DF.input   = DF.output,
-        beam.swath = beam.swath,
-        year       = year,
-        x.var      = x.var,
-        y.var      = y.var,
-        title      = NULL,
-        subtitle   = paste0(beam.swath,', ',year,', ',target.variable),
-        PNG.output = PNG.output
-        );
+    for ( i in 1:length(temp.list) ) {
+        x.var      <- temp.list[[i]][["x.var"]];
+        y.var      <- temp.list[[i]][["y.var"]];
+        PNG.output <- paste0('tmp-',beam.swath,'-',year,'-FPCA-scatter-',target.variable,'-',x.var,'-',y.var,'.png');
+        doFPCA_scatter(
+            DF.input   = DF.output,
+            beam.swath = beam.swath,
+            year       = year,
+            x.var      = x.var,
+            y.var      = y.var,
+            title      = NULL,
+            subtitle   = paste0(beam.swath,', ',year,', ',target.variable),
+            PNG.output = PNG.output
+            );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nexiting: ",this.function.name,"()"));
