@@ -16,8 +16,8 @@ getVariableStems <- function() {
 #       HH_VV                  = c("HH_VV_"),
 #       CloudPott              = c("CloudPott"),
 #       Touz                   = c("Touz_"),
-#       TouzDisc               = c("TouzDisc"),
-#       CircBasisChange        = c("CircBasisChange"),
+        TouzDisc               = c("TouzDisc"),
+        CircBasisChange        = c("CircBasisChange"),
         total_power            = c("total_power"),
         pedestal_height        = c("pedestal_height"),
         phase_difference_HH_VV = c("phase_difference_HH_VV")
