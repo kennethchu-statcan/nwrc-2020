@@ -60,11 +60,6 @@ reshapeData_long <- function(
         value   = TRUE
         );
 
-    #cat("\ntemp.colnames\n");
-    #print( temp.colnames   );
-    #cat("\nstr(DF.input)\n");
-    #print( str(DF.input)   );
-
     DF.temp <- DF.input[,c("X","Y",temp.colnames)];
 
     DF.temp <- DF.temp %>%
@@ -98,6 +93,14 @@ reshapeData_long <- function(
     for ( temp.colname in temp.colnames ) {
         DF.output[,temp.colname] <- as.numeric(DF.output[,temp.colname]); 
         }
+
+    DF.output[,"year"]         <- format(x = DF.output[,"date"], format = "%Y");
+    DF.output[,"new_year_day"] <- as.Date(paste0(DF.output[,"year"],"-01-01"));
+    DF.output[,"date_index"]   <- as.integer(DF.output[,"date"]) - as.integer(DF.output[,"new_year_day"]);
+
+    first.colnames     <- c("X","Y","year","new_year_day","date","date_index");
+    colnames.reordered <- c(first.colnames,setdiff(colnames(DF.output),first.colnames));
+    DF.output          <- DF.output[,colnames.reordered];
 
     return(DF.output);
 

@@ -31,19 +31,14 @@ beam.swath.diagnostics <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
-    #years <- c("2017");
-    years <- beam.swath.diagnostics_getYears(data.folder = beam.swath.directory);
-    for ( temp.year in years ) {
-        beam.swath.diagnostics_processYear(
-            beam.swath      = beam.swath,
-            year            = temp.year,
-            data.folder     = beam.swath.directory,
-            colname.pattern = colname.pattern,
-            land.types      = land.types,
-            make.plots      = make.plots,
-            make.heatmaps   = make.heatmaps
-            );
-        }
+    DF.data.standardized.timepoints <- beam.swath.diagnostics_getDataStandardizedTimepoints(
+        data.directory  = beam.swath.directory,
+        beam.swath      = beam.swath,
+        colname.pattern = colname.pattern
+        );
+
+    cat("\nstr(DF.data.standardized.timepoints)\n");
+    print( str(DF.data.standardized.timepoints)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat("\nwarnings()\n");
@@ -70,9 +65,41 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
-beam.swath.diagnostics_getYears <- function(data.folder = NULL) {
+beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
+    data.directory  = NULL,
+    beam.swath      = NULL,
+    colname.pattern = NULL
+    ) {
+
+    years <- beam.swath.diagnostics_getYears(data.directory = data.directory);
+    for ( temp.year in years ) {
+
+        list.data.raw <- getData(
+            data.directory = data.directory,
+            beam.swath     = beam.swath,
+            year           = temp.year,
+            output.file    = paste0("data-",beam.swath,"-",temp.year,"-raw.RData") 
+            );
+
+        list.data.reshaped <- reshapeData(
+            list.input      = list.data.raw,
+            beam.swath      = beam.swath,
+            colname.pattern = colname.pattern,
+            output.file     = paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData")
+            );
+
+        cat("\nstr(list.data.reshaped)\n");
+        print( str(list.data.reshaped)   );
+
+        }
+
+    return( NULL );
+
+    }
+
+beam.swath.diagnostics_getYears <- function(data.directory = NULL) {
     require(stringr);
-    temp.files <- list.files(path = data.folder);
+    temp.files <- list.files(path = data.directory);
     years <- sort(unique(as.character(
         stringr::str_match(string = temp.files, pattern = "[0-9]{4}")
         )));
@@ -82,7 +109,7 @@ beam.swath.diagnostics_getYears <- function(data.folder = NULL) {
 beam.swath.diagnostics_processYear <- function(
     beam.swath      = NULL,
     year            = NULL,
-    data.folder     = NULL,
+    data.directory  = NULL,
     colname.pattern = NULL,
     land.types      = NULL,
     make.plots      = TRUE,
@@ -92,10 +119,10 @@ beam.swath.diagnostics_processYear <- function(
     cat(paste0("\nbeam.swath.diagnostics_processYear(): ",beam.swath,", ",year,"\n"));
 
     list.data.raw <- getData(
-        data.folder  = data.folder,
-        beam.swath   = beam.swath,
-        year         = year,
-        output.file  = paste0("data-",beam.swath,"-",year,"-raw.RData") 
+        data.directory = data.directory,
+        beam.swath     = beam.swath,
+        year           = year,
+        output.file    = paste0("data-",beam.swath,"-",year,"-raw.RData") 
         );
 
     list.data.reshaped <- reshapeData(

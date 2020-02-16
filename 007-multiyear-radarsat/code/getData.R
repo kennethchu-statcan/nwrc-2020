@@ -1,9 +1,9 @@
 
 getData <- function(
-    data.folder = NULL,
-    beam.swath  = NULL,
-    year        = NULL,
-    output.file = NULL
+    data.directory = NULL,
+    beam.swath     = NULL,
+    year           = NULL,
+    output.file    = NULL
     ) {
 
     thisFunctionName <- "getData";
@@ -25,7 +25,7 @@ getData <- function(
 
     } else {
 
-        temp.files.given.year <- list.files(path = data.folder, pattern = year);
+        temp.files.given.year <- list.files(path = data.directory, pattern = year);
         temp.files.given.year <- grep(
             x       = temp.files.given.year,
             pattern = beam.swath,
@@ -42,7 +42,7 @@ getData <- function(
         for ( land.type in land.types ) {
             temp.file <- grep(x = temp.files.given.year, pattern = land.type, value = TRUE);
             DF.temp <- as.data.frame(readr::read_csv(
-                file = file.path(data.folder,temp.file)
+                file = file.path(data.directory,temp.file)
                 ));
             colnames(DF.temp) <- getData_fixColnames(
                 input.colnames = colnames(DF.temp)
