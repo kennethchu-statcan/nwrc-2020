@@ -3,6 +3,7 @@ getDataStandardizedTimepoints <- function(
     DF.input            = NULL,
     beam.swath          = NULL,
     colname.pattern     = NULL,
+    n.partition         = NULL,
     n.order             = NULL,
     n.basis             = NULL,
     smoothing.parameter = NULL,
@@ -32,10 +33,17 @@ getDataStandardizedTimepoints <- function(
     cat("\nstr(DF.input) -- getDataStandardizedTimepoints()\n");
     print( str(DF.input)   );
 
-    common.endpoints <- getDataStandardizedTimepoints_getCommonEndpoints(
-        DF.input   = DF.input,
-        beam.swath = beam.swath
-	);
+    list.bspline.basis <- getDataStandardizedTimepoints_getBsplineBasis(
+        DF.input            = DF.input,
+        beam.swath          = beam.swath,
+        n.partition         = n.partition,
+        n.order             = n.order,
+        n.basis             = n.basis,
+        smoothing.parameter = smoothing.parameter
+        );
+
+    cat("\nstr(list.bspline.basis)\n");
+    print( str(list.bspline.basis)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -287,12 +295,17 @@ getDataStandardizedTimepoints <- function(
     }
 
 ##################################################
-getDataStandardizedTimepoints_getCommonEndpoints <- function(
-    DF.input   = NULL,
-    beam.swath = NULL
+getDataStandardizedTimepoints_getBsplineBasis <- function(
+    DF.input            = NULL,
+    beam.swath          = NULL,
+    n.partition         = NULL,
+    n.order             = NULL,
+    n.basis             = NULL,
+    smoothing.parameter = NULL
     ) {
 
     require(dplyr);
+    require(fda);
 
     DF.yearly.endpoints <- unique(DF.input[,c("year","date","date_index")]) %>%
        dplyr::group_by(year) %>%
@@ -310,8 +323,39 @@ getDataStandardizedTimepoints_getCommonEndpoints <- function(
 
     common.start.index <- max(DF.yearly.endpoints[,"start_index"]);
     common.end.index   <- min(DF.yearly.endpoints[,  "end_index"]);
-				
-    return( NULL );
+
+    step.size <- round( (common.end.index - common.start.index) / n.partition );
+    spline.grid <- seq(common.start.index, common.end.index, step.size);
+
+    my.bspline.basis <- fda::create.bspline.basis(
+        rangeval    = range(spline.grid),
+        norder      = n.order,
+        nbasis      = n.basis,
+        dropind     = NULL,
+        quadvals    = NULL,
+        values      = NULL,
+        basisvalues = NULL,
+        names       = "bspl"
+        );
+
+    my.bspline.basis.fdParObj <- fda::fdPar(
+        fdobj  = my.bspline.basis,
+        Lfdobj = NULL,
+        lambda = smoothing.parameter,
+        penmat = NULL
+        );
+
+    list.output <- list(
+        start.end.indexes      = c(common.start.index,common.end.index),
+	n.partition            = n.partition,
+	step.size              = step.size,
+        spline.grid.range      = range(spline.grid),
+        spline.grid            = spline.grid,
+	bspline.basis          = my.bspline.basis,
+	bspline.basis.fdParObj = my.bspline.basis.fdParObj
+        );
+
+    return( list.output );
 
     }
 
