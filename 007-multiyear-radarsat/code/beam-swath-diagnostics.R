@@ -24,8 +24,8 @@ beam.swath.diagnostics <- function(
         land.types      = land.types
         );
 
-    cat("\nstr(DF.data)\n");
-    print( str(DF.data)   );
+    cat(paste0("\nstr(DF.data) -- ",beam.swath,"\n"));
+    print(        str(DF.data) );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 #    DF.OPC.attached <- beam.swath.diagnostics_attach.OPC(
