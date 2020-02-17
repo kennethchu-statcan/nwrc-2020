@@ -45,19 +45,66 @@ reshapeData <- function(
 	DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep = "_");
 
         DF.output[,"type"] <- factor(
-	        x       = as.character(DF.output[,"type"]),
-	        levels  = land.types,
-	        ordered = FALSE
-	        );
+	    x       = as.character(DF.output[,"type"]),
+	    levels  = land.types,
+	    ordered = FALSE
+	    );
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        temp.colnames <- grep(
+	# add scaled variables
+        target.variables <- grep(
             x       = colnames(DF.output),
             pattern = colname.pattern,
             value   = TRUE
             );
 
-        for ( temp.variable in temp.colnames ) {
+        for ( temp.variable in target.variables ) {
+            DF.output <- reshapeData_attachScaledVariable(
+                DF.input        = DF.output,
+                target.variable = temp.variable,
+                by.variable     = "X_Y_year"
+                );
+            }
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # add OPC (ordinary principal component) variables
+        temp.formula <- paste0("~ ",paste(x = target.variables, collapse = " + "));
+        temp.formula <- as.formula( temp.formula );
+
+        results.princomp <- princomp(
+            formula = temp.formula,
+            data    = DF.output
+            );
+
+        DF.scores <- results.princomp[['scores']];
+        DF.scores <- as.data.frame(DF.scores);
+        colnames(DF.scores) <- gsub(
+            x           = colnames(DF.scores),
+            pattern     = "Comp\\.",
+            replacement = paste0(colname.pattern,"_opc")
+            );
+
+        DF.output[,"syntheticID"] <- rownames(DF.output);
+        DF.scores[,"syntheticID"] <- rownames(DF.scores);
+
+        DF.output <- dplyr::left_join(
+            x  = DF.output,
+            y  = DF.scores,
+            by = "syntheticID"
+            );
+        DF.output <- as.data.frame(DF.output);
+
+        DF.output <- DF.output[,setdiff(colnames(DF.output),"syntheticID")];
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        # add scaled OPC variables
+        target.variables <- grep(
+            x       = colnames(DF.output),
+            pattern = paste0(colname.pattern,"_opc"),
+            value   = TRUE
+            );
+
+        for ( temp.variable in target.variables ) {
             DF.output <- reshapeData_attachScaledVariable(
                 DF.input        = DF.output,
                 target.variable = temp.variable,
@@ -73,7 +120,7 @@ reshapeData <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    remove(list = c("list.data"));
+    remove(list = c("list.data","DF.scores"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
