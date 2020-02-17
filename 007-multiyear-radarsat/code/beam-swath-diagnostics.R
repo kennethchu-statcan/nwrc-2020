@@ -135,7 +135,7 @@ beam.swath.diagnostics_getData <- function(
             output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
             );
 
-        cat(paste0("\nstr(DF.data.reshaped) -- ",temp.year,"\n"));
+        cat(paste0("\nstr(DF.data.reshaped) -- ",beam.swath,", ",temp.year,"\n"));
 	print(        str(DF.data.reshaped) );
 
 	DF.output <- rbind(DF.output,DF.data.reshaped);
