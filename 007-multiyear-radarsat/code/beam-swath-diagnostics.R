@@ -4,8 +4,8 @@ beam.swath.diagnostics <- function(
     beam.swath      = NULL,
     colname.pattern = NULL,
     land.types      = c("ag","forest","marsh","shallow","swamp","water"),
-    make.plots      = TRUE,
-    make.heatmaps   = TRUE
+    plot.timeseries = TRUE,
+    plot.heatmaps   = TRUE
     ) {
 
     thisFunctionName <- "beam.swath.diagnostics";
@@ -30,7 +30,7 @@ beam.swath.diagnostics <- function(
     cat(paste0("\nsummary(DF.data) -- ",beam.swath,"\n"));
     print(        summary(DF.data) );
 
-    if ( make.plots ) {
+    if ( plot.timeseries ) {
         beam.swath.diagnostics_plotGroupedTimeSeries(
             DF.input        = DF.data,
             beam.swath      = beam.swath,
