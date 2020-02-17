@@ -18,7 +18,6 @@ setwd( output.directory );
 ##################################################
 # source supporting R code
 code.files <- c(
-    "attachScaledVariables.R",
     "beam-swath-diagnostics.R",
     "doFPCA.R",
     "doPCA.R",
