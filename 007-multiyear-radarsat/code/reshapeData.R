@@ -66,6 +66,8 @@ reshapeData <- function(
                 );
             }
 
+        rownames(DF.output) <- paste0("ID_",seq(1,nrow(DF.output)));
+
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         # add OPC (ordinary principal component) variables
         temp.formula <- paste0("~ ",paste(x = target.variables, collapse = " + "));
