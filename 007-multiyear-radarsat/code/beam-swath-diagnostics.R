@@ -27,6 +27,14 @@ beam.swath.diagnostics <- function(
     cat(paste0("\nstr(DF.data) -- ",beam.swath,"\n"));
     print(        str(DF.data) );
 
+    if ( make.plots ) {
+        beam.swath.diagnostics_plotGroupedTimeSeries(
+            DF.input        = DF.data,
+            beam.swath      = beam.swath,
+            colname.pattern = colname.pattern
+            );
+        }
+
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 #    DF.OPC.attached <- beam.swath.diagnostics_attach.OPC(
 #        DF.input   = DF.data,
@@ -53,6 +61,77 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
+beam.swath.diagnostics_plotGroupedTimeSeries <- function(
+    DF.input        = NULL,
+    beam.swath      = NULL,
+    colname.pattern = NULL
+    ) {
+
+    require(ggplot2);
+
+    cat("\nstr(DF.input)\n");
+    print( str(DF.input)   );
+
+    years            <- unique(DF.input[,"year"]);
+    target.variables <- grep(x = colnames(DF.input), pattern = colname.pattern, value = TRUE);
+
+    for ( year            in years            ) {
+    for ( target.variable in target.variables ) {
+
+        PNG.output <- paste0('tmp-timeseries-',beam.swath,'-',year,'-',target.variable,'.png');
+
+	is.current.year   <- (DF.input[,"year"] == year);
+        DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
+        colnames(DF.temp) <- gsub(
+            x           = colnames(DF.temp),
+            pattern     = target.variable,
+            replacement = "target.variable"
+            );
+
+        my.ggplot <- initializePlot(
+            title    = NULL,
+            subtitle = paste0(beam.swath,", ",year,", ",target.variable)
+            );
+
+        my.ggplot <- my.ggplot + scale_x_date(
+            breaks       = sort(unique(DF.temp[,"date"])),
+            minor_breaks = NULL
+            );
+
+        my.ggplot <- my.ggplot + theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5)
+            );
+
+        my.ggplot <- my.ggplot + scale_y_continuous(
+            #limits = c(  -0.3,1.6),
+            #breaks = seq(-0.2,1.6,0.2)
+            limits = c(  -3.0,3.0),
+            breaks = seq(-3.0,3.0,1.0)
+            );
+
+        my.ggplot <- my.ggplot + geom_line(
+            data    = DF.temp,
+            mapping = aes(x=date,y=target.variable,group=X_Y_year,color=type),
+            alpha   = 0.3
+            );
+
+        my.ggplot <- my.ggplot + facet_grid(type ~ .);
+
+        ggsave(
+            file   = PNG.output,
+            plot   = my.ggplot,
+            dpi    = 150,
+            height =  16,
+            width  =  16,
+            units  = 'in'
+            );
+
+        }}
+
+    return( NULL );
+
+    }
+
 beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
     DF.input     = NULL,
     beam.swath   = NULL,
