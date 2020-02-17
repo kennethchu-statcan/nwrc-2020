@@ -1,11 +1,15 @@
 
 beam.swath.diagnostics <- function(
-    data.directory  = NULL,
-    beam.swath      = NULL,
-    colname.pattern = NULL,
-    land.types      = c("ag","forest","marsh","shallow","swamp","water"),
-    plot.timeseries = TRUE,
-    plot.heatmaps   = TRUE
+    data.directory      = NULL,
+    beam.swath          = NULL,
+    colname.pattern     = NULL,
+    land.types          = c("ag","forest","marsh","shallow","swamp","water"),
+    n.order             = 3,
+    n.basis             = 9,
+    smoothing.parameter = 0.1,
+    n.harmonics         = 7,
+    plot.timeseries     = TRUE,
+    plot.heatmaps       = TRUE
     ) {
 
     thisFunctionName <- "beam.swath.diagnostics";
@@ -39,13 +43,18 @@ beam.swath.diagnostics <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-#    DF.standardizedTimepoints <- beam.swath.diagnostics_getDataStandardizedTimepoints(
-#        DF.input   = DF.data,
-#        beam.swath = beam.swath
-#        );
-#
-#    cat("\nstr(DF.standardizedTimepoints)\n");
-#    print( str(DF.standardizedTimepoints)   );
+    DF.standardizedTimepoints <- getDataStandardizedTimepoints(
+        DF.input            = DF.data,
+        beam.swath          = beam.swath,
+        colname.pattern     = colname.pattern,
+	n.order             = n.order,
+        n.basis             = n.basis,
+        smoothing.parameter = smoothing.parameter,
+        n.harmonics         = n.harmonics
+        );
+
+    cat("\nstr(DF.standardizedTimepoints)\n");
+    print( str(DF.standardizedTimepoints)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
@@ -128,44 +137,6 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
         }}
 
     return( NULL );
-
-    }
-
-beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
-    DF.input     = NULL,
-    beam.swath   = NULL,
-    RData.output = paste0("data-",beam.swath,"-standardizedTimepoints.RData")
-    ) {
-
-    if ( file.exists(RData.output) ) {
-        DF.output <- readRDS(file = RData.output);    
-        return( DF.output );
-        } 
-
-    DF.data <- data.frame();
-
-    years <- beam.swath.diagnostics_getYears(data.directory = data.directory);
-    for ( temp.year in years ) {
-
-        list.data.raw <- getData(
-            data.directory = data.directory,
-            beam.swath     = beam.swath,
-            year           = temp.year,
-            output.file    = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-raw.RData"))
-            );
-
-        DF.data.reshaped <- reshapeData(
-            list.input      = list.data.raw,
-            beam.swath      = beam.swath,
-            colname.pattern = colname.pattern,
-            output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
-            );
-
-	DF.data <- rbind(DF.data,DF.data.reshaped);
-
-        }
-
-    return( DF.data );
 
     }
 

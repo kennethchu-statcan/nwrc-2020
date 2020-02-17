@@ -22,6 +22,7 @@ code.files <- c(
     "doFPCA.R",
     "doPCA.R",
     "getData.R",
+    "getDataStandardizedTimepoints.R",
     "getVariableStems.R",
     "initializePlot.R",
     "reshapeData.R",
@@ -83,12 +84,16 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     for ( beam.swath in beam.swaths ) {
         beam.swath.diagnostics(
-            data.directory  = data.directory,
-            beam.swath      = beam.swath,
-            colname.pattern = colname.pattern,
-            land.types      = c("marsh","swamp","water","forest","ag","shallow"),
-            plot.timeseries = FALSE,
-            plot.heatmaps   = FALSE
+            data.directory      = data.directory,
+            beam.swath          = beam.swath,
+            colname.pattern     = colname.pattern,
+            land.types          = c("marsh","swamp","water","forest","ag","shallow"),
+            n.order             = 3,
+            n.basis             = 9,
+            smoothing.parameter = 0.1,
+            n.harmonics         = 7,
+            plot.timeseries     = FALSE,
+            plot.heatmaps       = FALSE
             );
         }
 
