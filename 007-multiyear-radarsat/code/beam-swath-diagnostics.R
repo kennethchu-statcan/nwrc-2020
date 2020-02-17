@@ -53,33 +53,6 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
-beam.swath.diagnostics_attach.OPC <- function(
-    DF.input     = NULL,
-    beam.swath   = NULL,
-    RData.output = paste0("data-",beam.swath,"-OPC-attached.RData")
-    ) {
-
-    if ( file.exists(RData.output) ) {
-        DF.output <- readRDS(file = RData.output);    
-        return( DF.output );
-        } 
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.output <- DF.input;
-    rownames(DF.output) <- paste0("row_",seq(1,nrow(DF.output)));
-
-    DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep="_");
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if (!is.null(RData.output)) {
-        saveRDS(object = DF.output, file = RData.output);
-        }
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    return( DF.output );
-
-    }
-
 beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
     DF.input     = NULL,
     beam.swath   = NULL,
