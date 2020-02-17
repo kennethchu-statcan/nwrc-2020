@@ -27,6 +27,9 @@ beam.swath.diagnostics <- function(
     cat(paste0("\nstr(DF.data) -- ",beam.swath,"\n"));
     print(        str(DF.data) );
 
+    cat(paste0("\nsummary(DF.data) -- ",beam.swath,"\n"));
+    print(        summary(DF.data) );
+
     if ( make.plots ) {
         beam.swath.diagnostics_plotGroupedTimeSeries(
             DF.input        = DF.data,
@@ -104,12 +107,15 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
 
         if ( grepl(x = target.variable, pattern = "_scaled$") ) {
             my.ggplot <- my.ggplot + scale_y_continuous(
-                #limits = c(  -0.3,1.6),
-                #breaks = seq(-0.2,1.6,0.2)
-                limits = c(  -3.0,3.0),
-                breaks = seq(-3.0,3.0,1.0)
+                limits = c(  -3,3),
+                breaks = seq(-3,3,1)
                 );
-            }
+        } else {
+            my.ggplot <- my.ggplot + scale_y_continuous(
+                limits = c(  -30,30),
+                breaks = seq(-30,30,10)
+                );
+	    }
 
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
