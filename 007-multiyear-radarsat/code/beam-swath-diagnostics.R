@@ -102,12 +102,14 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
             axis.text.x = element_text(angle = 90, vjust = 0.5)
             );
 
-        my.ggplot <- my.ggplot + scale_y_continuous(
-            #limits = c(  -0.3,1.6),
-            #breaks = seq(-0.2,1.6,0.2)
-            limits = c(  -3.0,3.0),
-            breaks = seq(-3.0,3.0,1.0)
-            );
+        if ( grepl(x = target.variable, pattern = "_scaled$") ) {
+            my.ggplot <- my.ggplot + scale_y_continuous(
+                #limits = c(  -0.3,1.6),
+                #breaks = seq(-0.2,1.6,0.2)
+                limits = c(  -3.0,3.0),
+                breaks = seq(-3.0,3.0,1.0)
+                );
+            }
 
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
