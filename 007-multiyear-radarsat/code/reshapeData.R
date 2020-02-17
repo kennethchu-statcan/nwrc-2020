@@ -3,6 +3,7 @@ reshapeData <- function(
     list.input      = NULL,
     beam.swath      = NULL,
     colname.pattern = NULL,
+    land.types      = NULL,
     output.file     = NULL
     ) {
 
@@ -16,37 +17,128 @@ reshapeData <- function(
 
         cat(paste0("\n### ",output.file," already exists; loading this file ...\n"));
 
-        list.output <- readRDS(file = output.file);
+        DF.output <- readRDS(file = output.file);
 
         cat(paste0("\n### Finished loading raw data.\n"));
 
     } else {
 
-        list.output <- list();
+        list.data <- list();
         for ( temp.name in names(list.input) ) {
-            list.output[[ temp.name ]] <- reshapeData_long(
+            list.data[[ temp.name ]] <- reshapeData_long(
                 DF.input        = list.input[[ temp.name ]],
+                land.type       = temp.name,
                 beam.swath      = beam.swath,
                 colname.pattern = colname.pattern
                 );
-	        }
+            }
 
+        DF.output <- data.frame();
+        for ( temp.name in names(list.data) ) {
+            DF.output <- rbind(
+                DF.output,
+                list.data[[ temp.name ]]
+                );
+            }
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+	DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep = "_");
+
+        DF.output[,"type"] <- factor(
+	        x       = as.character(DF.output[,"type"]),
+	        levels  = land.types,
+	        ordered = FALSE
+	        );
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        temp.colnames <- grep(
+            x       = colnames(DF.output),
+            pattern = colname.pattern,
+            value   = TRUE
+            );
+
+        for ( temp.variable in temp.colnames ) {
+            DF.output <- reshapeData_attachScaledVariable(
+                DF.input        = DF.output,
+                target.variable = temp.variable,
+                by.variable     = "X_Y_year"
+                );
+            }
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         if (!is.null(output.file)) {
-            saveRDS(object = list.output, file = output.file);
+            saveRDS(object = DF.output, file = output.file);
             }
 
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    remove(list = c("list.data"));
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
-    return( list.output );
+    return( DF.output );
 
     }
 
 ###################################################
+reshapeData_attachScaledVariable <- function(
+    DF.input        = NULL,
+    target.variable = NULL,
+    by.variable     = NULL
+    ) {
+
+    require(dplyr);
+
+    my.formula <- as.formula(paste0(target.variable," ~ ",by.variable));
+
+    DF.means <- aggregate(formula = my.formula, data = DF.input, FUN = mean);
+    colnames(DF.means) <- gsub(
+        x           = colnames(DF.means),
+        pattern     = target.variable,
+        replacement = "mean_target"
+        );
+
+    DF.sds <- aggregate(formula = my.formula, data = DF.input, FUN = sd  );
+    colnames(DF.sds) <- gsub(
+        x           = colnames(DF.sds),
+        pattern     = target.variable,
+        replacement = "sd_target"
+        );
+
+    DF.output <- dplyr::left_join(
+        x  = DF.input,
+        y  = DF.means,
+        by = by.variable
+        );
+
+    DF.output <- dplyr::left_join(
+        x  = DF.output,
+        y  = DF.sds,
+        by = by.variable
+        );
+
+    DF.output <- as.data.frame(DF.output);
+
+    DF.output[,"scaled_variable"] <- DF.output[, target.variable ] - DF.output[,"mean_target"];
+    DF.output[,"scaled_variable"] <- DF.output[,"scaled_variable"] / DF.output[,  "sd_target"];
+
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "scaled_variable",
+        replacement = paste0(target.variable,"_scaled")
+        );
+
+    DF.output <- DF.output[,setdiff(colnames(DF.output),c("mean_target","sd_target"))];
+
+    return( DF.output );
+
+    }
+
 reshapeData_long <- function(
     DF.input        = NULL,
+    land.type       = NULL,
     beam.swath      = NULL,
     colname.pattern = NULL
     ) {
@@ -82,6 +174,7 @@ reshapeData_long <- function(
         dplyr::select(X,Y,date,variable,value) %>%
         tidyr::spread(key=variable,value=value);
 
+    DF.output[,"type"] <- as.character(land.type);
     DF.output[,"date"] <- as.Date(x = DF.output[,"date"], tryFormats = c("%Y%m%d"));
 
     temp.colnames <- grep(
@@ -98,11 +191,12 @@ reshapeData_long <- function(
     DF.output[,"new_year_day"] <- as.Date(paste0(DF.output[,"year"],"-01-01"));
     DF.output[,"date_index"]   <- as.integer(DF.output[,"date"]) - as.integer(DF.output[,"new_year_day"]);
 
-    first.colnames     <- c("X","Y","year","new_year_day","date","date_index");
+    first.colnames     <- c("X","Y","year","type","new_year_day","date","date_index");
     colnames.reordered <- c(first.colnames,setdiff(colnames(DF.output),first.colnames));
     DF.output          <- DF.output[,colnames.reordered];
 
-    return(DF.output);
+    remove( list = c("DF.temp") );
+    return( DF.output );
 
     }
 

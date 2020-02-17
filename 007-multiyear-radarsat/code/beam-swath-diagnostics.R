@@ -12,52 +12,40 @@ beam.swath.diagnostics <- function(
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    initial.directory     <- getwd();
-    temp.output.directory <- file.path(initial.directory,colname.pattern);
-    if ( !dir.exists(temp.output.directory) ) {
-        dir.create(path = temp.output.directory, recursive = TRUE);
-        }
-    setwd( temp.output.directory );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    stdout.connection <- file(file.path(temp.output.directory,"stdout.R.beam-swath-diagnostics"), open = "wt");
-    stderr.connection <- file(file.path(temp.output.directory,"stderr.R.beam-swath-diagnostics"), open = "wt");
-
-    sink(file = stdout.connection, type = "output" );
-    sink(file = stderr.connection, type = "message");
+    cat(paste0("\nbeam.swath: ",beam.swath,"\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
-    DF.data.standardized.timepoints <- beam.swath.diagnostics_getDataStandardizedTimepoints(
+    DF.data <- beam.swath.diagnostics_getData(
         data.directory  = beam.swath.directory,
         beam.swath      = beam.swath,
-        colname.pattern = colname.pattern
+        colname.pattern = colname.pattern,
+        land.types      = land.types
         );
 
-    cat("\nstr(DF.data.standardized.timepoints)\n");
-    print( str(DF.data.standardized.timepoints)   );
+    cat("\nstr(DF.data)\n");
+    print( str(DF.data)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat("\nwarnings()\n");
-    print( warnings()   );
-
-    cat("\ngetOption('repos')\n");
-    print( getOption('repos')   );
-
-    cat("\n.libPaths()\n");
-    print( .libPaths()   );
-
-    cat("\nsessionInfo\n");
-    print( sessionInfo() );
-
-    sink(file = NULL);
-    sink(file = NULL);
+#    DF.OPC.attached <- beam.swath.diagnostics_attach.OPC(
+#        DF.input   = DF.data,
+#        beam.swath = beam.swath
+#        );
+#
+#    cat("\nstr(DF.OPC.attached)\n");
+#    print( str(DF.OPC.attached)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    setwd( initial.directory );
+#    DF.standardizedTimepoints <- beam.swath.diagnostics_getDataStandardizedTimepoints(
+#        DF.input   = DF.data,
+#        beam.swath = beam.swath
+#        );
+#
+#    cat("\nstr(DF.standardizedTimepoints)\n");
+#    print( str(DF.standardizedTimepoints)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
     return( NULL );
@@ -65,11 +53,45 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
-beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
-    data.directory  = NULL,
-    beam.swath      = NULL,
-    colname.pattern = NULL
+beam.swath.diagnostics_attach.OPC <- function(
+    DF.input     = NULL,
+    beam.swath   = NULL,
+    RData.output = paste0("data-",beam.swath,"-OPC-attached.RData")
     ) {
+
+    if ( file.exists(RData.output) ) {
+        DF.output <- readRDS(file = RData.output);    
+        return( DF.output );
+        } 
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    DF.output <- DF.input;
+    rownames(DF.output) <- paste0("row_",seq(1,nrow(DF.output)));
+
+    DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep="_");
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    if (!is.null(RData.output)) {
+        saveRDS(object = DF.output, file = RData.output);
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    return( DF.output );
+
+    }
+
+beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
+    DF.input     = NULL,
+    beam.swath   = NULL,
+    RData.output = paste0("data-",beam.swath,"-standardizedTimepoints.RData")
+    ) {
+
+    if ( file.exists(RData.output) ) {
+        DF.output <- readRDS(file = RData.output);    
+        return( DF.output );
+        } 
+
+    DF.data <- data.frame();
 
     years <- beam.swath.diagnostics_getYears(data.directory = data.directory);
     for ( temp.year in years ) {
@@ -78,22 +100,83 @@ beam.swath.diagnostics_getDataStandardizedTimepoints <- function(
             data.directory = data.directory,
             beam.swath     = beam.swath,
             year           = temp.year,
-            output.file    = paste0("data-",beam.swath,"-",temp.year,"-raw.RData") 
+            output.file    = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-raw.RData"))
             );
 
-        list.data.reshaped <- reshapeData(
+        DF.data.reshaped <- reshapeData(
             list.input      = list.data.raw,
             beam.swath      = beam.swath,
             colname.pattern = colname.pattern,
-            output.file     = paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData")
+            output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
             );
 
-        cat("\nstr(list.data.reshaped)\n");
-        print( str(list.data.reshaped)   );
+	DF.data <- rbind(DF.data,DF.data.reshaped);
 
         }
 
-    return( NULL );
+    return( DF.data );
+
+    }
+
+beam.swath.diagnostics_getData <- function(
+    data.directory  = NULL,
+    beam.swath      = NULL,
+    colname.pattern = NULL,
+    land.types      = NULL,
+    RData.output    = paste0("data-",beam.swath,".RData")
+    ) {
+
+    if ( file.exists(RData.output) ) {
+        DF.output <- readRDS(file = RData.output);    
+        return( DF.output );
+        } 
+
+    DF.output <- data.frame();
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory <- getwd();
+    temp.directory    <- file.path(initial.directory,"data");
+    if ( !dir.exists(temp.directory) ) {
+        dir.create(path = temp.directory, recursive = TRUE);
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    years <- beam.swath.diagnostics_getYears(data.directory = data.directory);
+    for ( temp.year in years ) {
+
+        list.data <- getData(
+            data.directory = data.directory,
+            beam.swath     = beam.swath,
+            year           = temp.year,
+            output.file    = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-raw.RData"))
+            );
+
+        #cat(paste0("\nstr(list.data) -- ",temp.year,"\n"));
+	#print(        str(list.data) );
+
+        DF.data.reshaped <- reshapeData(
+            list.input      = list.data,
+            beam.swath      = beam.swath,
+            colname.pattern = colname.pattern,
+	    land.types      = land.types,
+            output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
+            );
+
+        cat(paste0("\nstr(DF.data.reshaped) -- ",temp.year,"\n"));
+	print(        str(DF.data.reshaped) );
+
+	DF.output <- rbind(DF.output,DF.data.reshaped);
+
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    if (!is.null(RData.output)) {
+        saveRDS(object = DF.output, file = RData.output);
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    remove(list = c("list.data.raw"));
+    return( DF.output );
 
     }
 

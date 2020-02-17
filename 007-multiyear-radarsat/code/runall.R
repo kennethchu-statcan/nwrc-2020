@@ -18,6 +18,7 @@ setwd( output.directory );
 ##################################################
 # source supporting R code
 code.files <- c(
+    "attachScaledVariables.R",
     "beam-swath-diagnostics.R",
     "doFPCA.R",
     "doPCA.R",
@@ -58,17 +59,58 @@ print( num.cores   );
 registerDoParallel(cores = num.cores);
 
 foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
+
     base::Sys.sleep(time = 2);
+    colname.pattern <- variable.stems[[temp.index]];
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,colname.pattern);
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    stdout.connection <- "stdout.R.beam-swath-diagnostics";
+    stdout.connection <- file(file.path(temp.output.directory,stdout.connection), open = "wt");
+
+    stderr.connection <- "stderr.R.beam-swath-diagnostics";
+    stderr.connection <- file(file.path(temp.output.directory,stderr.connection), open = "wt");
+
+    sink(file = stdout.connection, type = "output" );
+    sink(file = stderr.connection, type = "message");
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     for ( beam.swath in beam.swaths ) {
         beam.swath.diagnostics(
             data.directory  = data.directory,
             beam.swath      = beam.swath,
-            colname.pattern = variable.stems[[temp.index]],
+            colname.pattern = colname.pattern,
             land.types      = c("marsh","swamp","water","forest","ag","shallow"),
             make.plots      = TRUE,
             make.heatmaps   = FALSE
             );
         }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    cat("\nwarnings()\n");
+    print( warnings()   );
+
+    cat("\ngetOption('repos')\n");
+    print( getOption('repos')   );
+
+    cat("\n.libPaths()\n");
+    print( .libPaths()   );
+
+    cat("\nsessionInfo\n");
+    print( sessionInfo() );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    sink(file = NULL);
+    sink(file = NULL);
+    setwd( initial.directory );
+
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
