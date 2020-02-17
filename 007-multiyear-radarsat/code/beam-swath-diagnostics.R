@@ -39,15 +39,6 @@ beam.swath.diagnostics <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-#    DF.OPC.attached <- beam.swath.diagnostics_attach.OPC(
-#        DF.input   = DF.data,
-#        beam.swath = beam.swath
-#        );
-#
-#    cat("\nstr(DF.OPC.attached)\n");
-#    print( str(DF.OPC.attached)   );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 #    DF.standardizedTimepoints <- beam.swath.diagnostics_getDataStandardizedTimepoints(
 #        DF.input   = DF.data,
 #        beam.swath = beam.swath
