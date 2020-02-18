@@ -88,11 +88,11 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             beam.swath          = beam.swath,
             colname.pattern     = colname.pattern,
             land.types          = c("marsh","swamp","water","forest","ag","shallow"),
-	    n.partition         = 20,
-            n.order             =  3,
-            n.basis             =  9,
-            smoothing.parameter =  0.1,
-            n.harmonics         =  7,
+	    n.partition         = 100,
+            n.order             =   3,
+            n.basis             =   9,
+            smoothing.parameter =   0.1,
+            n.harmonics         =   7,
             plot.timeseries     = FALSE,
             plot.heatmaps       = FALSE
             );
