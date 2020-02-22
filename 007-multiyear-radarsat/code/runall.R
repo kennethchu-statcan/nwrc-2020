@@ -80,6 +80,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
 
     sink(file = stdout.connection, type = "output" );
     sink(file = stderr.connection, type = "message");
+    cat("\n");
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     for ( beam.swath in beam.swaths ) {
@@ -110,6 +111,8 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
 
     cat("\nsessionInfo\n");
     print( sessionInfo() );
+
+    cat("\n");
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     sink(file = NULL);

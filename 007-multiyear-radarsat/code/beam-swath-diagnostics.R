@@ -5,10 +5,10 @@ beam.swath.diagnostics <- function(
     colname.pattern     = NULL,
     land.types          = c("ag","forest","marsh","shallow","swamp","water"),
     n.partition         = 20,
-    n.order             = 3,
-    n.basis             = 9,
-    smoothing.parameter = 0.1,
-    n.harmonics         = 7,
+    n.order             =  3,
+    n.basis             =  9,
+    smoothing.parameter =  0.1,
+    n.harmonics         =  7,
     plot.timeseries     = TRUE,
     plot.heatmaps       = TRUE
     ) {
@@ -57,6 +57,28 @@ beam.swath.diagnostics <- function(
 
     cat("\nstr(DF.standardizedTimepoints)\n");
     print( str(DF.standardizedTimepoints)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    fpca.variables <- grep(
+        x       = colnames(DF.standardizedTimepoints),
+	pattern = colname.pattern,
+	value   = TRUE
+	);
+
+    for ( fpca.variable in fpca.variables ) {
+        DF.fpca <- doFPCA(
+            DF.input            = DF.standardizedTimepoints,
+            target.variable     = fpca.variable,
+            beam.swath          = beam.swath,
+            spline.grid         = NULL,
+            n.order             = 3,
+            n.basis             = 9,
+            smoothing.parameter = 0.1,
+            n.harmonics         = 7
+            );
+        cat("\nstr(DF.fpca)\n");
+        print( str(DF.fpca)   );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\n",thisFunctionName,"() quits."));
