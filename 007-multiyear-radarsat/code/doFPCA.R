@@ -42,20 +42,14 @@ doFPCA <- function(
         replacement = "target_variable"
         );
 
-    cat(paste0("\nstr(DF.temp) -- doFPCA(), ",target.variable," -- A-1\n"));
-    print( str(DF.temp) );
-
     DF.temp <- DF.temp %>%
         tidyr::spread(key = date_index, value = target_variable);
     DF.temp <- as.data.frame(DF.temp);
     rownames(DF.temp) <- DF.temp[,"X_Y_year"];
 
-    cat(paste0("\nstr(DF.temp) -- doFPCA(), ",target.variable," -- A-2\n"));
-    print( str(DF.temp) );
-
     DF.temp <- DF.temp[0 == rowSums(is.na(DF.temp)),];
 
-    cat(paste0("\nstr(DF.temp) -- doFPCA(), ",target.variable," -- A-3\n"));
+    cat(paste0("\nstr(DF.temp) -- doFPCA(), ",target.variable,"\n"));
     print( str(DF.temp) );
 
     cat(paste0("\nsummary(DF.temp) -- doFPCA(), ",target.variable,"\n"));
@@ -78,9 +72,6 @@ doFPCA <- function(
 
     cat("\nstr(DF.dates)\n");
     print( str(DF.dates)    );
-
-    cat("\nDF.dates\n");
-    print( DF.dates    );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     t.DF.temp <- t(DF.temp[,DF.dates[,"date_index_char"]]);
@@ -264,6 +255,19 @@ doFPCA <- function(
         subtitle   = paste0(beam.swath,', ',target.variable),
         PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'.png')
         );
+
+    years <- unique(DF.output[,"year"]);
+    for ( year in years ) {
+        doFPCA_scatter(
+            DF.input   = DF.output[DF.output[,"year"] == year,],
+            beam.swath = beam.swath,
+            x.var      = "fpc_1",
+            y.var      = "fpc_2",
+            title      = NULL,
+            subtitle   = paste0(beam.swath,', ',target.variable,', ',year),
+            PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'-',year,'.png')
+            );
+        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nexiting: ",this.function.name,"()"));
