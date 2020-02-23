@@ -39,7 +39,7 @@ require(foreach);
 require(doParallel);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-02-17.01";
+data.snapshot  <- "2020-02-24.01";
 data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -94,7 +94,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             n.basis             =   9,
             smoothing.parameter =   0.1,
             n.harmonics         =   7,
-            plot.timeseries     = FALSE,
+            plot.timeseries     = TRUE,
             plot.heatmaps       = FALSE
             );
         }
