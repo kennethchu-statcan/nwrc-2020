@@ -6,7 +6,8 @@ initializePlot <- function(
     subtitle       = 'my-subtitle',
     # my.palette   = c("#66C2A5","#FC8D62","#8DA0CB","blue","black","#FFD92F")
     # my.palette   = RColorBrewer::brewer.pal(n = 6, name = "Set2")
-    my.palette     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+    # my.palette   = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+    my.palette     = c("#000000","#E69F00","#CC79A7","#009E73","#F0E442","#0072B2","#D55E00","#56B4E9")
     ) {
 
     require(ggplot2);
