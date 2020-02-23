@@ -8,7 +8,7 @@ initializePlot <- function(
     # my.palette   = RColorBrewer::brewer.pal(n = 6, name = "Set2")
     # my.palette   = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
     # my.palette   = c("#000000","#E69F00","#CC79A7","#009E73","#F0E442","#0072B2","#D55E00","#56B4E9")
-    my.palette     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","red"    )
+    my.palette     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red",    "#D55E00","#CC79A7")
     ) {
 
     require(ggplot2);
