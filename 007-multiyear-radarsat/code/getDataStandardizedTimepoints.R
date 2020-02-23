@@ -8,6 +8,7 @@ getDataStandardizedTimepoints <- function(
     n.basis             = NULL,
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
+    do.diagnostics      = TRUE,
     RData.output        = paste0("data-",beam.swath,"-standardizedTimepoints.RData")
     ) {
 
@@ -70,6 +71,23 @@ getDataStandardizedTimepoints <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    cat(paste0("\nstr(DF.output) -- ",this.function.name,"() -- ",beam.swath,", ",colname.pattern,"\n"));
+    print( str(DF.output) );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    saveRDS(object = DF.output, file = RData.output);
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    if ( do.diagnostics ) {
+        getDataStandardizedTimepoints_diagnostics(
+            DF.input         = DF.input,
+	    DF.output        = DF.output,
+	    target.variables = target.variables,
+	    prefix           = beam.swath
+            );
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nexiting: ",this.function.name,"()"));
     cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
     return( DF.output );
@@ -77,6 +95,53 @@ getDataStandardizedTimepoints <- function(
     }
 
 ##################################################
+getDataStandardizedTimepoints_diagnostics <- function(
+    DF.input         = NULL,
+    DF.output        = NULL,
+    target.variables = NULL,
+    prefix           = NULL
+    ) {
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,"diagnostics-standardize-timepoints");
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    years <- unique(DF.input[,"year"]);
+
+    for ( year in years ) {
+
+	temp.X_Y_year.s <- sample(
+	    x    = DF.input[DF.input[,"year"] == year,"X_Y_year"],
+	    size = 10
+	    );
+
+        for ( temp.X_Y_year   in temp.X_Y_year.s  ) {
+        for ( target.variable in target.variables ) {
+
+            temp.file <- paste0("plot-bspline-",prefix,"-",target.variable,"-",temp.X_Y_year,".png");
+            png(temp.file, height = 12, width = 18, units = "in", res = 300);
+            DF.temp.in  <- DF.input[ DF.input[, "X_Y_year"] == temp.X_Y_year,c("date_index",target.variable)];
+            DF.temp.out <- DF.output[DF.output[,"X_Y_year"] == temp.X_Y_year,c("date_index",target.variable)];
+            plot( x = DF.temp.in[ ,"date_index"],  y = DF.temp.in[ ,target.variable], type = "b", col = "black", lwd = 2);
+            lines(x = DF.temp.out[,"date_index"],  y = DF.temp.out[,target.variable], type = "l", col = "blue",  lwd = 1);
+            dev.off();
+
+            }}
+    
+        }
+
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    setwd( initial.directory );
+    return( NULL );
+
+    }
+
 getDataStandardizedTimepoints_attachVariable <- function(
     DF.input            = NULL,
     DF.current          = NULL,
