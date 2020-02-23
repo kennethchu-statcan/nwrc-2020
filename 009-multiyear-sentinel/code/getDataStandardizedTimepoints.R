@@ -81,9 +81,9 @@ getDataStandardizedTimepoints <- function(
     if ( do.diagnostics ) {
         getDataStandardizedTimepoints_diagnostics(
             DF.input         = DF.input,
-	    DF.output        = DF.output,
-	    target.variables = target.variables,
-	    prefix           = beam.swath
+            DF.output        = DF.output,
+            target.variables = target.variables,
+            prefix           = beam.swath
             );
         }
 
@@ -155,6 +155,11 @@ getDataStandardizedTimepoints_attachVariable <- function(
     require(fda);
     require(tidyr);
 
+    cat("\ngetDataStandardizedTimepoints_attachVariable()\n");
+
+    cat("\nstr(DF.input)\n");
+    print( str(DF.input)   );
+
     DF.temp <- DF.input[,c("X_Y_year","year","date_index",target.variable)];
     colnames(DF.temp) <- gsub(
         x           = colnames(DF.temp),
@@ -162,19 +167,28 @@ getDataStandardizedTimepoints_attachVariable <- function(
         replacement = "target_variable"
         );
 
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
+
     DF.stack <- data.frame();
     years    <- unique(DF.input[,"year"]);
     for ( year in years ) {
+
+        cat(paste0("\ngetDataStandardizedTimepoints_attachVariable() -- ",target.variable,", ",year,"\n"));
 
         DF.temp.year <- DF.temp[DF.temp[,"year"] == year,] %>%
             tidyr::spread(key = date_index, value = target_variable);
         DF.temp.year <- as.data.frame(DF.temp.year);
         rownames(DF.temp.year) <- DF.temp.year[,"X_Y_year"];
 	DF.temp.year <- DF.temp.year[,setdiff(colnames(DF.temp.year),c("X_Y_year","year"))];
+
+        cat("\nstr(DF.temp.year)\n");
+	print( str(DF.temp.year)   );
+
         DF.temp.year <- DF.temp.year[0 == rowSums(is.na(DF.temp.year)),];
 
-        # cat("\nstr(DF.temp.year)\n");
-	# print( str(DF.temp.year)   );
+        cat("\nstr(DF.temp.year)\n");
+	print( str(DF.temp.year)   );
 
         t.DF.temp.year <- t(DF.temp.year);
 
@@ -224,8 +238,8 @@ getDataStandardizedTimepoints_attachVariable <- function(
         bspline.approximation <- as.data.frame(t(bspline.approximation));
         bspline.approximation[,"X_Y_year"] <- rownames(bspline.approximation);
 
-        # cat("\nstr(bspline.approximation)\n");
-	# print( str(bspline.approximation)   );
+        cat("\nstr(bspline.approximation)\n");
+	print( str(bspline.approximation)   );
 
         bspline.approximation.long <- bspline.approximation %>%
             tidyr::gather(key = date_index, value = target_variable, -X_Y_year);
@@ -238,8 +252,8 @@ getDataStandardizedTimepoints_attachVariable <- function(
             replacement = target.variable
             );
 
-        # cat("\nstr(bspline.approximation.long)\n");
-        # print( str(bspline.approximation.long)   );
+        cat("\nstr(bspline.approximation.long)\n");
+        print( str(bspline.approximation.long)   );
 
         DF.stack <- rbind(DF.stack,bspline.approximation.long);
 
@@ -293,6 +307,7 @@ getDataStandardizedTimepoints_getBsplineBasis <- function(
        dplyr::group_by(year) %>%
        dplyr::mutate( start_index = min(date_index), end_index = max(date_index) );
     DF.yearly.endpoints <- as.data.frame(DF.yearly.endpoints);
+    DF.yearly.endpoints <- DF.yearly.endpoints[order(DF.yearly.endpoints[,"date"]),];
 
     cat("\nDF.yearly.endpoints\n");
     print( DF.yearly.endpoints   );

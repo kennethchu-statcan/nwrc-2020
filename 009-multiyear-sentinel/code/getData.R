@@ -44,9 +44,22 @@ getData <- function(
             DF.temp <- as.data.frame(readr::read_csv(
                 file = file.path(data.directory,temp.file)
                 ));
-            colnames(DF.temp) <- getData_fixColnames(
-                input.colnames = colnames(DF.temp)
-                );
+            colnames(DF.temp) <- getData_fixColnames( input.colnames = colnames(DF.temp) );
+
+	    # The following is a special patch for the 2020-02-24.02 data snapshot.
+	    # It turns out that the agriculture data in this snapshot does NOT have
+	    # the timepoint 2017-09-02, while data for the other wetland types do
+	    # have that timepoint. If unmitigated, this would in all agricultural
+	    # lands in 2017 being dropped from the analysis.
+	    # The following patch is to add this timepoint for the 2017 agricultural
+	    # lands, and the value of the tree variables at the added timepoint is simply
+	    # the mean of the preceding and following timepoints.
+            if ( beam.swath == "IW106" & land.type == "ag" & year == "2017" ) {
+                DF.temp[,"S1_IW106_20170902_VH"   ] <- (DF.temp[,"S1_IW106_20170821_VH"   ] + DF.temp[,"S1_IW106_20170914_VH"   ])/2;
+                DF.temp[,"S1_IW106_20170902_VV"   ] <- (DF.temp[,"S1_IW106_20170821_VV"   ] + DF.temp[,"S1_IW106_20170914_VV"   ])/2;
+                DF.temp[,"S1_IW106_20170902_angle"] <- (DF.temp[,"S1_IW106_20170821_angle"] + DF.temp[,"S1_IW106_20170914_angle"])/2;
+                }
+
             list.data.raw[[ land.type ]] <- DF.temp;
             }
 
