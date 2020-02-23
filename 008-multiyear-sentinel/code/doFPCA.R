@@ -309,8 +309,8 @@ doFPCA_scatter <- function(
         );
 
     if ( grepl(x = subtitle, pattern = "scaled") ) {
-        my.ggplot <- my.ggplot + scale_x_continuous(limits=15*c(-1,1),breaks=seq(-15,15,5));
-        my.ggplot <- my.ggplot + scale_y_continuous(limits=15*c(-1,1),breaks=seq(-15,15,5));
+        my.ggplot <- my.ggplot + scale_x_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
+        my.ggplot <- my.ggplot + scale_y_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
     } else {
         my.ggplot <- my.ggplot + scale_x_continuous(limits=300*c(-1,1),breaks=seq(-300,300,100));
         my.ggplot <- my.ggplot + scale_y_continuous(limits=300*c(-1,1),breaks=seq(-300,300,100));
