@@ -19,6 +19,7 @@
 *.jpg
 data
 graphics
+graphics-multiyear
 *.RData
 000-data
 *DELETEME*
