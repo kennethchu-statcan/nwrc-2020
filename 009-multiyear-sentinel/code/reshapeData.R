@@ -201,10 +201,10 @@ reshapeData_long <- function(
         value   = TRUE
         );
 
-    # DF.temp <- DF.input[,c("X","Y",temp.colnames)];
-    DF.temp       <- DF.input[,temp.colnames];
-    DF.temp[,"X"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
-    DF.temp[,"Y"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
+    DF.temp <- DF.input[,c("X","Y",temp.colnames)];
+    #DF.temp       <- DF.input[,temp.colnames];
+    #DF.temp[,"X"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
+    #DF.temp[,"Y"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
 
     DF.temp <- DF.temp %>%
         tidyr::gather(column.name,value,-X,-Y);

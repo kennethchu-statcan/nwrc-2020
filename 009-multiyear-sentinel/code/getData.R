@@ -46,6 +46,9 @@ getData <- function(
                 ));
             colnames(DF.temp) <- getData_fixColnames( input.colnames = colnames(DF.temp) );
 
+	    retained.colnames <- grep(x = colnames(DF.temp), pattern = "Unnamed", ignore.case = TRUE, value = TRUE, invert = TRUE);
+	    DF.temp <- DF.temp[,retained.colnames];
+
 	    # The following is a special patch for the 2020-02-24.02 data snapshot.
 	    # It turns out that the agriculture data in this snapshot does NOT have
 	    # the timepoint 2017-09-02, while data for the other wetland types do
@@ -80,6 +83,18 @@ getData <- function(
 getData_fixColnames <- function(input.colnames = NULL) {
 
     output.colnames <- input.colnames;
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "POINT_X",
+        replacement = "X"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "POINT_Y",
+        replacement = "Y"
+        );
 
     output.colnames <- gsub(
         x           = output.colnames,
@@ -163,10 +178,12 @@ getData_fixColnames <- function(input.colnames = NULL) {
     output.colnames <- as.character(sapply(
         X   = output.colnames,
         FUN = function(x) {
-            y <- unlist(strsplit(x = x, "_"));
-            y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
-            y <- paste(y,collapse = "_");
-            return(y)
+            y <- unlist(strsplit(x = x, split = "_"));
+            if ( length(y) > 1 ) {
+                y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
+                y <- paste(y,collapse = "_");
+                }
+            return(y);
             }
 	));
 
