@@ -308,6 +308,10 @@ doFPCA_scatter <- function(
         subtitle = subtitle
         );
 
+    my.ggplot <- my.ggplot + guides(
+        colour = guide_legend(override.aes = list(alpha =  0.75, size = 10))
+        );
+   
     if ( grepl(x = subtitle, pattern = "scaled") ) {
         my.ggplot <- my.ggplot + scale_x_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
         my.ggplot <- my.ggplot + scale_y_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
@@ -319,8 +323,8 @@ doFPCA_scatter <- function(
     my.ggplot <- my.ggplot + geom_point(
         data    = DF.temp,
         mapping = aes(x = x_var, y = y_var, colour = type),
-	shape   = ".",
-        alpha   = 0.1
+	size    = 0.2,
+        alpha   = 0.3
         );
 
     ggsave(
