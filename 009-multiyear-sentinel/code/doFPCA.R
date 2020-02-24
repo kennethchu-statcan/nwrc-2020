@@ -309,7 +309,7 @@ doFPCA_scatter <- function(
         );
 
     my.ggplot <- my.ggplot + guides(
-        colour = guide_legend(override.aes = list(alpha =  0.75, size = 10))
+        colour = guide_legend(override.aes = list(alpha =  0.5, size = 5))
         );
    
     if ( grepl(x = subtitle, pattern = "scaled") ) {
