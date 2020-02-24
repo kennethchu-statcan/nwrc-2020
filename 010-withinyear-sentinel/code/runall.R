@@ -34,7 +34,7 @@ for ( code.file in code.files ) {
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-02-24.02";
+data.snapshot  <- "2020-02-24.03";
 data.directory <- file.path(data.directory,data.snapshot,"Sentinal1","relative-orbit-number");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###

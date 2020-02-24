@@ -83,6 +83,18 @@ getData_fixColnames <- function(input.colnames = NULL) {
 
     output.colnames <- gsub(
         x           = output.colnames,
+        pattern     = "POINT_X",
+        replacement = "X"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "POINT_Y",
+        replacement = "Y"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
         pattern     = "X2",
         replacement = "X"
         );
@@ -128,8 +140,10 @@ getData_fixColnames <- function(input.colnames = NULL) {
         X   = output.colnames,
         FUN = function(x) {
             y <- unlist(strsplit(x = x, "_"));
-            y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
-            y <- paste(y,collapse = "_");
+            if ( length(y) > 1 ) {
+                y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
+                y <- paste(y,collapse = "_");
+                }
             return(y)
             }
 	));
