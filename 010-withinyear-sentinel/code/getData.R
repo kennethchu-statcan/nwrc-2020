@@ -1,0 +1,140 @@
+
+getData <- function(
+    data.folder = NULL,
+    beam.swath  = NULL,
+    year        = NULL,
+    output.file = NULL
+    ) {
+
+    thisFunctionName <- "getData";
+
+    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
+    cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    require(readr);
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    if ( file.exists(output.file) ) {
+
+        cat(paste0("\n### ",output.file," already exists; loading this file ...\n"));
+
+        list.data.raw <- readRDS(file = output.file);
+
+        cat(paste0("\n### Finished loading raw data.\n"));
+
+    } else {
+
+        temp.files.given.year <- list.files(path = data.folder, pattern = year);
+        temp.files.given.year <- grep(
+            x       = temp.files.given.year,
+            pattern = beam.swath,
+            value   = TRUE
+            );
+
+        land.types <- unique(gsub(
+            x           = temp.files.given.year,
+            pattern     = "_[0-9]{4}_.+",
+            replacement = ""
+            ));
+
+        list.data.raw <- list();
+        for ( land.type in land.types ) {
+            temp.file <- grep(x = temp.files.given.year, pattern = land.type, value = TRUE);
+            DF.temp <- as.data.frame(readr::read_csv(
+                file = file.path(data.folder,temp.file)
+                ));
+            colnames(DF.temp) <- getData_fixColnames( input.colnames = colnames(DF.temp) );
+
+	    # The following is a special patch for the 2020-02-24.02 data snapshot.
+	    # It turns out that the agriculture data in this snapshot does NOT have
+	    # the timepoint 2017-09-02, while data for the other wetland types do
+	    # have that timepoint. If unmitigated, this would in all agricultural
+	    # lands in 2017 being dropped from the analysis.
+	    # The following patch is to add this timepoint for the 2017 agricultural
+	    # lands, and the value of the tree variables at the added timepoint is simply
+	    # the mean of the preceding and following timepoints.
+            if ( beam.swath == "IW106" & land.type == "ag" & year == "2017" ) {
+                DF.temp[,"S1_IW106_20170902_VH"   ] <- (DF.temp[,"S1_IW106_20170821_VH"   ] + DF.temp[,"S1_IW106_20170914_VH"   ])/2;
+                DF.temp[,"S1_IW106_20170902_VV"   ] <- (DF.temp[,"S1_IW106_20170821_VV"   ] + DF.temp[,"S1_IW106_20170914_VV"   ])/2;
+                DF.temp[,"S1_IW106_20170902_angle"] <- (DF.temp[,"S1_IW106_20170821_angle"] + DF.temp[,"S1_IW106_20170914_angle"])/2;
+                }
+
+            list.data.raw[[ land.type ]] <- DF.temp;
+            }
+
+        if (!is.null(output.file)) {
+            saveRDS(object = list.data.raw, file = output.file);
+            }
+
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    cat(paste0("\n",thisFunctionName,"() quits."));
+    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
+    return( list.data.raw );
+
+    }
+
+##################################################
+getData_fixColnames <- function(input.colnames = NULL) {
+
+    output.colnames <- input.colnames;
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "X2",
+        replacement = "X"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "X3",
+        replacement = "Y"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_1_1",
+        replacement = "_1"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_2_2",
+        replacement = "_2"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_3_3",
+        replacement = "_3"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "_4_4",
+        replacement = "_4"
+        );
+
+    output.colnames <- gsub(
+        x           = output.colnames,
+        pattern     = "Yamaguchi_double_bounc$",
+        replacement = "Yamaguchi_double_bounce"
+        );
+
+    # standardize order of components in column names
+    output.colnames <- as.character(sapply(
+        X   = output.colnames,
+        FUN = function(x) {
+            y <- unlist(strsplit(x = x, "_"));
+            y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
+            y <- paste(y,collapse = "_");
+            return(y)
+            }
+	));
+
+    return( output.colnames );
+
+    }
+
