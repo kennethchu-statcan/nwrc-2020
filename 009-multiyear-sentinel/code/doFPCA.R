@@ -319,7 +319,8 @@ doFPCA_scatter <- function(
     my.ggplot <- my.ggplot + geom_point(
         data    = DF.temp,
         mapping = aes(x = x_var, y = y_var, colour = type),
-        alpha   = 0.3
+	shape   = ".",
+        alpha   = 0.1
         );
 
     ggsave(
