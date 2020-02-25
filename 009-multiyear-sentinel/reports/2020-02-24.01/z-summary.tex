@@ -1,0 +1,122 @@
+
+\vskip -1.5cm
+
+\section{Summary}
+\setcounter{theorem}{0}
+
+%\renewcommand{\theenumi}{\alph{enumi}}
+%\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+\renewcommand{\theenumi}{\roman{enumi}}
+\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+\begin{itemize}
+\item
+	We used \textbf{\color{red}Sentinel-1} data retrieved on \textbf{\color{red}February 24}, 2020.
+
+	There was one beam mode (i.e., IW),
+	two relative orbit numbers (4 and 106),
+	two channels (i.e., VH and VV),
+	three calendar years (2017, 2018, 2019), and
+	six wetland types (i.e., marsh, swamp, water, forest, agricultural, shallow water).
+
+\item
+	\textbf{Functional Principal Component Analysis (FPCA) I}
+	\begin{itemize}
+
+	\item
+		We performed the across-year, across-wetland-type FPCA.
+		In other words, for each channel (i.e., VH or VV), its discrete time series
+		across all years and wetland types were treated as a single group (of discrete time series)
+		on which FPCA was performed.
+
+	\item
+		Note that, in order to apply FPCA to a group of discrete time series,
+		we need these time series to be defined on a common grid of time points.
+		However, the radar satellite measurement time series across years do NOT
+		share the same grid of time points. 
+		Hence, in order to perform FPCA across years, we
+		\textbf{\color{red}must standardize the temporal grid across years} somehow.
+
+	\item
+		For each (year, wetland type, channel), we began with 1000 discrete time series,
+		each corresponding to a geographical location.
+		Each time series (location) with one or more missing values was removed.
+		A B-spline approximation was independently fitted through each of the remaining time series
+		(i.e. those free of missing values).
+		We will call this the \textbf{pre-standardized B-spline approximation}
+		of the given original time series.
+
+	\item
+		Separately, we determined the a common standardized temporal grid.
+		To this end, we first determined the maximal common time interval
+		across all years and wetland types, as follows:
+		The left end-point of this maximal common time interval is simply the maximum of the beginning time points
+		of all the time series across years and wetland types,
+		whereas its right end-point is the minimum of the finishing time points of all the time series.
+		The standardized temporal grid was then obtained by adding 100 equally spaced
+		artificial time points within the common time interval.
+
+	\item
+		Next, we replaced each original time series with an artificial time series by evaluating its
+		B-spline approximation at the standardized temporal grid points.
+		(This is possible since each B-spline approximation is a function
+		defined over the maximal common time interval.)
+		In what follows, we will call this the
+		\textbf{standardized B-spline approximation}
+		of the original time series.
+
+	\item
+		Lastly, functional principal components were computed for all the
+		standardized B-spline approximations, across years and wetland types, as a single group.
+		The first two principal component scores were retained for each such time series
+		in order to visualize the extent of separation in the resulting two-dimensional space
+		of the different wetland types.
+		See Appendices \ref{FPCA-scatter-original-IW4}, \ref{FPCA-scatter-original-IW106}.
+	\end{itemize}
+
+\item
+	\textbf{FPCA II}
+	\begin{itemize}
+	\item
+		We proceeded as in FPCA I, but with each time series replaced
+		with its ``scaled'' counterpart.
+		(More precisely, the scaled time series is obtained from the original time series
+		by subtracting its average of the original time series, followed by
+		dividing by the standard deviation of the original time series.)
+		See Appendices \ref{FPCA-scatter-scaled-IW4}, \ref{FPCA-scatter-scaled-IW106}
+	\end{itemize}
+
+\item
+	\textbf{FPCA III}
+	\begin{itemize}
+	\item
+		For each (year, time point, location), we have its (VH,VV) measurements as a point in $\Re^{2}$.
+		As (year, time point, location) varies, we obtain a collection of data points in $\Re^{2}$.
+		We performed ordinary principal components to this collection of data points,
+		and replaced each data point -- (VH,VV) measurements, given (year, time point, location) --
+		with its resulting OPC scores.
+		We then proceeded as in FPCA I, but with the VH and VV time series replaced
+		with their corresponding OPC time series.
+		See Appendices \ref{FPCA-scatter-opc-IW4}, \ref{FPCA-scatter-opc-IW106}.
+	\end{itemize}
+
+\item
+	\textbf{FPCA IV}
+	\begin{itemize}
+	\item
+		We then proceeded as in FPCA III, but with each OPC time series replaced
+		with its ``scaled'' counterpart.
+		See Appendices \ref{FPCA-scatter-opc-scaled-IW4}, \ref{FPCA-scatter-opc-scaled-IW106}.
+	\end{itemize}
+\end{itemize}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
+
+%\renewcommand{\theenumi}{\alph{enumi}}
+%\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+\renewcommand{\theenumi}{\roman{enumi}}
+\renewcommand{\labelenumi}{\textnormal{(\theenumi)}$\;\;$}
+
+          %%%%% ~~~~~~~~~~~~~~~~~~~~ %%%%%
