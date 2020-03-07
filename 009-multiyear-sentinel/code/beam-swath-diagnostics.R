@@ -46,7 +46,7 @@ beam.swath.diagnostics <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.standardizedTimepoints <- getDataStandardizedTimepoints(
+    LIST.standardizedTimepoints <- getDataStandardizedTimepoints(
         DF.input            = DF.data,
         beam.swath          = beam.swath,
         colname.pattern     = colname.pattern,
@@ -57,19 +57,19 @@ beam.swath.diagnostics <- function(
         n.harmonics         = n.harmonics
         );
 
-    cat("\nstr(DF.standardizedTimepoints)\n");
-    print( str(DF.standardizedTimepoints)   );
+    cat("\nstr(LIST.standardizedTimepoints)\n");
+    print( str(LIST.standardizedTimepoints)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     fpca.variables <- grep(
-        x       = colnames(DF.standardizedTimepoints),
+        x       = colnames(LIST.standardizedTimepoints[["df_standardized_timepoints"]]),
 	pattern = colname.pattern,
 	value   = TRUE
 	);
 
     for ( fpca.variable in fpca.variables ) {
         DF.fpca <- doFPCA(
-            DF.input            = DF.standardizedTimepoints,
+            DF.input            = LIST.standardizedTimepoints[["df_standardized_timepoints"]],
             target.variable     = fpca.variable,
             beam.swath          = beam.swath,
             spline.grid         = NULL,
@@ -138,8 +138,8 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
                 );
         } else {
             my.ggplot <- my.ggplot + scale_y_continuous(
-                limits = c(  -30,30),
-                breaks = seq(-30,30,10)
+                limits = c(  -40,20),
+                breaks = seq(-40,20,10)
                 );
 	    }
 

@@ -9,7 +9,7 @@ getDataStandardizedTimepoints <- function(
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
     do.diagnostics      = TRUE,
-    RData.output        = paste0("data-",beam.swath,"-standardizedTimepoints.RData")
+    output.RData        = paste0("data-",beam.swath,"-standardizedTimepoints.RData")
     ) {
 
     this.function.name <- "getDataStandardizedTimepoints";
@@ -17,12 +17,12 @@ getDataStandardizedTimepoints <- function(
     cat(paste0("starting: ",this.function.name,"()\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if (file.exists(RData.output)) {
-        cat(paste0("\nloading file: ",RData.output,"\n"));
-        DF.output <- base::readRDS(file = RData.output);
+    if (file.exists(output.RData)) {
+        cat(paste0("\nloading file: ",output.RData,"\n"));
+        LIST.output <- base::readRDS(file = output.RData);
         cat(paste0("\nexiting: ",this.function.name,"()"));
         cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
-        return( DF.output );
+        return( LIST.output );
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -58,8 +58,10 @@ getDataStandardizedTimepoints <- function(
 	list.bspline.basis = list.bspline.basis
         );
 
+    LIST.bsplines <- list();
     for ( target.variable in target.variables ) {
-        DF.output <- getDataStandardizedTimepoints_attachVariable(
+
+        LIST.temp <- getDataStandardizedTimepoints_attachVariable(
             DF.input            = DF.input,
 	    DF.current          = DF.output,
             target.variable     = target.variable,
@@ -68,14 +70,15 @@ getDataStandardizedTimepoints <- function(
             smoothing.parameter = smoothing.parameter,
 	    list.bspline.basis  = list.bspline.basis
             );
+
+	LIST.bsplines[[target.variable]] <- LIST.temp[["list_bsplines"]];
+        DF.output                        <- LIST.temp[["df_standardized_timepoints"]];
+
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nstr(DF.output) -- ",this.function.name,"() -- ",beam.swath,", ",colname.pattern,"\n"));
     print( str(DF.output) );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    saveRDS(object = DF.output, file = RData.output);
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     if ( do.diagnostics ) {
@@ -88,9 +91,17 @@ getDataStandardizedTimepoints <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    LIST.output <- list(
+        df_standardized_timepoints = DF.output,
+	list_bsplines              = LIST.bsplines
+        );
+
+    saveRDS(object = LIST.output, file = output.RData);
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nexiting: ",this.function.name,"()"));
     cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
-    return( DF.output );
+    return( LIST.output );
 
     }
 
@@ -170,8 +181,10 @@ getDataStandardizedTimepoints_attachVariable <- function(
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
 
-    DF.stack <- data.frame();
-    years    <- unique(DF.input[,"year"]);
+    LIST.bsplines <- list();
+    DF.stack      <- data.frame();
+
+    years <- unique(DF.input[,"year"]);
     for ( year in years ) {
 
         cat(paste0("\ngetDataStandardizedTimepoints_attachVariable() -- ",target.variable,", ",year,"\n"));
@@ -257,6 +270,13 @@ getDataStandardizedTimepoints_attachVariable <- function(
 
         DF.stack <- rbind(DF.stack,bspline.approximation.long);
 
+	LIST.bsplines[[year]] <- list(
+            input_timeseries       = DF.temp.year,
+            bspline_basis          = temp.bspline.basis,
+            bspline_basis_fdParObj = temp.bspline.basis.fdParObj,
+	    target_in_basis_fd     = target.in.basis.fd 
+            );
+
         }
 
     DF.output <- dplyr::left_join(
@@ -265,7 +285,13 @@ getDataStandardizedTimepoints_attachVariable <- function(
         by = c("X_Y_year","date_index")
         );
 
-    return( DF.output );
+
+    LIST.output <- list(
+        df_standardized_timepoints = DF.output,
+        list_bsplines              = LIST.bsplines
+        );
+
+    return( LIST.output );
 
     }
 

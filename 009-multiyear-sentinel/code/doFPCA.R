@@ -9,8 +9,8 @@ doFPCA <- function(
     n.basis             = NULL,
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
-    FILE.output.RData   = paste0("tmp-",beam.swath,"-FPC-",target.variable,".RData"),
-    FILE.output.csv     = paste0("tmp-",beam.swath,"-FPC-",target.variable,".csv"  )
+    output.RData        = paste0("tmp-",beam.swath,"-FPC-",target.variable,".RData"),
+    output.CSV          = paste0("tmp-",beam.swath,"-FPC-",target.variable,".csv"  )
     ) {
 
     this.function.name <- "doFPCA";
@@ -18,12 +18,12 @@ doFPCA <- function(
     cat(paste0("starting: ",this.function.name,"()\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    if (file.exists(FILE.output.RData)) {
-        cat(paste0("\nloading file: ",FILE.output.RData,"\n"));
-        DF.output <- base::readRDS(file = FILE.output.RData);
+    if (file.exists(output.RData)) {
+        cat(paste0("\nloading file: ",output.RData,"\n"));
+        LIST.output <- base::readRDS(file = output.RData);
         cat(paste0("\nexiting: ",this.function.name,"()"));
         cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
-        return( DF.output );
+        return( LIST.output );
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -233,13 +233,23 @@ doFPCA <- function(
     print( str(DF.output)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat(paste0("\nsaving to file: ",FILE.output.RData,"\n"));
-    base::saveRDS(object = DF.output, file = FILE.output.RData);
+    LIST.output <- list(
+        dates                  = DF.dates,
+	spline_grid            = spline.grid,
+	bspline_basis          = bspline.basis,
+        bspline_basis_fdParObj = bspline.basis.fdParObj,
+        target_variable_basis  = target.variable.fd,
+        target_variable_fpc    = results.pca.fd,
+        target_variable_scores = DF.output
+        );
 
-    if ( !file.exists(FILE.output.csv) ) {
-        cat(paste0("\nwriting file: ",FILE.output.csv,"\n"));
+    cat(paste0("\nsaving to file: ",output.RData,"\n"));
+    base::saveRDS(object = LIST.output, file = output.RData);
+
+    if ( !file.exists(output.CSV) ) {
+        cat(paste0("\nwriting file: ",output.CSV,"\n"));
         write.csv(
-            file      = FILE.output.csv,
+            file      = output.CSV,
             x         = DF.output,
             row.names = FALSE
             );
@@ -272,7 +282,7 @@ doFPCA <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     cat(paste0("\nexiting: ",this.function.name,"()"));
     cat(paste0("\n",paste(rep("#",50),collapse=""),"\n"));
-    return( DF.output );
+    return( LIST.output );
 
     }
 
