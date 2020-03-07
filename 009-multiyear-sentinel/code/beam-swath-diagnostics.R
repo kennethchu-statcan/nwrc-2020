@@ -68,6 +68,7 @@ beam.swath.diagnostics <- function(
 	);
 
     for ( fpca.variable in fpca.variables ) {
+
         LIST.fpca <- doFPCA(
             DF.input            = LIST.standardizedTimepoints[["df_standardized_timepoints"]],
             target.variable     = fpca.variable,
@@ -78,8 +79,18 @@ beam.swath.diagnostics <- function(
             smoothing.parameter = 0.1,
             n.harmonics         = 7
             );
+
         cat("\nstr(LIST.fpca)\n");
         print( str(LIST.fpca)   );
+
+        beam.swath.diagnostics_diagnostics.FPCA(
+            beam.swath                   = beam.swath,
+            fpca.variable                = fpca.variable,
+            DF.data                      = DF.data,
+            LIST.standardized_timepoints = LIST.standardizedTimepoints,
+            LIST.fpca                    = LIST.fpca
+            );
+
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -90,6 +101,106 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
+beam.swath.diagnostics_diagnostics.FPCA <- function(
+    beam.swath                   = NULL,
+    fpca.variable                = NULL,
+    DF.data                      = NULL,
+    LIST.standardized_timepoints = NULL,
+    LIST.fpca                    = NULL
+    ) {
+
+    require(fda);
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,"diagnostics-fpca-complete");
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    years <- unique(DF.data[,"year"]);
+    types <- unique(DF.data[,"type"]);
+
+    for ( temp.year in years ) {
+    for ( temp.type in types ) {
+
+        is.selected   <- (DF.data[,"year"] == temp.year) & (DF.data[,"type"] == temp.type);
+	DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
+	temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 10, replace = FALSE);
+
+	temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.01);
+        DF.bsplines.original <- fda::eval.fd(
+            evalarg = temp.evalarg,
+            fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
+	    );
+        DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
+	DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
+
+	for ( temp.XY.year in temp.XY.years ) {
+
+            PNG.output <- paste0('plot-bspline-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
+
+            XY.string  <- temp.XY.year;
+            XY.string  <- gsub(x = XY.string, pattern = "_[0-9]{4}$", replacement = "" );
+            XY.string  <- gsub(x = XY.string, pattern = "_",          replacement = ",");
+	    XY.string  <- paste0("(x,y) = (",XY.string,")");
+
+            my.ggplot <- initializePlot(
+                title    = NULL,
+                subtitle = paste0(beam.swath,", ",temp.year,", ",temp.type,", ",fpca.variable,", ",XY.string)
+                );
+
+            my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
+
+            DF.temp <- DF.year.type[DF.year.type[,"X_Y_year"] == temp.XY.year,c("date_index",fpca.variable)];
+	    DF.temp <- as.data.frame(DF.temp);
+	    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = fpca.variable, replacement = "fpca.variable");
+            my.ggplot <- my.ggplot + ggplot2::geom_point(
+                data    = DF.temp,
+                mapping = aes(x = date_index, y = fpca.variable),
+                alpha   = 0.8,
+		size    = 3,
+		colour  = "black"
+                );
+
+            my.ggplot <- my.ggplot + ggplot2::geom_line(
+                data    = DF.temp,
+                mapping = aes(x = date_index, y = fpca.variable),
+                alpha   = 0.8,
+		colour  = "black"
+                );
+
+            DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
+	    DF.temp <- as.data.frame(DF.temp);
+	    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "fpca.variable");
+            my.ggplot <- my.ggplot + ggplot2::geom_line(
+                data    = DF.temp,
+                mapping = aes(x = date_index, y = fpca.variable),
+                alpha   = 0.8,
+		colour  = "blue"
+                );
+
+	    ggplot2::ggsave(
+                file   = PNG.output,
+                plot   = my.ggplot,
+                dpi    = 150,
+                height =   8,
+                width  =  16,
+                units  = 'in'
+                );
+
+            }
+
+        }}
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    setwd( initial.directory );
+    return( NULL );
+
+    }
+
 beam.swath.diagnostics_plotGroupedTimeSeries <- function(
     DF.input        = NULL,
     beam.swath      = NULL,

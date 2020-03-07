@@ -17,8 +17,8 @@ initializePlot <- function(
     my.ggplot <- ggplot(data = NULL) + theme_bw();
     my.ggplot <- my.ggplot + theme(
         title            = element_text(size = textsize.title, face = "bold"),
-        axis.title.x     = element_blank(),
-        axis.title.y     = element_blank(),
+        axis.title.x     = element_text(size = textsize.axis,  face = "bold"),
+        axis.title.y     = element_text(size = textsize.axis,  face = "bold"),
         axis.text.x      = element_text(size = textsize.axis, face = "bold"),
         axis.text.y      = element_text(size = textsize.axis, face = "bold"),
 	strip.text.y     = element_text(size = textsize.axis, face = "bold"),
