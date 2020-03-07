@@ -149,7 +149,7 @@ beam.swath.diagnostics_diagnostics.FPCA <- function(
 
             my.ggplot <- initializePlot(
                 title    = NULL,
-                subtitle = paste0(beam.swath,", ",temp.year,", ",temp.type,", ",fpca.variable,", ",XY.string)
+                subtitle = paste0(beam.swath,", ",temp.year,", ",temp.type,", ",XY.string)
                 );
 
             my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
