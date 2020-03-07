@@ -9,8 +9,8 @@ doFPCA <- function(
     n.basis             = NULL,
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
-    output.RData        = paste0("tmp-",beam.swath,"-FPC-",target.variable,".RData"),
-    output.CSV          = paste0("tmp-",beam.swath,"-FPC-",target.variable,".csv"  )
+    output.RData        = paste0("tmp-",beam.swath,"-FPCA-",target.variable,".RData"),
+    output.CSV          = paste0("tmp-",beam.swath,"-FPCA-",target.variable,".csv"  )
     ) {
 
     this.function.name <- "doFPCA";
