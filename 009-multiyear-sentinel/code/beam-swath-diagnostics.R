@@ -68,7 +68,7 @@ beam.swath.diagnostics <- function(
 	);
 
     for ( fpca.variable in fpca.variables ) {
-        DF.fpca <- doFPCA(
+        LIST.fpca <- doFPCA(
             DF.input            = LIST.standardizedTimepoints[["df_standardized_timepoints"]],
             target.variable     = fpca.variable,
             beam.swath          = beam.swath,
@@ -78,8 +78,8 @@ beam.swath.diagnostics <- function(
             smoothing.parameter = 0.1,
             n.harmonics         = 7
             );
-        cat("\nstr(DF.fpca)\n");
-        print( str(DF.fpca)   );
+        cat("\nstr(LIST.fpca)\n");
+        print( str(LIST.fpca)   );
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
