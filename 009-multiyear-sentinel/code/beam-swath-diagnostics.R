@@ -119,6 +119,9 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     n.harmonics                  = NULL
     ) {
 
+    require(ggplot2);
+    require(cowplot);
+
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     initial.directory     <- getwd();
     temp.output.directory <- file.path(initial.directory,"diagnostics-fpca-harmonics");
@@ -154,60 +157,73 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     PNG.output <- paste0('fpca-harmonics-',beam.swath,'-',fpca.variable,'.png');
 
-    my.ggplot <- initializePlot(
-        title    = NULL,
-        subtitle = paste0(beam.swath,", ",fpca.variable)
-        );
+    my.cowplot <- my.ggplot <- ggplot(data = NULL) + theme_bw();
 
-    my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index" );
-    my.ggplot <- my.ggplot + ggplot2::ylab( label = "FPC 1"      );
-    my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+    list.plots <- list();
+    for ( temp.harmonic in setdiff(colnames(DF.fpca.harmonics.plus),"date_index") ) {
 
-    DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index","harmonic1")]);
-    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
-    cat("\nstr(DF.temp)\n");
-    print( str(DF.temp)   );
-    my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data     = DF.temp,
-        mapping  = aes(x = date_index, y = dummy.colname),
-        colour   = "#FF9700",
-        linetype = "solid",
-        size     = 2.0,
-        alpha    = 0.8
-        );
+        my.ggplot <- initializePlot(
+            title    = NULL,
+            subtitle = paste0(beam.swath,", ",fpca.variable)
+            );
 
-    DF.temp <- data.frame("date_index" = temp.evalarg, "dummy.colname" = vector.meanfd);
-    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "mean", replacement = "dummy.colname");
-    cat("\nstr(DF.temp)\n");
-    print( str(DF.temp)   );
-    my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data     = DF.temp,
-        mapping  = aes(x = date_index, y = dummy.colname),
-        colour   = "gray",
-        linetype = "solid",
-        size     = 1.0,
-        alpha    = 0.8
-        );
+        temp.ylab <- gsub(x = temp.harmonic, pattern = "harmonic", "FPC ");
 
-    DF.temp <- as.data.frame(DF.fpca.harmonics.minus[,c("date_index","harmonic1")]);
-    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
-    cat("\nstr(DF.temp)\n");
-    print( str(DF.temp)   );
-    my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data     = DF.temp,
-        mapping  = aes(x = date_index, y = dummy.colname),
-        colour   = "#0068FF",
-        linetype = "solid",
-        size     = 2.0,
-        alpha    = 0.8
+        my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index" );
+        my.ggplot <- my.ggplot + ggplot2::ylab( label = temp.ylab    );
+        my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+
+        DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index",temp.harmonic)]);
+        colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.harmonic, replacement = "dummy.colname");
+        my.ggplot <- my.ggplot + ggplot2::geom_line(
+            data     = DF.temp,
+            mapping  = aes(x = date_index, y = dummy.colname),
+            colour   = "#FF9700",
+            linetype = "solid",
+            size     = 2.0,
+            alpha    = 0.8
+            );
+
+        DF.temp <- data.frame("date_index" = temp.evalarg, "dummy.colname" = vector.meanfd);
+        colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "mean", replacement = "dummy.colname");
+        my.ggplot <- my.ggplot + ggplot2::geom_line(
+            data     = DF.temp,
+            mapping  = aes(x = date_index, y = dummy.colname),
+            colour   = "gray",
+            linetype = "solid",
+            size     = 1.0,
+            alpha    = 0.8
+            );
+
+        DF.temp <- as.data.frame(DF.fpca.harmonics.minus[,c("date_index",temp.harmonic)]);
+        colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.harmonic, replacement = "dummy.colname");
+        my.ggplot <- my.ggplot + ggplot2::geom_line(
+            data     = DF.temp,
+            mapping  = aes(x = date_index, y = dummy.colname),
+            colour   = "#0068FF",
+            linetype = "solid",
+            size     = 2.0,
+            alpha    = 0.8
+            );
+
+        list.plots[[temp.harmonic]] <- my.ggplot;
+
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    my.cowplot <- cowplot::plot_grid(
+        plotlist = list.plots,
+        ncol     = 1,
+        align    = "v",
+        axis     = "lr"
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ggplot2::ggsave(
         file   = PNG.output,
-        plot   = my.ggplot,
+        plot   = my.cowplot,
         dpi    = 150,
-        height =   6,
+        height =  28,
         width  =  16,
         units  = 'in'
         );
