@@ -146,7 +146,7 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     DF.fpca.harmonics.plus  <- DF.fpca.standardizedTimepoints %*% diag(sqrt( LIST.fpca[["target_variable_fpc"]][["values"]][1:n.harmonics] ));
     DF.fpca.harmonics.minus <- DF.fpca.harmonics.plus;
     for ( j in seq(1,ncol(DF.fpca.harmonics.plus)) ) {
-        DF.fpca.harmonics.plus[,j]  <- vector.meanfd + DF.fpca.harmonics.plus[, j];
+        DF.fpca.harmonics.plus[, j] <- vector.meanfd + DF.fpca.harmonics.plus[, j];
         DF.fpca.harmonics.minus[,j] <- vector.meanfd - DF.fpca.harmonics.minus[,j];
         }
     colnames(DF.fpca.harmonics.plus ) <- paste0("harmonic",1:ncol(DF.fpca.harmonics.plus ));
@@ -161,7 +161,6 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
 
     list.plots <- list();
     temp.harmonics <- setdiff(colnames(DF.fpca.harmonics.plus),"date_index");
-    #for ( temp.harmonic in setdiff(colnames(DF.fpca.harmonics.plus),"date_index") ) {
     for ( temp.index in seq(1,length(temp.harmonics)) ) {
 
         temp.harmonic <- temp.harmonics[temp.index];
@@ -271,7 +270,7 @@ beam.swath.diagnostics_FPCA.fit <- function(
 
         is.selected   <- (DF.data[,"year"] == temp.year) & (DF.data[,"type"] == temp.type);
         DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
-        temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 2, replace = FALSE);
+        temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 10, replace = FALSE);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.1);
