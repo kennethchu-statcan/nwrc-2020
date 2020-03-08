@@ -152,6 +152,7 @@ beam.swath.diagnostics_diagnostics.FPCA <- function(
                 subtitle = paste0(beam.swath,", ",temp.year,", ",temp.type,", ",XY.string)
                 );
 
+            my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index"  );
             my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
 
             DF.temp <- DF.year.type[DF.year.type[,"X_Y_year"] == temp.XY.year,c("date_index",fpca.variable)];
