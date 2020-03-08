@@ -380,7 +380,17 @@ beam.swath.diagnostics_FPCA.fit <- function(
                 units  = 'in'
                 );
 
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            remove( list = c("my.ggplot") );
+
             }
+
+        remove(list = c(
+            "DF.bsplines.original",
+            "vector.meanfd",
+            "DF.fpca.standardizedTimepoints",
+            "DF.fpca.fit"
+            ));
 
         }}
 
