@@ -168,11 +168,12 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
     my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data    = DF.temp,
-        mapping = aes(x = date_index, y = dummy.colname),
-        colour  = "red",
-        size    = 1.3,
-        alpha   = 0.8
+        data     = DF.temp,
+        mapping  = aes(x = date_index, y = dummy.colname),
+        colour   = "#FF9700",
+        linetype = "solid",
+        size     = 2.0,
+        alpha    = 0.8
         );
 
     DF.temp <- data.frame("date_index" = temp.evalarg, "dummy.colname" = vector.meanfd);
@@ -180,11 +181,12 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
     my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data    = DF.temp,
-        mapping = aes(x = date_index, y = dummy.colname),
-        colour  = "black",
-        size    = 1.3,
-        alpha   = 0.8
+        data     = DF.temp,
+        mapping  = aes(x = date_index, y = dummy.colname),
+        colour   = "gray",
+        linetype = "solid",
+        size     = 1.0,
+        alpha    = 0.8
         );
 
     DF.temp <- as.data.frame(DF.fpca.harmonics.minus[,c("date_index","harmonic1")]);
@@ -192,11 +194,12 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     cat("\nstr(DF.temp)\n");
     print( str(DF.temp)   );
     my.ggplot <- my.ggplot + ggplot2::geom_line(
-        data    = DF.temp,
-        mapping = aes(x = date_index, y = dummy.colname),
-        colour  = "blue",
-        size    = 1.3,
-        alpha   = 0.8
+        data     = DF.temp,
+        mapping  = aes(x = date_index, y = dummy.colname),
+        colour   = "#0068FF",
+        linetype = "solid",
+        size     = 2.0,
+        alpha    = 0.8
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
