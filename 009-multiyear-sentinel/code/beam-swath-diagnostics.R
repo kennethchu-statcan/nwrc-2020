@@ -288,11 +288,13 @@ beam.swath.diagnostics_FPCA.fit <- function(
             fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
 	    );
 
+        temp.XY.years <- intersect(temp.XY.years,colnames(DF.bsplines.original));
+
         print("B-3");
 	cat("\nsetdiff(temp.XY.years,colnames(DF.bsplines.original))\n");
 	print( setdiff(temp.XY.years,colnames(DF.bsplines.original))   );
 
-        DF.bsplines.original <- DF.bsplines.original[,intersect(temp.XY.years,colnames(DF.bsplines.original))];
+        DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
 
         print("B-4");
 
