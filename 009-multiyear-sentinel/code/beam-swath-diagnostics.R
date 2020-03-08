@@ -223,7 +223,7 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
         file   = PNG.output,
         plot   = my.cowplot,
         dpi    = 150,
-        height =  28,
+        height = 4 * n.harmonics,
         width  =  16,
         units  = 'in'
         );
