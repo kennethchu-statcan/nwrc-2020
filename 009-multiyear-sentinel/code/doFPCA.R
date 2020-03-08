@@ -318,6 +318,11 @@ doFPCA_scatter <- function(
         subtitle = subtitle
         );
 
+    temp.xlab <- gsub(x = toupper(x.var), pattern = "_", replacement = " ");
+    temp.ylab <- gsub(x = toupper(y.var), pattern = "_", replacement = " ");
+    my.ggplot <- my.ggplot + xlab( label = temp.xlab );
+    my.ggplot <- my.ggplot + ylab( label = temp.ylab );
+
     my.ggplot <- my.ggplot + guides(
         colour = guide_legend(override.aes = list(alpha =  0.5, size = 5))
         );
