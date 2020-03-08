@@ -131,7 +131,7 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     setwd( temp.output.directory );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.01);
+    temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.1);
 
     vector.meanfd <- fda::eval.fd(
         evalarg = temp.evalarg,
