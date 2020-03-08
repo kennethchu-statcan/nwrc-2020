@@ -92,13 +92,13 @@ beam.swath.diagnostics <- function(
             n.harmonics                  = n.harmonics
             );
 
-#        beam.swath.diagnostics_FPCA.fit(
-#            beam.swath                   = beam.swath,
-#            fpca.variable                = fpca.variable,
-#            DF.data                      = DF.data,
-#            LIST.standardized_timepoints = LIST.standardizedTimepoints,
-#            LIST.fpca                    = LIST.fpca
-#            );
+        beam.swath.diagnostics_FPCA.fit(
+            beam.swath                   = beam.swath,
+            fpca.variable                = fpca.variable,
+            DF.data                      = DF.data,
+            LIST.standardized_timepoints = LIST.standardizedTimepoints,
+            LIST.fpca                    = LIST.fpca
+            );
 
         }
 
@@ -267,12 +267,14 @@ beam.swath.diagnostics_FPCA.fit <- function(
     for ( temp.year in years ) {
     for ( temp.type in types ) {
 
+        cat(paste0("\n# year: ",temp.year,", type: ",temp.type,"\n"));
+
         is.selected   <- (DF.data[,"year"] == temp.year) & (DF.data[,"type"] == temp.type);
         DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
         temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 2, replace = FALSE);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.01);
+        temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.1);
         DF.bsplines.original <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
@@ -281,7 +283,7 @@ beam.swath.diagnostics_FPCA.fit <- function(
         DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.01);
+        temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.1);
 
         vector.meanfd <- fda::eval.fd(
             evalarg = temp.evalarg,
@@ -302,6 +304,8 @@ beam.swath.diagnostics_FPCA.fit <- function(
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         for ( temp.XY.year in temp.XY.years ) {
+
+            cat(paste0("\n# X_Y_year = ",temp.XY.year,"\n"));
 
             PNG.output <- paste0('fpca-fit-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
 
@@ -386,6 +390,7 @@ beam.swath.diagnostics_FPCA.fit <- function(
             }
 
         remove(list = c(
+            "DF.year.type",
             "DF.bsplines.original",
             "vector.meanfd",
             "DF.fpca.standardizedTimepoints",
