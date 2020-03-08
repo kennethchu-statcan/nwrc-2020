@@ -160,17 +160,25 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
     my.cowplot <- my.ggplot <- ggplot(data = NULL) + theme_bw();
 
     list.plots <- list();
-    for ( temp.harmonic in setdiff(colnames(DF.fpca.harmonics.plus),"date_index") ) {
+    temp.harmonics <- setdiff(colnames(DF.fpca.harmonics.plus),"date_index");
+    #for ( temp.harmonic in setdiff(colnames(DF.fpca.harmonics.plus),"date_index") ) {
+    for ( temp.index in seq(1,length(temp.harmonics)) ) {
+
+        temp.harmonic <- temp.harmonics[temp.index];
+
+        temp.varprop <- LIST.fpca[["target_variable_fpc"]][["varprop"]][temp.index];
+        temp.varprop <- round(x = 100 * temp.varprop, digits = 3);
 
         my.ggplot <- initializePlot(
             title    = NULL,
-            subtitle = paste0(beam.swath,", ",fpca.variable)
+            subtitle = paste0(beam.swath,", ",fpca.variable, " (variability captured = ",temp.varprop,"%)")
             );
 
-        temp.ylab <- gsub(x = temp.harmonic, pattern = "harmonic", "FPC ");
+        temp.xlab <- ifelse(temp.index == length(temp.harmonics),"date index","");
+        temp.ylab <- gsub(x = temp.harmonic, pattern = "harmonic", replacement = "FPC ");
 
-        my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index" );
-        my.ggplot <- my.ggplot + ggplot2::ylab( label = temp.ylab    );
+        my.ggplot <- my.ggplot + ggplot2::xlab( label = temp.xlab );
+        my.ggplot <- my.ggplot + ggplot2::ylab( label = temp.ylab );
         my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
 
         DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index",temp.harmonic)]);
