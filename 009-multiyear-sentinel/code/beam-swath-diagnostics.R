@@ -268,31 +268,58 @@ beam.swath.diagnostics_FPCA.fit <- function(
 
         cat(paste0("\n# year: ",temp.year,", type: ",temp.type,"\n"));
 
+        print("A-1");
+
         is.selected   <- (DF.data[,"year"] == temp.year) & (DF.data[,"type"] == temp.type);
         DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
         temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 10, replace = FALSE);
 
+        print("A-2");
+
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        print("B-1");
+
         temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.1);
+
+        print("B-2");
+
         DF.bsplines.original <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
 	    );
-        DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
+
+        print("B-3");
+	cat("\nsetdiff(temp.XY.years,colnames(DF.bsplines.original))\n");
+	print( setdiff(temp.XY.years,colnames(DF.bsplines.original))   );
+
+        DF.bsplines.original <- DF.bsplines.original[,intersect(temp.XY.years,colnames(DF.bsplines.original))];
+
+        print("B-4");
+
         DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
+
+        print("B-5");
+
+        print("A-3");
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.1);
+
+        print("A-4");
 
         vector.meanfd <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
             );
 
+        print("A-5");
+
         DF.fpca.standardizedTimepoints <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
             );
+
+        print("A-6");
 
         DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
         for ( j in seq(1,ncol(DF.fpca.fit)) ) {
@@ -300,6 +327,8 @@ beam.swath.diagnostics_FPCA.fit <- function(
             }
         colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
         DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
+
+        print("A-7");
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         for ( temp.XY.year in temp.XY.years ) {
