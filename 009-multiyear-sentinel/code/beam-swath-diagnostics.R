@@ -28,7 +28,7 @@ beam.swath.diagnostics <- function(
         beam.swath      = beam.swath,
         colname.pattern = colname.pattern,
         land.types      = land.types,
-	exclude.years   = exclude.years
+        exclude.years   = exclude.years
         );
 
     cat(paste0("\nstr(DF.data) -- ",beam.swath,"\n"));
@@ -51,7 +51,7 @@ beam.swath.diagnostics <- function(
         beam.swath          = beam.swath,
         colname.pattern     = colname.pattern,
         n.partition         = n.partition,
-	n.order             = n.order,
+        n.order             = n.order,
         n.basis             = n.basis,
         smoothing.parameter = smoothing.parameter,
         n.harmonics         = n.harmonics
@@ -63,9 +63,9 @@ beam.swath.diagnostics <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     fpca.variables <- grep(
         x       = colnames(LIST.standardizedTimepoints[["df_standardized_timepoints"]]),
-	pattern = colname.pattern,
-	value   = TRUE
-	);
+        pattern = colname.pattern,
+        value   = TRUE
+        );
 
     for ( fpca.variable in fpca.variables ) {
 
@@ -89,7 +89,7 @@ beam.swath.diagnostics <- function(
             DF.data                      = DF.data,
             LIST.standardized_timepoints = LIST.standardizedTimepoints,
             LIST.fpca                    = LIST.fpca,
-	    n.harmonics                  = n.harmonics
+            n.harmonics                  = n.harmonics
             );
 
 #        beam.swath.diagnostics_FPCA.fit(
@@ -161,6 +161,7 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
 
     my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index" );
     my.ggplot <- my.ggplot + ggplot2::ylab( label = "FPC 1"      );
+    my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
 
     DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index","harmonic1")]);
     colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
