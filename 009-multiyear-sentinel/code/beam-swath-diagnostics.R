@@ -156,10 +156,11 @@ beam.swath.diagnostics_FPCA.harmonics <- function(
 
     my.ggplot <- initializePlot(
         title    = NULL,
-        subtitle = paste0(beam.swath," ")
+        subtitle = paste0(beam.swath,", ",fpca.variable)
         );
 
-    my.ggplot <- my.ggplot + ggplot2::ylab( label = "harmonic1" );
+    my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index" );
+    my.ggplot <- my.ggplot + ggplot2::ylab( label = "FPC 1"      );
 
     DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index","harmonic1")]);
     colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
@@ -239,17 +240,17 @@ beam.swath.diagnostics_FPCA.fit <- function(
     for ( temp.type in types ) {
 
         is.selected   <- (DF.data[,"year"] == temp.year) & (DF.data[,"type"] == temp.type);
-	DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
-	temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 2, replace = FALSE);
+        DF.year.type  <- DF.data[is.selected,c("X_Y_year","date_index",fpca.variable)];
+        temp.XY.years <- sample(x = unique(DF.year.type[,"X_Y_year"]), size = 2, replace = FALSE);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.01);
+        temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.01);
         DF.bsplines.original <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
 	    );
         DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
-	DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
+        DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.01);
@@ -268,18 +269,18 @@ beam.swath.diagnostics_FPCA.fit <- function(
         for ( j in seq(1,ncol(DF.fpca.fit)) ) {
             DF.fpca.fit[,j] <- DF.fpca.fit[,j] + vector.meanfd;
             }
-	colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
-	DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
+        colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
+        DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	for ( temp.XY.year in temp.XY.years ) {
+        for ( temp.XY.year in temp.XY.years ) {
 
             PNG.output <- paste0('fpca-fit-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
 
             XY.string  <- temp.XY.year;
             XY.string  <- gsub(x = XY.string, pattern = "_[0-9]{4}$", replacement = "" );
             XY.string  <- gsub(x = XY.string, pattern = "_",          replacement = ",");
-	    XY.string  <- paste0("(x,y) = (",XY.string,")");
+            XY.string  <- paste0("(x,y) = (",XY.string,")");
 
             my.ggplot <- initializePlot(
                 title    = NULL,
@@ -288,56 +289,56 @@ beam.swath.diagnostics_FPCA.fit <- function(
 
             my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index"  );
             my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
-	    my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+            my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
 
             my.ggplot <- my.ggplot + geom_vline(
                 xintercept = range(LIST.fpca[["spline_grid"]]),
-		colour   = "red",
-		alpha    = 0.5,
-		linetype = 2,
-		size     = 0.8
+                colour     = "red",
+                alpha      = 0.5,
+                linetype   = 2,
+                size       = 0.8
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.temp <- DF.year.type[DF.year.type[,"X_Y_year"] == temp.XY.year,c("date_index",fpca.variable)];
-	    DF.temp <- as.data.frame(DF.temp);
-	    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = fpca.variable, replacement = "dummy.colname");
+            DF.temp <- as.data.frame(DF.temp);
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = fpca.variable, replacement = "dummy.colname");
             my.ggplot <- my.ggplot + ggplot2::geom_point(
                 data    = DF.temp,
                 mapping = aes(x = date_index, y = dummy.colname),
                 alpha   = 0.8,
-		size    = 3,
-		colour  = "black"
+                size    = 3,
+                colour  = "black"
                 );
 
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = DF.temp,
                 mapping = aes(x = date_index, y = dummy.colname),
-		colour  = "black",
+                colour  = "black",
                 alpha   = 0.5
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
-	    DF.temp <- as.data.frame(DF.temp);
-	    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+            DF.temp <- as.data.frame(DF.temp);
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = DF.temp,
                 mapping = aes(x = date_index, y = dummy.colname),
                 colour  = "blue",
-		size    = 1.3,
+                size    = 1.3,
                 alpha   = 0.8
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
-	    DF.temp <- as.data.frame(DF.temp);
-	    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+            DF.temp <- as.data.frame(DF.temp);
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = DF.temp,
                 mapping = aes(x = date_index, y = dummy.colname),
                 colour  = "red",
-		size    = 1.3,
+                size    = 1.3,
                 alpha   = 0.8
                 );
 
