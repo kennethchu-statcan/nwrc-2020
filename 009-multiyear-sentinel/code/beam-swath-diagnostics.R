@@ -83,13 +83,22 @@ beam.swath.diagnostics <- function(
         cat("\nstr(LIST.fpca)\n");
         print( str(LIST.fpca)   );
 
-        beam.swath.diagnostics_diagnostics.FPCA(
+        beam.swath.diagnostics_FPCA.harmonics(
             beam.swath                   = beam.swath,
             fpca.variable                = fpca.variable,
             DF.data                      = DF.data,
             LIST.standardized_timepoints = LIST.standardizedTimepoints,
-            LIST.fpca                    = LIST.fpca
+            LIST.fpca                    = LIST.fpca,
+	    n.harmonics                  = n.harmonics
             );
+
+#        beam.swath.diagnostics_FPCA.fit(
+#            beam.swath                   = beam.swath,
+#            fpca.variable                = fpca.variable,
+#            DF.data                      = DF.data,
+#            LIST.standardized_timepoints = LIST.standardizedTimepoints,
+#            LIST.fpca                    = LIST.fpca
+#            );
 
         }
 
@@ -101,7 +110,110 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
-beam.swath.diagnostics_diagnostics.FPCA <- function(
+beam.swath.diagnostics_FPCA.harmonics <- function(
+    beam.swath                   = NULL,
+    fpca.variable                = NULL,
+    DF.data                      = NULL,
+    LIST.standardized_timepoints = NULL,
+    LIST.fpca                    = NULL,
+    n.harmonics                  = NULL
+    ) {
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory     <- getwd();
+    temp.output.directory <- file.path(initial.directory,"diagnostics-fpca-harmonics");
+    if ( !dir.exists(temp.output.directory) ) {
+        dir.create(path = temp.output.directory, recursive = TRUE);
+        }
+    setwd( temp.output.directory );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.01);
+
+    vector.meanfd <- fda::eval.fd(
+        evalarg = temp.evalarg,
+        fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
+        );
+
+    DF.fpca.standardizedTimepoints <- fda::eval.fd(
+        evalarg = temp.evalarg,
+        fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
+        );
+
+    DF.fpca.harmonics.plus  <- DF.fpca.standardizedTimepoints %*% diag(sqrt( LIST.fpca[["target_variable_fpc"]][["values"]][1:n.harmonics] ));
+    DF.fpca.harmonics.minus <- DF.fpca.harmonics.plus;
+    for ( j in seq(1,ncol(DF.fpca.harmonics.plus)) ) {
+        DF.fpca.harmonics.plus[,j]  <- vector.meanfd + DF.fpca.harmonics.plus[, j];
+        DF.fpca.harmonics.minus[,j] <- vector.meanfd - DF.fpca.harmonics.minus[,j];
+        }
+    colnames(DF.fpca.harmonics.plus ) <- paste0("harmonic",1:ncol(DF.fpca.harmonics.plus ));
+    colnames(DF.fpca.harmonics.minus) <- paste0("harmonic",1:ncol(DF.fpca.harmonics.minus));
+    DF.fpca.harmonics.plus  <- cbind("date_index" = temp.evalarg, DF.fpca.harmonics.plus );
+    DF.fpca.harmonics.minus <- cbind("date_index" = temp.evalarg, DF.fpca.harmonics.minus);
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    PNG.output <- paste0('fpca-harmonics-',beam.swath,'-',fpca.variable,'.png');
+
+    my.ggplot <- initializePlot(
+        title    = NULL,
+        subtitle = paste0(beam.swath," ")
+        );
+
+    my.ggplot <- my.ggplot + ggplot2::ylab( label = "harmonic1" );
+
+    DF.temp <- as.data.frame(DF.fpca.harmonics.plus[,c("date_index","harmonic1")]);
+    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
+    my.ggplot <- my.ggplot + ggplot2::geom_line(
+        data    = DF.temp,
+        mapping = aes(x = date_index, y = dummy.colname),
+        colour  = "red",
+        size    = 1.3,
+        alpha   = 0.8
+        );
+
+    DF.temp <- data.frame("date_index" = temp.evalarg, "dummy.colname" = vector.meanfd);
+    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "mean", replacement = "dummy.colname");
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
+    my.ggplot <- my.ggplot + ggplot2::geom_line(
+        data    = DF.temp,
+        mapping = aes(x = date_index, y = dummy.colname),
+        colour  = "black",
+        size    = 1.3,
+        alpha   = 0.8
+        );
+
+    DF.temp <- as.data.frame(DF.fpca.harmonics.minus[,c("date_index","harmonic1")]);
+    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = "harmonic1", replacement = "dummy.colname");
+    cat("\nstr(DF.temp)\n");
+    print( str(DF.temp)   );
+    my.ggplot <- my.ggplot + ggplot2::geom_line(
+        data    = DF.temp,
+        mapping = aes(x = date_index, y = dummy.colname),
+        colour  = "blue",
+        size    = 1.3,
+        alpha   = 0.8
+        );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    ggplot2::ggsave(
+        file   = PNG.output,
+        plot   = my.ggplot,
+        dpi    = 150,
+        height =   6,
+        width  =  16,
+        units  = 'in'
+        );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    setwd( initial.directory );
+    return( NULL );
+
+    }
+
+beam.swath.diagnostics_FPCA.fit <- function(
     beam.swath                   = NULL,
     fpca.variable                = NULL,
     DF.data                      = NULL,
@@ -144,13 +256,13 @@ beam.swath.diagnostics_diagnostics.FPCA <- function(
 
         vector.meanfd <- fda::eval.fd(
             evalarg = temp.evalarg,
-	    fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
+            fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
             );
 
-	DF.fpca.standardizedTimepoints <- fda::eval.fd(
+        DF.fpca.standardizedTimepoints <- fda::eval.fd(
             evalarg = temp.evalarg,
-	    fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
-	    );
+            fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
+            );
 
         DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
         for ( j in seq(1,ncol(DF.fpca.fit)) ) {
@@ -162,7 +274,7 @@ beam.swath.diagnostics_diagnostics.FPCA <- function(
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 	for ( temp.XY.year in temp.XY.years ) {
 
-            PNG.output <- paste0('plot-bspline-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
+            PNG.output <- paste0('fpca-fit-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
 
             XY.string  <- temp.XY.year;
             XY.string  <- gsub(x = XY.string, pattern = "_[0-9]{4}$", replacement = "" );
