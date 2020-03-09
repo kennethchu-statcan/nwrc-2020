@@ -142,13 +142,14 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
 
     years            <- unique(DF.input[,"year"]);
     target.variables <- grep(x = colnames(DF.input), pattern = colname.pattern, value = TRUE);
+    land.types       <- levels(DF.input[,"type"]);
 
     for ( year            in years            ) {
     for ( target.variable in target.variables ) {
 
         PNG.output <- paste0('tmp-ribbon-',beam.swath,'-',year,'-',target.variable,'.png');
 
-	is.current.year   <- (DF.input[,"year"] == year);
+        is.current.year   <- (DF.input[,"year"] == year);
         #DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
         DF.temp           <- DF.input[is.current.year,c("date","type",target.variable)];
         colnames(DF.temp) <- gsub(
@@ -157,21 +158,36 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
             replacement = "target.variable"
             );
 
-	DF.temp <- DF.temp %>%
+        DF.temp <- DF.temp %>%
             dplyr::group_by( date, type ) %>%
             dplyr::summarize(
                 target_mean = mean(target.variable),
 		target_sd   =   sd(target.variable)
                 );
 
+#        DF.temp[,"type"] <- factor(
+#            x       = as.character(DF.temp[,"type"]),
+#            levels  = land.types,
+#            ordered = FALSE
+#            );
+
         DF.temp <- as.data.frame(DF.temp);
 	DF.temp[,"target_mean_plus_sd" ] <- DF.temp[,"target_mean"] + DF.temp[,"target_sd"];
 	DF.temp[,"target_mean_minus_sd"] <- DF.temp[,"target_mean"] - DF.temp[,"target_sd"];
 
+        cat("\nstr(DF.temp)\n");
+        print( str(DF.temp)   );
+
+        cat("\nDF.temp\n");
+        print( DF.temp   );
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         my.ggplot <- initializePlot(
             title    = NULL,
             subtitle = paste0(beam.swath,", ",year,", ",target.variable)
             );
+
+        my.ggplot <- my.ggplot + ylab(label = NULL);
 
         my.ggplot <- my.ggplot + scale_x_date(
             breaks       = sort(unique(DF.temp[,"date"])),
@@ -194,21 +210,30 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
                 );
 	    }
 
+        print("C-1");
+
+        my.ggplot <- my.ggplot + geom_ribbon(
+            data    = DF.temp,
+            #mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
+            mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
+            alpha   = 0.2
+            );
+
+        print("C-2");
+
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
             mapping = aes(x = date, y = target_mean),
 	    colour  = "black",
 	    size    = 1.5,
-            alpha   = 0.5
+            alpha   = 0.9
             );
 
-        my.ggplot <- my.ggplot + geom_ribbon(
-            data    = DF.temp,
-            mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
-            alpha   = 0.2
-            );
+        print("C-3");
 
         my.ggplot <- my.ggplot + facet_grid(type ~ .);
+
+        print("C-4");
 
         ggsave(
             file   = PNG.output,
