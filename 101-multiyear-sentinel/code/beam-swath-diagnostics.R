@@ -213,9 +213,9 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
             mapping = aes(x = date, y = target_mean),
-	    colour  = "black",
-	    size    = 1.5,
-            alpha   = 0.9
+            colour  = "black",
+            size    = 1.3,
+            alpha   = 0.5
             );
 
         my.ggplot <- my.ggplot + facet_grid(type ~ .);
