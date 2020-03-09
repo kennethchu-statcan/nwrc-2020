@@ -192,17 +192,17 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
             axis.text.x = element_text(angle = 90, vjust = 0.5)
             );
 
-        if ( grepl(x = target.variable, pattern = "_scaled$") ) {
-            my.ggplot <- my.ggplot + scale_y_continuous(
-                limits = c(  -3,3),
-                breaks = seq(-3,3,1)
-                );
-        } else {
-            my.ggplot <- my.ggplot + scale_y_continuous(
-                limits = c(  -40,20),
-                breaks = seq(-40,20,10)
-                );
-	    }
+        #if ( grepl(x = target.variable, pattern = "_scaled$") ) {
+        #    my.ggplot <- my.ggplot + scale_y_continuous(
+        #        limits = c(  -3,3),
+        #        breaks = seq(-3,3,1)
+        #        );
+        #} else {
+        #    my.ggplot <- my.ggplot + scale_y_continuous(
+        #        limits = c(  -40,20),
+        #        breaks = seq(-40,20,10)
+        #        );
+	#    }
 
         my.ggplot <- my.ggplot + geom_ribbon(
             data    = DF.temp,
@@ -218,7 +218,7 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
             alpha   = 0.5
             );
 
-        my.ggplot <- my.ggplot + facet_grid(type ~ .);
+        my.ggplot <- my.ggplot + facet_grid(type ~ ., scales = "free_y");
 
         ggsave(
             file   = PNG.output,
