@@ -161,15 +161,9 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
         DF.temp <- DF.temp %>%
             dplyr::group_by( date, type ) %>%
             dplyr::summarize(
-                target_mean = mean(target.variable),
-		target_sd   =   sd(target.variable)
+                target_mean = mean(target.variable, na.rm = TRUE),
+		target_sd   =   sd(target.variable, na.rm = TRUE)
                 );
-
-#        DF.temp[,"type"] <- factor(
-#            x       = as.character(DF.temp[,"type"]),
-#            levels  = land.types,
-#            ordered = FALSE
-#            );
 
         DF.temp <- as.data.frame(DF.temp);
 	DF.temp[,"target_mean_plus_sd" ] <- DF.temp[,"target_mean"] + DF.temp[,"target_sd"];
@@ -210,16 +204,11 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
                 );
 	    }
 
-        print("C-1");
-
         my.ggplot <- my.ggplot + geom_ribbon(
             data    = DF.temp,
-            #mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
             mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
             alpha   = 0.2
             );
-
-        print("C-2");
 
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
@@ -229,11 +218,7 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
             alpha   = 0.9
             );
 
-        print("C-3");
-
         my.ggplot <- my.ggplot + facet_grid(type ~ .);
-
-        print("C-4");
 
         ggsave(
             file   = PNG.output,
@@ -579,6 +564,8 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
             title    = NULL,
             subtitle = paste0(beam.swath,", ",year,", ",target.variable)
             );
+
+        my.ggplot <- my.ggplot + ylab(label = NULL);
 
         my.ggplot <- my.ggplot + scale_x_date(
             breaks       = sort(unique(DF.temp[,"date"])),
