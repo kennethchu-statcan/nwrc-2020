@@ -1,9 +1,10 @@
 
 getData <- function(
-    data.directory = NULL,
-    beam.swath     = NULL,
-    year           = NULL,
-    output.file    = NULL
+    data.directory     = NULL,
+    beam.swath         = NULL,
+    year               = NULL,
+    exclude.land.types = NULL,
+    output.file        = NULL
     ) {
 
     thisFunctionName <- "getData";
@@ -37,6 +38,10 @@ getData <- function(
             pattern     = "_[0-9]{4}_.+",
             replacement = ""
             ));
+
+        if ( !is.null(exclude.land.types) ) {
+            land.types <- setdiff( land.types, exclude.land.types ); 
+            }
 
         list.data.raw <- list();
         for ( land.type in land.types ) {
