@@ -96,6 +96,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             n.basis             =   9,
             smoothing.parameter =   0.1,
             n.harmonics         =   7,
+            plot.char.size      =   0.5,
             plot.timeseries     = TRUE,
             plot.heatmaps       = FALSE
             );

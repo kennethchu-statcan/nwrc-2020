@@ -11,6 +11,7 @@ beam.swath.diagnostics <- function(
     n.basis             =  9,
     smoothing.parameter =  0.1,
     n.harmonics         =  7,
+    plot.char.size      =  0.2,
     plot.timeseries     = TRUE,
     plot.heatmaps       = TRUE
     ) {
@@ -87,7 +88,8 @@ beam.swath.diagnostics <- function(
             n.order             = 3,
             n.basis             = 9,
             smoothing.parameter = 0.1,
-            n.harmonics         = 7
+            n.harmonics         = 7,
+            plot.char.size      = plot.char.size
             );
 
         cat("\nstr(LIST.fpca)\n");

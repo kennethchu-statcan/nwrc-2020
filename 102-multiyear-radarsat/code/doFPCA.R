@@ -9,6 +9,7 @@ doFPCA <- function(
     n.basis             = NULL,
     smoothing.parameter = NULL,
     n.harmonics         = NULL,
+    plot.char.size      = 0.2,
     output.RData        = paste0("tmp-",beam.swath,"-FPCA-",target.variable,".RData"),
     output.CSV          = paste0("tmp-",beam.swath,"-FPCA-",target.variable,".csv"  )
     ) {
@@ -257,25 +258,27 @@ doFPCA <- function(
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doFPCA_scatter(
-        DF.input   = DF.output,
-        beam.swath = beam.swath,
-        x.var      = "fpc_1",
-        y.var      = "fpc_2",
-        title      = NULL,
-        subtitle   = paste0(beam.swath,', ',target.variable),
-        PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'.png')
+        DF.input       = DF.output,
+        beam.swath     = beam.swath,
+        x.var          = "fpc_1",
+        y.var          = "fpc_2",
+        title          = NULL,
+        subtitle       = paste0(beam.swath,', ',target.variable),
+        plot.char.size = plot.char.size,
+        PNG.output     = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'.png')
         );
 
     years <- unique(DF.output[,"year"]);
     for ( year in years ) {
         doFPCA_scatter(
-            DF.input   = DF.output[DF.output[,"year"] == year,],
-            beam.swath = beam.swath,
-            x.var      = "fpc_1",
-            y.var      = "fpc_2",
-            title      = NULL,
-            subtitle   = paste0(beam.swath,', ',target.variable,', ',year),
-            PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'-',year,'.png')
+            DF.input       = DF.output[DF.output[,"year"] == year,],
+            beam.swath     = beam.swath,
+            x.var          = "fpc_1",
+            y.var          = "fpc_2",
+            title          = NULL,
+            subtitle       = paste0(beam.swath,', ',target.variable,', ',year),
+            plot.char.size = plot.char.size,
+            PNG.output     = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'-',year,'.png')
             );
         }
 
@@ -288,13 +291,14 @@ doFPCA <- function(
 
 ##################################################
 doFPCA_scatter <- function(
-    DF.input   = NULL,
-    beam.swath = NULL,
-    x.var      = NULL,
-    y.var      = NULL,
-    title      = NULL,
-    subtitle   = NULL,
-    PNG.output = 'tmp-FPCA-scatter.png'
+    DF.input       = NULL,
+    beam.swath     = NULL,
+    x.var          = NULL,
+    y.var          = NULL,
+    title          = NULL,
+    subtitle       = NULL,
+    plot.char.size = 0.2,
+    PNG.output     = 'tmp-FPCA-scatter.png'
     ) {
 
     require(ggplot2);
@@ -341,7 +345,7 @@ doFPCA_scatter <- function(
     my.ggplot <- my.ggplot + geom_point(
         data    = DF.temp,
         mapping = aes(x = x_var, y = y_var, colour = type),
-	size    = 0.2,
+        size    = plot.char.size,
         alpha   = 0.3
         );
 
