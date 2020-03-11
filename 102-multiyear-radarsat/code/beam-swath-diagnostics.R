@@ -621,6 +621,7 @@ beam.swath.diagnostics_getData <- function(
     beam.swath      = NULL,
     colname.pattern = NULL,
     exclude.years   = NULL,
+    exclude.land.types = exclude.land.types,
     land.types      = NULL,
     RData.output    = paste0("data-",beam.swath,".RData")
     ) {
@@ -648,27 +649,28 @@ beam.swath.diagnostics_getData <- function(
     for ( temp.year in years ) {
 
         list.data <- getData(
-            data.directory = data.directory,
-            beam.swath     = beam.swath,
-            year           = temp.year,
-            output.file    = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-raw.RData"))
+            data.directory     = data.directory,
+            beam.swath         = beam.swath,
+            year               = temp.year,
+            exclude.land.types = exclude.land.types,
+            output.file        = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-raw.RData"))
             );
 
         #cat(paste0("\nstr(list.data) -- ",temp.year,"\n"));
-	#print(        str(list.data) );
+        #print(        str(list.data) );
 
         DF.data.reshaped <- reshapeData(
             list.input      = list.data,
             beam.swath      = beam.swath,
             colname.pattern = colname.pattern,
-	    land.types      = land.types,
+            land.types      = land.types,
             output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
             );
 
         cat(paste0("\nstr(DF.data.reshaped) -- ",beam.swath,", ",temp.year,"\n"));
-	print(        str(DF.data.reshaped) );
+        print(        str(DF.data.reshaped) );
 
-	DF.output <- rbind(DF.output,DF.data.reshaped);
+        DF.output <- rbind(DF.output,DF.data.reshaped);
 
         }
 
