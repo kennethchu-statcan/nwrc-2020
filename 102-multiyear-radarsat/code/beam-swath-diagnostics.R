@@ -25,11 +25,12 @@ beam.swath.diagnostics <- function(
     beam.swath.directory <- file.path(data.directory,beam.swath);
 
     DF.data <- beam.swath.diagnostics_getData(
-        data.directory  = beam.swath.directory,
-        beam.swath      = beam.swath,
-        colname.pattern = colname.pattern,
-        land.types      = land.types,
-        exclude.years   = exclude.years
+        data.directory     = beam.swath.directory,
+        beam.swath         = beam.swath,
+        colname.pattern    = colname.pattern,
+        land.types         = land.types,
+        exclude.years      = exclude.years,
+        exclude.land.types = exclude.land.types
         );
 
     cat(paste0("\nstr(DF.data) -- ",beam.swath,"\n"));
