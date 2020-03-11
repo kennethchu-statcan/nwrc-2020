@@ -36,6 +36,10 @@ initializePlot <- function(
         values = my.palette
         );
 
+    my.ggplot <- my.ggplot + scale_colour_manual(
+        values = my.palette
+        );
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     return( my.ggplot );
 
