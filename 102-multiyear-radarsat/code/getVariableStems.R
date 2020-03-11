@@ -8,7 +8,8 @@ getVariableStems <- function() {
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     list.output <- list(
-        dBZ = c("dBZ")
+        polarization = c("cov_matrix_real_comp"),
+        dBZ          = c("dBZ_cov_comp")
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###

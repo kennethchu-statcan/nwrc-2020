@@ -90,6 +90,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             colname.pattern     = colname.pattern,
             land.types          = c("marsh","swamp","water","forest","ag","shallow"),
             exclude.years       = "2016",
+            exclude.land.types  = c("ag","forest","shallow","water"),
             n.partition         = 100,
             n.order             =   3,
             n.basis             =   9,

@@ -1,9 +1,10 @@
 
 getData <- function(
-    data.directory = NULL,
-    beam.swath     = NULL,
-    year           = NULL,
-    output.file    = NULL
+    data.directory     = NULL,
+    beam.swath         = NULL,
+    year               = NULL,
+    exclude.land.types = NULL,
+    output.file        = NULL
     ) {
 
     thisFunctionName <- "getData";
@@ -38,6 +39,10 @@ getData <- function(
             replacement = ""
             ));
 
+        if ( !is.null(exclude.land.types) ) {
+            land.types <- setdiff( land.types, exclude.land.types ); 
+            }
+ 
         list.data.raw <- list();
         for ( land.type in land.types ) {
 
@@ -77,6 +82,26 @@ getData_add.dBZ.variables <- function(DF.input = NULL) {
         new.colname <- paste0(temp.colname,"_dBZ");
         DF.output[,new.colname] <- 10 * log10(DF.output[,temp.colname]);
         }
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "cov_matrix_real_comp_1_dBZ",
+        replacement = "dBZ_cov_comp_1"
+        );
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "cov_matrix_real_comp_2_dBZ",
+        replacement = "dBZ_cov_comp_2"
+        );
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "cov_matrix_real_comp_3_dBZ",
+        replacement = "dBZ_cov_comp_3"
+        );
+    colnames(DF.output) <- gsub(
+        x           = colnames(DF.output),
+        pattern     = "cov_matrix_real_comp_4_dBZ",
+        replacement = "dBZ_cov_comp_4"
+        );
     return(DF.output);
     }
 

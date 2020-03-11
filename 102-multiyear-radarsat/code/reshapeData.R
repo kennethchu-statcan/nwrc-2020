@@ -215,21 +215,26 @@ reshapeData_long <- function(
         pattern = "[0-9]{8}"
         );
 
-    DF.temp[,"variable"] <- DF.temp[,"column.name"];
-    DF.temp[,"variable"] <- gsub(
-        x           = DF.temp[,"variable"],
-	pattern     = "RS2_",
-	replacement = ""
-        );
-    DF.temp[,"variable"] <- gsub(
-        x           = DF.temp[,"variable"],
-	pattern     = beam.swath,
-	replacement = ""
-        );
-    DF.temp[,"variable"] <- gsub(
-        x           = DF.temp[,"variable"],
-	pattern     = "_[0-9]{8}_",
-	replacement = ""
+#    DF.temp[,"variable"] <- DF.temp[,"column.name"];
+#    DF.temp[,"variable"] <- gsub(
+#        x           = DF.temp[,"variable"],
+#        pattern     = "RS2_",
+#        replacement = ""
+#        );
+#    DF.temp[,"variable"] <- gsub(
+#        x           = DF.temp[,"variable"],
+#        pattern     = beam.swath,
+#        replacement = ""
+#        );
+#    DF.temp[,"variable"] <- gsub(
+#        x           = DF.temp[,"variable"],
+#        pattern     = "_[0-9]{8}_",
+#        replacement = ""
+#        );
+
+    DF.temp[,"variable"] <- stringr::str_extract(
+        string  = DF.temp[,"column.name"],
+        pattern = paste0(colname.pattern,".*")
         );
 
     DF.temp <- DF.temp[,c("X","Y","date","variable","value")];

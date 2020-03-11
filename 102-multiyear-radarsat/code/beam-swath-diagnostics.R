@@ -4,6 +4,7 @@ beam.swath.diagnostics <- function(
     beam.swath          = NULL,
     colname.pattern     = NULL,
     exclude.years       = NULL,
+    exclude.land.types  = NULL,
     land.types          = c("ag","forest","marsh","shallow","swamp","water"),
     n.partition         = 20,
     n.order             =  3,
@@ -38,11 +39,19 @@ beam.swath.diagnostics <- function(
     print(        summary(DF.data) );
 
     if ( plot.timeseries ) {
+
         beam.swath.diagnostics_plotGroupedTimeSeries(
             DF.input        = DF.data,
             beam.swath      = beam.swath,
             colname.pattern = colname.pattern
             );
+
+        beam.swath.diagnostics_TimeSeriesRibbonPlots(
+            DF.input        = DF.data,
+            beam.swath      = beam.swath,
+            colname.pattern = colname.pattern
+            );
+
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -110,6 +119,128 @@ beam.swath.diagnostics <- function(
     }
 
 ##################################################
+beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
+    DF.input        = NULL,
+    beam.swath      = NULL,
+    colname.pattern = NULL
+    ) {
+
+    require(ggplot2);
+    require(dplyr);
+
+    cat("\nstr(DF.input)\n");
+    print( str(DF.input)   );
+
+    years            <- unique(DF.input[,"year"]);
+    target.variables <- grep(x = colnames(DF.input), pattern = colname.pattern, value = TRUE);
+    land.types       <- levels(DF.input[,"type"]);
+
+    for ( year            in years            ) {
+    for ( target.variable in target.variables ) {
+
+        PNG.output <- paste0('tmp-ribbon-',beam.swath,'-',year,'-',target.variable,'.png');
+
+        is.current.year   <- (DF.input[,"year"] == year);
+        #DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
+        DF.temp           <- DF.input[is.current.year,c("date","type",target.variable)];
+        colnames(DF.temp) <- gsub(
+            x           = colnames(DF.temp),
+            pattern     = target.variable,
+            replacement = "target.variable"
+            );
+
+        DF.temp <- DF.temp %>%
+            dplyr::group_by( date, type ) %>%
+            dplyr::summarize(
+                target_mean = mean(target.variable, na.rm = TRUE),
+                target_sd   =   sd(target.variable, na.rm = TRUE)
+                );
+
+        DF.temp <- as.data.frame(DF.temp);
+        DF.temp[,"target_mean_plus_sd" ] <- DF.temp[,"target_mean"] + DF.temp[,"target_sd"];
+        DF.temp[,"target_mean_minus_sd"] <- DF.temp[,"target_mean"] - DF.temp[,"target_sd"];
+
+        cat("\nstr(DF.temp)\n");
+        print( str(DF.temp)   );
+
+        cat("\nDF.temp\n");
+        print( DF.temp   );
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        my.ggplot <- initializePlot(
+            title    = NULL,
+            subtitle = paste0(beam.swath,", ",year,", ",target.variable)
+            );
+
+        my.ggplot <- my.ggplot + ylab(label = NULL);
+
+        my.ggplot <- my.ggplot + scale_x_date(
+            breaks       = sort(unique(DF.temp[,"date"])),
+            minor_breaks = NULL
+            );
+
+        my.ggplot <- my.ggplot + theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5)
+            );
+
+        my.ggplot <- my.ggplot + geom_ribbon(
+            data    = DF.temp,
+            mapping = aes(x = date, ymin = target_mean_minus_sd, ymax = target_mean_plus_sd, fill = type),
+            alpha   = 0.2
+            );
+
+        my.ggplot <- my.ggplot + geom_line(
+            data    = DF.temp,
+            mapping = aes(x = date, y = target_mean),
+            colour  = "black",
+            size    = 1.3,
+            alpha   = 0.5
+            );
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        my.ggplot <- my.ggplot + facet_grid(type ~ ., scales = "free_y");
+
+        ggsave(
+            file   = PNG.output,
+            plot   = my.ggplot,
+            dpi    = 150,
+            height =  16,
+            width  =  16,
+            units  = 'in'
+            );
+
+        ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+        PNG.output <- paste0('tmp-ribbon-',beam.swath,'-',year,'-',target.variable,'-fixed.png');
+
+        if ( grepl(x = target.variable, pattern = "_scaled$") ) {
+            my.ggplot <- my.ggplot + scale_y_continuous(
+                limits = c(  -3,3),
+                breaks = seq(-3,3,1)
+                );
+        } else {
+            my.ggplot <- my.ggplot + scale_y_continuous(
+                limits = c(  -40,20),
+                breaks = seq(-40,20,10)
+                );
+            }
+
+        my.ggplot <- my.ggplot + facet_grid(type ~ ., scales = "fixed");
+
+        ggsave(
+            file   = PNG.output,
+            plot   = my.ggplot,
+            dpi    = 150,
+            height =  16,
+            width  =  16,
+            units  = 'in'
+            );
+
+        }}
+
+    return( NULL );
+
+    }
+
 beam.swath.diagnostics_FPCA.harmonics <- function(
     beam.swath                   = NULL,
     fpca.variable                = NULL,
