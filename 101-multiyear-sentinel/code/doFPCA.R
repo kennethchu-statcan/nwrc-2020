@@ -132,13 +132,13 @@ doFPCA <- function(
         0.1
         );
 
-    visualize.bslpine.fit(
-        week.indices     = DF.dates[,"date_index"],
-        spline.grid      = spline.grid,
-        t.DF.time.series = t.DF.temp,
-        time.series.fd   = target.variable.fd,
-        prefix           = paste0(beam.swath,"-",target.variable)
-        );
+#    visualize.bslpine.fit(
+#        week.indices     = DF.dates[,"date_index"],
+#        spline.grid      = spline.grid,
+#        t.DF.time.series = t.DF.temp,
+#        time.series.fd   = target.variable.fd,
+#        prefix           = paste0(beam.swath,"-",target.variable)
+#        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     return.value.tryCatch <- tryCatch(
@@ -181,27 +181,27 @@ doFPCA <- function(
             plot.pca.fd(x = results.pca.fd, harm = 1:n.plots);
             dev.off();
             },
-	error = function(e) {
+        error = function(e) {
             my.message <- paste0("Error: fda::plot.pca.fd(), ",beam.swath,", ",target.variable);
             message("\n");
             message(my.message);
             message(e);
             message("\n");
-	    message("\nstr(results.pca.fd)\n");
-	    message(   str(results.pca.fd)   );
+            message("\nstr(results.pca.fd)\n");
+            message(   str(results.pca.fd)   );
             return( -1 );
-	    }
+            }
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    visualize.fpca.fit(
-        week.indices     = DF.dates[,"date_index"],
-        spline.grid      = spline.grid,
-        t.DF.time.series = t.DF.temp,
-        time.series.fd   = target.variable.fd,
-        results.pca.fd   = results.pca.fd,
-        prefix           = paste0(beam.swath,"-",target.variable)
-        );
+#    visualize.fpca.fit(
+#        week.indices     = DF.dates[,"date_index"],
+#        spline.grid      = spline.grid,
+#        t.DF.time.series = t.DF.temp,
+#        time.series.fd   = target.variable.fd,
+#        results.pca.fd   = results.pca.fd,
+#        prefix           = paste0(beam.swath,"-",target.variable)
+#        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ### Recalculating the FPCA scores.
@@ -235,8 +235,8 @@ doFPCA <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     LIST.output <- list(
         dates                  = DF.dates,
-	spline_grid            = spline.grid,
-	bspline_basis          = bspline.basis,
+        spline_grid            = spline.grid,
+        bspline_basis          = bspline.basis,
         bspline_basis_fdParObj = bspline.basis.fdParObj,
         target_variable_basis  = target.variable.fd,
         target_variable_fpc    = results.pca.fd,
