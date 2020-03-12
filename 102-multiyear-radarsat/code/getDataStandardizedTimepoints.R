@@ -63,15 +63,15 @@ getDataStandardizedTimepoints <- function(
 
         LIST.temp <- getDataStandardizedTimepoints_attachVariable(
             DF.input            = DF.input,
-	    DF.current          = DF.output,
+            DF.current          = DF.output,
             target.variable     = target.variable,
             n.order             = n.order,
             n.basis             = n.basis,
             smoothing.parameter = smoothing.parameter,
-	    list.bspline.basis  = list.bspline.basis
+            list.bspline.basis  = list.bspline.basis
             );
 
-	LIST.bsplines[[target.variable]] <- LIST.temp[["list_bsplines"]];
+        LIST.bsplines[[target.variable]] <- LIST.temp[["list_bsplines"]];
         DF.output                        <- LIST.temp[["df_standardized_timepoints"]];
 
         }
@@ -93,7 +93,7 @@ getDataStandardizedTimepoints <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     LIST.output <- list(
         df_standardized_timepoints = DF.output,
-	list_bsplines              = LIST.bsplines
+        list_bsplines              = LIST.bsplines
         );
 
     saveRDS(object = LIST.output, file = output.RData);

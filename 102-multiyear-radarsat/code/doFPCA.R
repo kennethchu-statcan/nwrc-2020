@@ -133,13 +133,13 @@ doFPCA <- function(
         0.1
         );
 
-    visualize.bslpine.fit(
-        week.indices     = DF.dates[,"date_index"],
-        spline.grid      = spline.grid,
-        t.DF.time.series = t.DF.temp,
-        time.series.fd   = target.variable.fd,
-        prefix           = paste0(beam.swath,"-",target.variable)
-        );
+#    visualize.bslpine.fit(
+#        week.indices     = DF.dates[,"date_index"],
+#        spline.grid      = spline.grid,
+#        t.DF.time.series = t.DF.temp,
+#        time.series.fd   = target.variable.fd,
+#        prefix           = paste0(beam.swath,"-",target.variable)
+#        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     return.value.tryCatch <- tryCatch(
@@ -195,14 +195,14 @@ doFPCA <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    visualize.fpca.fit(
-        week.indices     = DF.dates[,"date_index"],
-        spline.grid      = spline.grid,
-        t.DF.time.series = t.DF.temp,
-        time.series.fd   = target.variable.fd,
-        results.pca.fd   = results.pca.fd,
-        prefix           = paste0(beam.swath,"-",target.variable)
-        );
+#    visualize.fpca.fit(
+#        week.indices     = DF.dates[,"date_index"],
+#        spline.grid      = spline.grid,
+#        t.DF.time.series = t.DF.temp,
+#        time.series.fd   = target.variable.fd,
+#        results.pca.fd   = results.pca.fd,
+#        prefix           = paste0(beam.swath,"-",target.variable)
+#        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ### Recalculating the FPCA scores.
