@@ -42,16 +42,16 @@ reshapeData <- function(
             }
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep = "_");
+        DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep = "_");
 
         DF.output[,"type"] <- factor(
-	    x       = as.character(DF.output[,"type"]),
-	    levels  = land.types,
-	    ordered = FALSE
-	    );
+            x       = as.character(DF.output[,"type"]),
+            levels  = land.types,
+            ordered = FALSE
+            );
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-	# add scaled variables
+        # add scaled variables
         target.variables <- grep(
             x       = colnames(DF.output),
             pattern = colname.pattern,
@@ -236,7 +236,7 @@ reshapeData_long <- function(
         );
 
     for ( temp.colname in temp.colnames ) {
-        DF.output[,temp.colname] <- as.numeric(DF.output[,temp.colname]); 
+        DF.output[,temp.colname] <- as.numeric(DF.output[,temp.colname]);
         }
 
     DF.output[,"year"]         <- format(x = DF.output[,"date"], format = "%Y");
@@ -251,4 +251,3 @@ reshapeData_long <- function(
     return( DF.output );
 
     }
-
