@@ -3,6 +3,7 @@ doFPCA <- function(
     DF.input            = NULL,
     target.variable     = NULL,
     beam.swath          = NULL,
+    DF.colour.scheme    = NULL,
     week.indices        = NULL,
     spline.grid         = NULL,
     n.order             = NULL,
@@ -257,25 +258,27 @@ doFPCA <- function(
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     doFPCA_scatter(
-        DF.input   = DF.output,
-        beam.swath = beam.swath,
-        x.var      = "fpc_1",
-        y.var      = "fpc_2",
-        title      = NULL,
-        subtitle   = paste0(beam.swath,', ',target.variable),
-        PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'.png')
+        DF.input         = DF.output,
+        beam.swath       = beam.swath,
+        DF.colour.scheme = DF.colour.scheme,
+        x.var            = "fpc_1",
+        y.var            = "fpc_2",
+        title            = NULL,
+        subtitle         = paste0(beam.swath,', ',target.variable),
+        PNG.output       = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'.png')
         );
 
     years <- unique(DF.output[,"year"]);
     for ( year in years ) {
         doFPCA_scatter(
-            DF.input   = DF.output[DF.output[,"year"] == year,],
-            beam.swath = beam.swath,
-            x.var      = "fpc_1",
-            y.var      = "fpc_2",
-            title      = NULL,
-            subtitle   = paste0(beam.swath,', ',target.variable,', ',year),
-            PNG.output = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'-',year,'.png')
+            DF.input         = DF.output[DF.output[,"year"] == year,],
+            beam.swath       = beam.swath,
+            DF.colour.scheme = DF.colour.scheme,
+            x.var            = "fpc_1",
+            y.var            = "fpc_2",
+            title            = NULL,
+            subtitle         = paste0(beam.swath,', ',target.variable,', ',year),
+            PNG.output       = paste0('tmp-',beam.swath,'-FPCA-scatter-',target.variable,'-',year,'.png')
             );
         }
 
@@ -288,13 +291,14 @@ doFPCA <- function(
 
 ##################################################
 doFPCA_scatter <- function(
-    DF.input   = NULL,
-    beam.swath = NULL,
-    x.var      = NULL,
-    y.var      = NULL,
-    title      = NULL,
-    subtitle   = NULL,
-    PNG.output = 'tmp-FPCA-scatter.png'
+    DF.input         = NULL,
+    beam.swath       = NULL,
+    DF.colour.scheme = NULL,
+    x.var            = NULL,
+    y.var            = NULL,
+    title            = NULL,
+    subtitle         = NULL,
+    PNG.output       = 'tmp-FPCA-scatter.png'
     ) {
 
     require(ggplot2);
@@ -314,8 +318,9 @@ doFPCA_scatter <- function(
         );
 
     my.ggplot <- initializePlot(
-        title    = title,
-        subtitle = subtitle
+        title      = title,
+        subtitle   = subtitle,
+        my.palette = DF.colour.scheme[DF.colour.scheme[,"land.type"] %in% as.character(unique(DF.temp[,"type"])),"colour"]
         );
 
     temp.xlab <- gsub(x = toupper(x.var), pattern = "_", replacement = " ");
@@ -326,7 +331,7 @@ doFPCA_scatter <- function(
     my.ggplot <- my.ggplot + guides(
         colour = guide_legend(override.aes = list(alpha =  0.5, size = 5))
         );
-   
+
     if ( grepl(x = subtitle, pattern = "scaled") ) {
         my.ggplot <- my.ggplot + scale_x_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
         my.ggplot <- my.ggplot + scale_y_continuous(limits=20*c(-1,1),breaks=seq(-20,20,5));
@@ -338,7 +343,7 @@ doFPCA_scatter <- function(
     my.ggplot <- my.ggplot + geom_point(
         data    = DF.temp,
         mapping = aes(x = x_var, y = y_var, colour = type),
-	size    = 0.2,
+        size    = 0.2,
         alpha   = 0.3
         );
 
@@ -354,4 +359,3 @@ doFPCA_scatter <- function(
     return( NULL );
 
     }
-

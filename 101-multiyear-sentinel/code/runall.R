@@ -52,6 +52,13 @@ beam.swaths <- list.files(path = data.directory);
 print( beam.swaths );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.colour.scheme <- data.frame(
+    land.type = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
+    colour    = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
+    );
+rownames(DF.colour.scheme) <- DF.colour.scheme[,"land.type"];
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 num.cores <- max(1,detectCores() - 1);
 cat("\nnum.cores\n");
 print( num.cores   );
@@ -88,9 +95,9 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             data.directory      = data.directory,
             beam.swath          = beam.swath,
             colname.pattern     = colname.pattern,
-            land.types          = c("marsh","swamp","water","forest","ag","shallow"),
+            DF.colour.scheme    = DF.colour.scheme,
             exclude.years       = "2016",
-            exclude.land.types  = c("ag","forest","shallow"),
+            exclude.land.types  = c("marsh","water","ag","shallow"),
             n.partition         = 100,
             n.order             =   3,
             n.basis             =   9,
@@ -138,4 +145,3 @@ print( format(Sys.time(),"%Y-%m-%d %T %Z") );
 
 stop.proc.time <- proc.time();
 print( stop.proc.time - start.proc.time );
-

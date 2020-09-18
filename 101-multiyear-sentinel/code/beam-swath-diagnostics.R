@@ -3,9 +3,13 @@ beam.swath.diagnostics <- function(
     data.directory      = NULL,
     beam.swath          = NULL,
     colname.pattern     = NULL,
+    DF.colour.scheme    = data.frame(
+        row.names = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
+        land.type = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
+        colour    = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
+        ),
     exclude.years       = NULL,
     exclude.land.types  = NULL,
-    land.types          = c("ag","forest","marsh","shallow","swamp","water"),
     n.partition         = 20,
     n.order             =  3,
     n.basis             =  9,
@@ -20,6 +24,9 @@ beam.swath.diagnostics <- function(
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
     cat(paste0("\nbeam.swath: ",beam.swath,"\n"));
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    land.types <- DF.colour.scheme[,"land.type"];
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     beam.swath.directory <- file.path(data.directory,beam.swath);
@@ -42,18 +49,31 @@ beam.swath.diagnostics <- function(
     if ( plot.timeseries ) {
 
         beam.swath.diagnostics_plotGroupedTimeSeries(
-            DF.input        = DF.data,
-            beam.swath      = beam.swath,
-            colname.pattern = colname.pattern
+            DF.input         = DF.data,
+            beam.swath       = beam.swath,
+            colname.pattern  = colname.pattern,
+            DF.colour.scheme = DF.colour.scheme
             );
 
         beam.swath.diagnostics_TimeSeriesRibbonPlots(
-            DF.input        = DF.data,
-            beam.swath      = beam.swath,
-            colname.pattern = colname.pattern
+            DF.input         = DF.data,
+            beam.swath       = beam.swath,
+            colname.pattern  = colname.pattern,
+            DF.colour.scheme = DF.colour.scheme
             );
 
         }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    # cat(paste0("\n",thisFunctionName,"() quits."));
+    # cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
+    # return( NULL );
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     LIST.standardizedTimepoints <- getDataStandardizedTimepoints(
@@ -83,6 +103,7 @@ beam.swath.diagnostics <- function(
             DF.input            = LIST.standardizedTimepoints[["df_standardized_timepoints"]],
             target.variable     = fpca.variable,
             beam.swath          = beam.swath,
+            DF.colour.scheme    = DF.colour.scheme,
             spline.grid         = NULL,
             n.order             = 3,
             n.basis             = 9,
@@ -121,9 +142,10 @@ beam.swath.diagnostics <- function(
 
 ##################################################
 beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
-    DF.input        = NULL,
-    beam.swath      = NULL,
-    colname.pattern = NULL
+    DF.input         = NULL,
+    beam.swath       = NULL,
+    colname.pattern  = NULL,
+    DF.colour.scheme = NULL
     ) {
 
     require(ggplot2);
@@ -134,7 +156,6 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
 
     years            <- unique(DF.input[,"year"]);
     target.variables <- grep(x = colnames(DF.input), pattern = colname.pattern, value = TRUE);
-    land.types       <- levels(DF.input[,"type"]);
 
     for ( year            in years            ) {
     for ( target.variable in target.variables ) {
@@ -142,7 +163,6 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
         PNG.output <- paste0('tmp-ribbon-',beam.swath,'-',year,'-',target.variable,'.png');
 
         is.current.year   <- (DF.input[,"year"] == year);
-        #DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
         DF.temp           <- DF.input[is.current.year,c("date","type",target.variable)];
         colnames(DF.temp) <- gsub(
             x           = colnames(DF.temp),
@@ -154,7 +174,7 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
             dplyr::group_by( date, type ) %>%
             dplyr::summarize(
                 target_mean = mean(target.variable, na.rm = TRUE),
-		target_sd   =   sd(target.variable, na.rm = TRUE)
+                target_sd   =   sd(target.variable, na.rm = TRUE)
                 );
 
         DF.temp <- as.data.frame(DF.temp);
@@ -167,10 +187,14 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
         cat("\nDF.temp\n");
         print( DF.temp   );
 
+        cat("\nlevels(DF.temp[,'type'])\n");
+        print( levels(DF.temp[,'type'])   );
+
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         my.ggplot <- initializePlot(
-            title    = NULL,
-            subtitle = paste0(beam.swath,", ",year,", ",target.variable)
+            title      = NULL,
+            subtitle   = paste0(beam.swath,", ",year,", ",target.variable),
+            my.palette = DF.colour.scheme[DF.colour.scheme[,"land.type"] %in% as.character(unique(DF.temp[,"type"])),"colour"]
             );
 
         my.ggplot <- my.ggplot + ylab(label = NULL);
@@ -183,7 +207,6 @@ beam.swath.diagnostics_TimeSeriesRibbonPlots <- function(
         my.ggplot <- my.ggplot + theme(
             axis.text.x = element_text(angle = 90, vjust = 0.5)
             );
-
 
         my.ggplot <- my.ggplot + geom_ribbon(
             data    = DF.temp,
@@ -542,9 +565,10 @@ beam.swath.diagnostics_FPCA.fit <- function(
     }
 
 beam.swath.diagnostics_plotGroupedTimeSeries <- function(
-    DF.input        = NULL,
-    beam.swath      = NULL,
-    colname.pattern = NULL
+    DF.input         = NULL,
+    beam.swath       = NULL,
+    colname.pattern  = NULL,
+    DF.colour.scheme = NULL
     ) {
 
     require(ggplot2);
@@ -560,7 +584,7 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
 
         PNG.output <- paste0('tmp-timeseries-',beam.swath,'-',year,'-',target.variable,'.png');
 
-	is.current.year   <- (DF.input[,"year"] == year);
+        is.current.year   <- (DF.input[,"year"] == year);
         DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
         colnames(DF.temp) <- gsub(
             x           = colnames(DF.temp),
@@ -569,8 +593,9 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
             );
 
         my.ggplot <- initializePlot(
-            title    = NULL,
-            subtitle = paste0(beam.swath,", ",year,", ",target.variable)
+            title      = NULL,
+            subtitle   = paste0(beam.swath,", ",year,", ",target.variable),
+            my.palette = DF.colour.scheme[DF.colour.scheme[,"land.type"] %in% as.character(unique(DF.temp[,"type"])),"colour"]
             );
 
         my.ggplot <- my.ggplot + ylab(label = NULL);
@@ -594,7 +619,7 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
                 limits = c(  -40,20),
                 breaks = seq(-40,20,10)
                 );
-	    }
+            }
 
         my.ggplot <- my.ggplot + geom_line(
             data    = DF.temp,
@@ -630,9 +655,9 @@ beam.swath.diagnostics_getData <- function(
     ) {
 
     if ( file.exists(RData.output) ) {
-        DF.output <- readRDS(file = RData.output);    
+        DF.output <- readRDS(file = RData.output);
         return( DF.output );
-        } 
+        }
 
     DF.output <- data.frame();
 
@@ -646,8 +671,8 @@ beam.swath.diagnostics_getData <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     years <- beam.swath.diagnostics_getYears(
         data.directory = data.directory,
-	exclude.years  = exclude.years
-	);
+        exclude.years  = exclude.years
+        );
 
     for ( temp.year in years ) {
 
@@ -666,7 +691,7 @@ beam.swath.diagnostics_getData <- function(
             list.input      = list.data,
             beam.swath      = beam.swath,
             colname.pattern = colname.pattern,
-	    land.types      = land.types,
+            land.types      = land.types,
             output.file     = file.path(temp.directory,paste0("data-",beam.swath,"-",temp.year,"-reshaped.RData"))
             );
 
@@ -716,7 +741,7 @@ beam.swath.diagnostics_processYear <- function(
         data.directory = data.directory,
         beam.swath     = beam.swath,
         year           = year,
-        output.file    = paste0("data-",beam.swath,"-",year,"-raw.RData") 
+        output.file    = paste0("data-",beam.swath,"-",year,"-raw.RData")
         );
 
     list.data.reshaped <- reshapeData(
@@ -772,4 +797,3 @@ beam.swath.diagnostics_processYear <- function(
     return( NULL );
 
     }
-
