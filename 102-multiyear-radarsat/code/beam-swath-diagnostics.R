@@ -561,7 +561,7 @@ beam.swath.diagnostics_plotGroupedTimeSeries <- function(
 
         PNG.output <- paste0('tmp-timeseries-',beam.swath,'-',year,'-',target.variable,'.png');
 
-	is.current.year   <- (DF.input[,"year"] == year);
+        is.current.year   <- (DF.input[,"year"] == year);
         DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","type",target.variable)];
         colnames(DF.temp) <- gsub(
             x           = colnames(DF.temp),
@@ -645,8 +645,8 @@ beam.swath.diagnostics_getData <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     years <- beam.swath.diagnostics_getYears(
         data.directory = data.directory,
-	exclude.years  = exclude.years
-	);
+        exclude.years  = exclude.years
+        );
 
     for ( temp.year in years ) {
 
@@ -749,7 +749,7 @@ beam.swath.diagnostics_processYear <- function(
         cat("\nstr(DF.pca)\n");
         print( str(DF.pca)   );
 
-	fpca.variables <- grep(x = colnames(DF.pca), pattern = colname.pattern, value = TRUE);
+        fpca.variables <- grep(x = colnames(DF.pca), pattern = colname.pattern, value = TRUE);
         for ( fpca.variable in fpca.variables ) {
             DF.fpca <- doFPCA(
                 DF.input            = DF.pca,
@@ -764,7 +764,7 @@ beam.swath.diagnostics_processYear <- function(
                 );
             cat("\nstr(DF.fpca)\n");
             print( str(DF.fpca)   );
-	    }
+            }
 
         }
 
