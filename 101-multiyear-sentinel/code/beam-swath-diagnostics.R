@@ -65,17 +65,6 @@ beam.swath.diagnostics <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    # cat(paste0("\n",thisFunctionName,"() quits."));
-    # cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
-    # return( NULL );
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     LIST.standardizedTimepoints <- getDataStandardizedTimepoints(
         DF.input            = DF.data,
         beam.swath          = beam.swath,
@@ -434,7 +423,7 @@ beam.swath.diagnostics_FPCA.fit <- function(
         DF.bsplines.original <- fda::eval.fd(
             evalarg = temp.evalarg,
             fdobj   = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
-	    );
+            );
 
         temp.XY.years <- intersect(temp.XY.years,colnames(DF.bsplines.original));
 
@@ -775,7 +764,7 @@ beam.swath.diagnostics_processYear <- function(
         cat("\nstr(DF.pca)\n");
         print( str(DF.pca)   );
 
-	fpca.variables <- grep(x = colnames(DF.pca), pattern = colname.pattern, value = TRUE);
+        fpca.variables <- grep(x = colnames(DF.pca), pattern = colname.pattern, value = TRUE);
         for ( fpca.variable in fpca.variables ) {
             DF.fpca <- doFPCA(
                 DF.input            = DF.pca,
@@ -790,7 +779,7 @@ beam.swath.diagnostics_processYear <- function(
                 );
             cat("\nstr(DF.fpca)\n");
             print( str(DF.fpca)   );
-	    }
+            }
 
         }
 
