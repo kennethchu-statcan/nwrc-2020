@@ -90,7 +90,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             colname.pattern     = colname.pattern,
             land.types          = c("marsh","swamp","water","forest","ag","shallow"),
             exclude.years       = "2016",
-            exclude.land.types  = c("ag","forest","shallow"),
+            exclude.land.types  = c("water","forest","ag","shallow"),
             n.partition         = 100,
             n.order             =   3,
             n.basis             =   9,
@@ -139,4 +139,3 @@ print( format(Sys.time(),"%Y-%m-%d %T %Z") );
 
 stop.proc.time <- proc.time();
 print( stop.proc.time - start.proc.time );
-
