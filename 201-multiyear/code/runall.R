@@ -39,13 +39,13 @@ require(foreach);
 require(doParallel);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-satellites     <- "sentinel";
-data.snapshot  <- "2020-02-24.03";
-data.directory <- file.path(data.directory,data.snapshot,"Sentinal1","relative-orbit-number");
-
-# satellites     <- "radarsat";
+# satellites     <- "sentinel";
 # data.snapshot  <- "2020-02-24.03";
-# data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
+# data.directory <- file.path(data.directory,data.snapshot,"Sentinal1","relative-orbit-number");
+
+satellites     <- "radarsat";
+data.snapshot  <- "2020-02-24.03";
+data.directory <- file.path(data.directory,data.snapshot,"RADARSAT");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 set.seed(7654321);
@@ -103,7 +103,7 @@ foreach ( temp.index = 1:length(variable.stems) ) %dopar% {
             colname.pattern     = colname.pattern,
             DF.colour.scheme    = DF.colour.scheme,
             exclude.years       = "2016",
-            exclude.land.types  = c("marsh","water","ag","shallow"),
+            exclude.land.types  = NULL, #c("marsh","water","ag","shallow"),
             n.partition         = 100,
             n.order             =   3,
             n.basis             =   9,
