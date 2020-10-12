@@ -72,6 +72,16 @@ fpcFeatureEngine <- R6::R6Class(
 
         transform = function(newdata = NULL) {
 
+            DF.temp <- private$add.auxiliary.columns(DF.input = newdata);
+            cat("\nstr(DF.temp)\n");
+            print( str(DF.temp)   );
+
+            DF.temp <- private$standardized.grid.interpolate(
+                DF.input = DF.temp
+                );
+            cat("\nstr(DF.temp)\n");
+            print( str(DF.temp)   );
+
           #   DF.newdata           <- newdata;
           #   colnames(DF.newdata) <- tolower(colnames(DF.newdata));
           #   rownames(DF.newdata) <- sapply(
@@ -337,73 +347,28 @@ fpcFeatureEngine <- R6::R6Class(
             visualize = FALSE
             ) {
 
-            # data              <- training.set;
-            # colnames(data)    <- tolower(colnames(data));
-            # value.colnames    <- paste0(variable.series,week.indices);
-            # working_dataframe <- data[,value.colnames];
-            #
-            # df <- working_dataframe;
-            # rownames(df) <- sapply(X = rownames(df), FUN = function(x){paste0(sample(x=letters,size = 10, replace = TRUE), collapse = "")});
-            #
-            # transposed.df.value <- t(df[,value.colnames]);
-
-            date_index.colnames <- base::grep(
-                x       = base::colnames(DF.input),
-                pattern = "^[0-9]+$",
-                value   = TRUE
-                );
-
-            DF.dates <- data.frame(
-                date_index_char  = base::as.character(date_index.colnames),
-                date_index       = base::as.integer(  date_index.colnames),
-                stringsAsFactors = FALSE
-                );
-
-            cat("\nstr(DF.dates)\n");
-            print( str(DF.dates)    );
-
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            t.DF.input <- base::t(DF.input[,DF.dates[,"date_index_char"]]);
+            t.DF.input <- base::t(DF.input[,base::as.character(self$standardized.bspline.basis[['spline.grid']])]);
             cat("\nstr(t.DF.input)\n");
             print( str(t.DF.input)   );
 
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            # create basis functions with respect to which
-            # FPCA computations will be carried out
-            bspline.basis <- fda::create.bspline.basis(
-                rangeval    = base::range(DF.dates[,"date_index"]), # range(week.indices),
-                norder      = self$n.order,
-                nbasis      = self$n.basis,
-                dropind     = NULL,
-                quadvals    = NULL,
-                values      = NULL,
-                basisvalues = NULL,
-                names       = 'bspl'
-                );
-
-            # create associated functional data
-            # parameter object for the basis functions
-            # created above
-            bspline.basis.fdParObj <- fda::fdPar(
-                fdobj  = bspline.basis,
-                lambda = self$smoothing.parameter
-                );
-
-            # express NDVI data as linear combinations
-            # of the basis functions created above
+            # express standardized-grid time series as linear combinations
+            # of the standardized-grid B-spline basis
             target.variable.fd <- fda::smooth.basis(
-                argvals      = DF.dates[,"date_index"],,
-                y            = t.DF.input, #transposed.df.value,
-                fdParobj     = bspline.basis.fdParObj,
+                argvals      = self$standardized.bspline.basis[['spline.grid']],
+                y            = t.DF.input,
+                fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']],
                 method       = 'cho1',
                 dfscale      = 1,
                 returnMatrix = FALSE
                 );
 
+            # perform FPCA computations on standardized-grid time time series
+            # in terms of standardized-grid B-spline basis
             results.pca.fd <- fda::pca.fd(
                 fdobj     = target.variable.fd[['fd']],
                 nharm     = self$n.harmonics,
-                harmfdPar = bspline.basis.fdParObj
+                harmfdPar = self$standardized.bspline.basis[['bspline.basis.fdParObj']]
                 );
 
             training.row.means <- base::apply(
@@ -435,9 +400,9 @@ fpcFeatureEngine <- R6::R6Class(
 
             base::return(
                 base::list(
-                    bspline.basis.fdParObj = bspline.basis.fdParObj,
-                    training.row.means     = training.row.means,
-                    harmonics              = results.pca.fd[["harmonics"]]
+                    # bspline.basis.fdParObj = bspline.basis.fdParObj,
+                    training.row.means = training.row.means,
+                    harmonics          = results.pca.fd[["harmonics"]]
                     )
                 );
 
