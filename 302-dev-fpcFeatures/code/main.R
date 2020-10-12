@@ -91,6 +91,11 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
 
 my.fpcFeatureEngine$fit();
 
+DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VH);
+
+cat("\nstr(DF.bspline.fpc)\n");
+print( str(DF.bspline.fpc)   );
+
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
