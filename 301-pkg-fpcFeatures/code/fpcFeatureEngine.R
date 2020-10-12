@@ -19,7 +19,7 @@ fpcFeatureEngine <- R6::R6Class(
 
         # class attributes
         standardized.bspline.basis = NULL,
-        learned.fpca.parameters    = base::list(),
+        learned.fpca.parameters    = NULL,
 
         initialize = function(
             learner.metadata    = NULL,
