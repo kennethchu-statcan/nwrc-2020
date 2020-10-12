@@ -188,7 +188,7 @@ fpcFeatureEngine <- R6::R6Class(
             print( str(DF.temp)   );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            LIST.bsplines <- base::list();
+            # LIST.bsplines <- base::list();
             DF.stack      <- base::data.frame();
 
             years <- base::unique(DF.input[,"year"]);
@@ -277,12 +277,12 @@ fpcFeatureEngine <- R6::R6Class(
 
                 DF.stack <- base::rbind(DF.stack,bspline.approximation.long);
 
-                LIST.bsplines[[year]] <- base::list(
-                    input_timeseries       = DF.temp.year,
-                    bspline_basis          = temp.bspline.basis,
-                    bspline_basis_fdParObj = temp.bspline.basis.fdParObj,
-                    target_in_basis_fd     = target.in.basis.fd
-                    );
+                # LIST.bsplines[[year]] <- base::list(
+                #     input_timeseries       = DF.temp.year,
+                #     bspline_basis          = temp.bspline.basis,
+                #     bspline_basis_fdParObj = temp.bspline.basis.fdParObj,
+                #     target_in_basis_fd     = target.in.basis.fd
+                #     );
 
                 }
 
@@ -330,7 +330,7 @@ fpcFeatureEngine <- R6::R6Class(
             # base::return( LIST.output );
             base::return( DF.output );
 
-            }, # getDataStandardizedTimepoints_attachVariable()
+            }, # standardized.grid.interpolate()
 
         learn.fpca.parameters = function(
             DF.input  = NULL,
