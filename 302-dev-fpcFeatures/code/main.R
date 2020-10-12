@@ -34,6 +34,7 @@ for ( code.file in code.files ) {
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 pkg.files <- c(
     "fpcFeatureEngine.R",
+    "getDataStandardizedTimepoints.R",
     "initializePlot.R"
     );
 
@@ -75,10 +76,78 @@ cat("\nstr(DF.data)\n");
 print( str(DF.data)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.VH <- DF.data[,c("X","Y","date","VH")];
+my.fpcFeatureEngine <- fpcFeatureEngine$new(
+    training.data       = DF.VH,
+    location.ID         = c('X','Y'),
+    date                = 'date',
+    variable            = 'VH',
+    n.partition         = 100,
+    n.order             =   3,
+    n.basis             =   9,
+    smoothing.parameter =   0.1,
+    n.harmonics         =   7
+    );
+
+my.fpcFeatureEngine$fit();
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+cat("\n##################################################\n");
+cat("\n##### warnings():\n");
+print(       warnings()    );
+
+cat("\n##### getOption('repos'):\n");
+print(       getOption('repos')    );
+
+cat("\n##### .libPaths():\n");
+print(       .libPaths()    );
+
+cat("\n##### sessionInfo():\n");
+print(       sessionInfo()    );
+
+# print system time to log
+cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
+
+# print elapsed time to log
+stop.proc.time <- proc.time();
+cat("\n##### stop.proc.time - start.proc.time:\n");
+print(       stop.proc.time - start.proc.time    );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+quit(save = "no");
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.VH <- DF.data[,c("X","Y","year","X_Y_year","date","date_index","VH")];
+
+cat("\nstr(DF.VH)\n");
+print( str(DF.VH)   );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+LIST.standardizedTimepoints <- getDataStandardizedTimepoints(
+    DF.input            = DF.VH,
+    beam.swath          = beam.mode,
+    colname.pattern     = "VH",
+    n.partition         = 100,
+    n.order             =   3,
+    n.basis             =   9,
+    smoothing.parameter =   0.1,
+    n.harmonics         =   7,
+    do.diagnostics      = TRUE,
+    output.RData        = paste0("data-",beam.mode,"-standardizedTimepoints.RData")
+    );
+
+cat("\nstr(LIST.standardizedTimepoints)\n");
+print( str(LIST.standardizedTimepoints)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
