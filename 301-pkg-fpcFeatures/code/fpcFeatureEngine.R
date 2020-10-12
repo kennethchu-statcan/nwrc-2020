@@ -75,11 +75,25 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.temp)\n");
             print( str(DF.temp)   );
 
-            DF.temp <- private$standardized.grid.interpolate(
+            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
                 DF.input = DF.temp
                 );
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            base::rownames(DF.newdata.standardized.wide) <- base::sapply(
+				        X   = base::rownames(DF.newdata.standardized.wide),
+				        FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
+                );
+            cat("\nstr(DF.newdata.standardized.wide)\n");
+            print( str(DF.newdata.standardized.wide)   );
+
+            DF.fpc <- private$apply.fpca.parameters(
+                DF.input  = DF.newdata.standardized.wide[,base::setdiff(base::colnames(DF.newdata.standardized.wide),base::c('location_year','year'))],
+                visualize = FALSE
+                );
+
+            DF.output <- cbind(
+                DF.newdata.standardized.wide,
+                DF.fpc[rownames(DF.newdata.standardized.wide),]
+					      );
 
           #   DF.newdata           <- newdata;
           #   colnames(DF.newdata) <- tolower(colnames(DF.newdata));
@@ -399,7 +413,6 @@ fpcFeatureEngine <- R6::R6Class(
 
             base::return(
                 base::list(
-                    # bspline.basis.fdParObj = bspline.basis.fdParObj,
                     training.row.means = training.row.means,
                     harmonics          = results.pca.fd[["harmonics"]]
                     )
@@ -408,60 +421,64 @@ fpcFeatureEngine <- R6::R6Class(
             }, # learn.fpca.parameters()
 
         apply.fpca.parameters = function(
-            DF.input        = NULL,
-            variable.series = NULL,
-            week.indices    = NULL,
-            visualize       = FALSE
+            DF.input  = NULL,
+            visualize = FALSE
             ) {
 
-            t.DF.time.series <- t(DF.input);
+            #t.DF.time.series <- t(DF.input);
+            t.DF.input <- base::t(DF.input);
 
-            time.series.fd <- fda::smooth.basis(
-                argvals      = week.indices,
-                y            = t.DF.time.series,
-                fdParobj     = self$learned.fpca.parameters[[variable.series]][["week.fdParObj"]],
+            cat('\nstr(t.DF.input)\n');
+            print( str(t.DF.input)   );
+
+            #time.series.fd <- fda::smooth.basis(
+            t.DF.input.fd <- fda::smooth.basis(
+                argvals      = self$standardized.bspline.basis[['spline.grid']],
+                y            = t.DF.input, # t.DF.time.series,
+                fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']], #self$learned.fpca.parameters[["week.fdParObj"]],
                 method       = 'cho1',
                 dfscale      = 1,
                 returnMatrix = FALSE
                 );
 
-            training.row.means <- self$learned.fpca.parameters[[variable.series]][["training.row.means"]];
-            temp.ncols         <- ncol(time.series.fd[['fd']][['coefs']]);
+            training.row.means <- self$learned.fpca.parameters[["training.row.means"]];
+            temp.ncols         <- base::ncol(t.DF.input.fd[['fd']][['coefs']]);
 
-            time.series.fd.centered <- fd(
-                coef     = time.series.fd[['fd']][['coefs']] - matrix(rep(training.row.means,temp.ncols),ncol=temp.ncols),
-					      basisobj = time.series.fd[['fd']][['basis']],
+            t.DF.input.fd.centered <- fda::fd(
+                coef     = t.DF.input.fd[['fd']][['coefs']] - matrix(rep(training.row.means,temp.ncols),ncol=temp.ncols),
+					      basisobj = t.DF.input.fd[['fd']][['basis']],
 					      fdnames  = NULL
 					      );
-            attr(time.series.fd.centered[['coefs']],"dimnames") <- NULL;
+            attr(t.DF.input.fd.centered[['coefs']],"dimnames") <- NULL;
 
             results.inprod <- fda::inprod(
-                fdobj1 = time.series.fd.centered,
-                fdobj2 = self$learned.fpca.parameters[[variable.series]][["harmonics"]]
+                fdobj1 = t.DF.input.fd.centered,
+                fdobj2 = self$learned.fpca.parameters[["harmonics"]]
                 );
 
             DF.fpc <- results.inprod;
-            colnames(DF.fpc) <- paste0(paste0('fpc_',variable.series,'_'),seq(1,ncol(DF.fpc)));
+            #colnames(DF.fpc)<- paste0(paste0('fpc_',variable.series,'_'),seq(1,ncol(DF.fpc)));
+            colnames(DF.fpc) <- paste0('fpc_',seq(1,ncol(DF.fpc)));
             rownames(DF.fpc) <- rownames(DF.input);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             if ( visualize == TRUE ) {
 
                 time.series.fd <- fda::smooth.basis(
-                    argvals      = week.indices,
-                    y            = t.DF.time.series,
-                    fdParobj     = self$learned.fpca.parameters[[variable.series]][["week.fdParObj"]],
+                    argvals      = self$standardized.bspline.basis[['spline.grid']], #week.indices,
+                    y            = t.DF.input, #t.DF.time.series,
+                    fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']], #self$learned.fpca.parameters[[variable.series]][["week.fdParObj"]],
                     method       = 'cho1',
                     dfscale      = 1,
                     returnMatrix = FALSE
                     );
 
                 private$visualize.bslpine.fit(
-                    week.indices     = week.indices,
+                    week.indices     = self$standardized.bspline.basis[['spline.grid']], #week.indices,
                     spline.grid      = seq(min(week.indices),max(week.indices),0.1),
-                    t.DF.time.series = t.DF.time.series,
+                    t.DF.time.series = t.DF.input, #t.DF.time.series,
                     time.series.fd   = time.series.fd,
-                    prefix           = paste0("transform-",variable.series)
+                    prefix           = "transform"
                     );
 
                 # private$visualize.fpca.fit(
@@ -470,7 +487,7 @@ fpcFeatureEngine <- R6::R6Class(
                 #     t.DF.time.series = t.DF.time.series,
                 #     time.series.fd   = time.series.fd,
                 #     results.pca.fd   = results.pca.fd,
-                #     prefix           = paste0("transform-",variable.series)
+                #     prefix           = "transform"
                 #     );
 
                 }
