@@ -19,7 +19,6 @@ fpcFeatureEngine <- R6::R6Class(
 
         # class attributes
         standardized.bspline.basis = NULL,
-        spline.grid                = NULL,
         learned.fpca.parameters    = base::list(),
 
         initialize = function(
