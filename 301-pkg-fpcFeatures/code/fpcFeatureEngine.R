@@ -403,9 +403,9 @@ fpcFeatureEngine <- R6::R6Class(
 
             t.DF.input.fd.centered <- fda::fd(
                 coef     = t.DF.input.fd[['fd']][['coefs']] - matrix(rep(training.row.means,temp.ncols),ncol=temp.ncols),
-					      basisobj = t.DF.input.fd[['fd']][['basis']],
-					      fdnames  = NULL
-					      );
+                basisobj = t.DF.input.fd[['fd']][['basis']],
+                fdnames  = NULL
+                );
             attr(t.DF.input.fd.centered[['coefs']],"dimnames") <- NULL;
 
             results.inprod <- fda::inprod(
