@@ -79,8 +79,8 @@ fpcFeatureEngine <- R6::R6Class(
                 DF.input = DF.temp
                 );
             base::rownames(DF.newdata.standardized.wide) <- base::sapply(
-				        X   = base::rownames(DF.newdata.standardized.wide),
-				        FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
+                X   = base::rownames(DF.newdata.standardized.wide),
+                FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
                 );
             cat("\nstr(DF.newdata.standardized.wide)\n");
             print( str(DF.newdata.standardized.wide)   );
@@ -93,44 +93,15 @@ fpcFeatureEngine <- R6::R6Class(
             DF.output <- cbind(
                 DF.newdata.standardized.wide,
                 DF.fpc[rownames(DF.newdata.standardized.wide),]
-					      );
+                );
 
-          #   DF.newdata           <- newdata;
-          #   colnames(DF.newdata) <- tolower(colnames(DF.newdata));
-          #   rownames(DF.newdata) <- sapply(
-				  #       X   = rownames(DF.newdata),
-				  #       FUN = function(x) { paste0(sample(x=letters,size=10,replace=TRUE),collapse="") }
-          #       );
-          #
-          #   DF.output <- as.data.frame(DF.newdata);
-          #
-          #   if ( self$learner.metadata[["fpca_ndvi"]][["transform"]] == TRUE ) {
-          #       print('Adding NDVI components...')
-          #
-          #       time.series.colnames <- paste0("ndvi",self$learner.metadata[["fpca_ndvi"]][["week.indices"]]);
-          #       DF.temp              <- DF.newdata[,time.series.colnames];
-          #
-          #       DF.fpc <- private$apply.fpca.parameters(
-          #           DF.input        = DF.temp,
-          #           variable.series = 'ndvi',
-          #           week.indices    = self$learner.metadata[["fpca_ndvi"]][["week.indices"]],
-          #           visualize       = self$learner.metadata[["fpca_ndvi"]][["visualize"]]
-          #           );
-          #
-          #       DF.output <- cbind(
-          #           DF.output,
-          #           DF.fpc[rownames(DF.output),]
-					#           );
-          #
-          #       }
-          #
-			    # return( DF.output );
+            return( DF.output );
 
-        } # transform()
+            } # transform()
 
-		),
+        ), # public = base::list()
 
-    private = list(
+    private = base::list(
 
         add.auxiliary.columns = function(DF.input = self$training.data) {
             DF.output <- DF.input;
@@ -211,7 +182,6 @@ fpcFeatureEngine <- R6::R6Class(
             print( str(DF.temp)   );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            # LIST.bsplines <- base::list();
             DF.stack      <- base::data.frame();
 
             years <- base::unique(DF.input[,"year"]);
@@ -300,13 +270,6 @@ fpcFeatureEngine <- R6::R6Class(
 
                 DF.stack <- base::rbind(DF.stack,bspline.approximation.long);
 
-                # LIST.bsplines[[year]] <- base::list(
-                #     input_timeseries       = DF.temp.year,
-                #     bspline_basis          = temp.bspline.basis,
-                #     bspline_basis_fdParObj = temp.bspline.basis.fdParObj,
-                #     target_in_basis_fd     = target.in.basis.fd
-                #     );
-
                 }
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -342,12 +305,6 @@ fpcFeatureEngine <- R6::R6Class(
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.output <- DF.output[0 == rowSums(is.na(DF.output)),];
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            # LIST.output <- base::list(
-            #     df_standardized_timepoints = DF.output,
-            #     list_bsplines              = LIST.bsplines
-            #     );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             # base::return( LIST.output );
