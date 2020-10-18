@@ -34,7 +34,6 @@ for ( code.file in code.files ) {
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 pkg.files <- c(
     "fpcFeatureEngine.R",
-    "getDataStandardizedTimepoints.R",
     "initializePlot.R"
     );
 
@@ -76,12 +75,22 @@ cat("\nstr(DF.data)\n");
 print( str(DF.data)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.VH <- DF.data[,c("X","Y","date","VH")];
+is.not.2016 <- ("2016" != DF.data[,'year']);
+IW4 <- DF.data[is.not.2016,c(c("X","Y","date","VV","VH"))];
+colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^X$", replacement = "x");
+colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^Y$", replacement = "y");
+saveRDS(object = IW4, file = "IW4.RData");
+
+cat("\nstr(IW4)\n");
+print( str(IW4)   );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.VV <- IW4[,c("x","y","date","VV")];
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VH,
-    location.ID         = c('X','Y'),
+    training.data       = DF.VV,
+    location.ID         = c('x','y'),
     date                = 'date',
-    variable            = 'VH',
+    variable            = 'VV',
     n.partition         = 100,
     n.order             =   3,
     n.basis             =   9,
@@ -91,70 +100,35 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
 
 my.fpcFeatureEngine$fit();
 
-DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VH);
+DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
+rownames(DF.bspline.fpc) <- DF.bspline.fpc[,'location_year'];
 
 cat("\nstr(DF.bspline.fpc)\n");
 print( str(DF.bspline.fpc)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-cat("\n##################################################\n");
-cat("\n##### warnings():\n");
-print(       warnings()    );
-
-cat("\n##### getOption('repos'):\n");
-print(       getOption('repos')    );
-
-cat("\n##### .libPaths():\n");
-print(       .libPaths()    );
-
-cat("\n##### sessionInfo():\n");
-print(       sessionInfo()    );
-
-# print system time to log
-cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
-
-# print elapsed time to log
-stop.proc.time <- proc.time();
-cat("\n##### stop.proc.time - start.proc.time:\n");
-print(       stop.proc.time - start.proc.time    );
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-quit(save = "no");
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-
-
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.VH <- DF.data[,c("X","Y","year","X_Y_year","date","date_index","VH")];
-
-cat("\nstr(DF.VH)\n");
-print( str(DF.VH)   );
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-LIST.standardizedTimepoints <- getDataStandardizedTimepoints(
-    DF.input            = DF.VH,
-    beam.swath          = beam.mode,
-    colname.pattern     = "VH",
-    n.partition         = 100,
-    n.order             =   3,
-    n.basis             =   9,
-    smoothing.parameter =   0.1,
-    n.harmonics         =   7,
-    do.diagnostics      = TRUE,
-    output.RData        = paste0("data-",beam.mode,"-standardizedTimepoints.RData")
+png('temp.png', height = 8, width = 8, unit = 'in', res = 300);
+plot(
+    x    = DF.bspline.fpc[,'fpc_1'],
+    y    = DF.bspline.fpc[,'fpc_2'],
+    pch  = 19,
+    cex  =  0.1,
+    xlim = 300 * c(-1,1),
+    ylim = 150 * c(-1,1)
     );
-
-cat("\nstr(LIST.standardizedTimepoints)\n");
-print( str(LIST.standardizedTimepoints)   );
+dev.off()
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('location_year','year'))];
+DF.temp <- t(DF.temp);
+#DF.temp[,'date_index'] <- as.numeric(rownames(DF.temp));
+#DF.temp[,'date_index'] <- rep(-999,nrow(DF.temp));
+#DF.temp <- DF.temp[,c('date_index',setdiff(colnames(DF.temp),'date_index'))];
+
+cat("\nstr(DF.temp)\n");
+print( str(DF.temp)   );
+
+print( DF.temp[,c("305296.0_4866461_2017","305296.0_4866461_2018")] );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 

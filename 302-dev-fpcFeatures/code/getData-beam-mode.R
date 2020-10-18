@@ -13,12 +13,14 @@ getData.beam.mode <- function(
     thisFunctionName <- "getData.beam.mode";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
-    cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
+    cat(paste0("\n",thisFunctionName,"() starts.\n"));
     cat(paste0("\nbeam.mode: ",beam.mode,"\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     if ( file.exists(RData.output) ) {
         DF.output <- readRDS(file = RData.output);
+        cat(paste0("\n",thisFunctionName,"() exits."));
+        cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
         return( DF.output );
         }
 
