@@ -76,9 +76,10 @@ print( str(DF.data)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 is.not.2016 <- ("2016" != DF.data[,'year']);
-IW4 <- DF.data[is.not.2016,c(c("X","Y","date","VV","VH"))];
-colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^X$", replacement = "x");
-colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^Y$", replacement = "y");
+IW4 <- DF.data[is.not.2016,c(c("X","Y","date","type","VV","VH"))];
+colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^X$",    replacement = "x");
+colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^Y$",    replacement = "y");
+colnames(IW4) <- gsub(x = colnames(IW4), pattern = "^type$", replacement = "land_cover");
 saveRDS(object = IW4, file = "IW4.RData");
 
 cat("\nstr(IW4)\n");
@@ -86,9 +87,15 @@ print( str(IW4)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 DF.VV <- IW4[,c("x","y","date","VV")];
+DF.VV[,"x_y"] <- apply(
+    X      = DF.VV[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
     training.data       = DF.VV,
-    location.ID         = c('x','y'),
+    location            = 'x_y',
     date                = 'date',
     variable            = 'VV',
     n.partition         = 100,
@@ -101,7 +108,6 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
 my.fpcFeatureEngine$fit();
 
 DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
-rownames(DF.bspline.fpc) <- DF.bspline.fpc[,'location_year'];
 
 cat("\nstr(DF.bspline.fpc)\n");
 print( str(DF.bspline.fpc)   );
@@ -119,7 +125,7 @@ plot(
 dev.off()
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('location_year','year'))];
+DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('x_y','year'))];
 DF.temp <- t(DF.temp);
 #DF.temp[,'date_index'] <- as.numeric(rownames(DF.temp));
 #DF.temp[,'date_index'] <- rep(-999,nrow(DF.temp));
@@ -128,7 +134,7 @@ DF.temp <- t(DF.temp);
 cat("\nstr(DF.temp)\n");
 print( str(DF.temp)   );
 
-print( DF.temp[,c("305296.0_4866461_2017","305296.0_4866461_2018")] );
+print( DF.temp[,c(1,2)] );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
