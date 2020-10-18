@@ -30,7 +30,7 @@ fpcFeatureEngine <- R6::R6Class(
         # instantiation parameters
         learner.metadata    = NULL,
         training.data       = NULL,
-        location.ID         = NULL,
+        location            = NULL,
         date                = NULL,
         variable            = NULL,
         n.partition         = NULL,
@@ -47,7 +47,7 @@ fpcFeatureEngine <- R6::R6Class(
         #' Create a fpcFeatureEngine object.
         #' @param learner.metadata learner.metadata.
         #' @param training.data data frame
-        #' @param location.ID location.ID
+        #' @param location location
         #' @param date date
         #' @param variable variable
         #' @param n.partition n.partition
@@ -59,7 +59,7 @@ fpcFeatureEngine <- R6::R6Class(
         initialize = function(
             learner.metadata    = NULL,
             training.data       = NULL,
-            location.ID         = NULL,
+            location            = NULL,
             date                = NULL,
             variable            = NULL,
             n.partition         = 100,
@@ -70,7 +70,7 @@ fpcFeatureEngine <- R6::R6Class(
             ) {
             self$learner.metadata    <- learner.metadata;
             self$training.data       <- training.data;
-            self$location.ID         <- location.ID;
+            self$location            <- location;
             self$date                <- date;
             self$variable            <- variable;
             self$n.partition         <- n.partition;
@@ -116,6 +116,10 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.temp)\n");
             print( str(DF.temp)   );
 
+            DF.dictionary <- unique(DF.temp[,c('location_year',self$location,'year')]);
+            cat("\nstr(DF.dictionary)\n");
+            print( str(DF.dictionary)   );
+
             DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
                 DF.input = DF.temp
                 );
@@ -131,10 +135,24 @@ fpcFeatureEngine <- R6::R6Class(
                 visualize = FALSE
                 );
 
-            DF.output <- cbind(
+            DF.output <- base::cbind(
                 DF.newdata.standardized.wide,
                 DF.fpc[rownames(DF.newdata.standardized.wide),]
                 );
+
+            DF.output <- base::merge(
+                x     = DF.output,
+                y     = DF.dictionary[,base::c('location_year',self$location)],
+                by    = "location_year",
+                all.x = TRUE
+                );
+            base::rownames(DF.output) <- DF.output[,'location_year'];
+
+            cat("\nstr(DF.output)\n");
+            print( str(DF.output)   );
+
+            colnames.to.delete <- base::c('location_year',self$location,'year');
+            DF.output <- DF.output[,base::c(self$location,'year',base::setdiff(base::colnames(DF.output),colnames.to.delete))];
 
             return( DF.output );
 
@@ -148,7 +166,7 @@ fpcFeatureEngine <- R6::R6Class(
             DF.output <- DF.input;
             DF.output[,'year'] <- base::as.character(base::format(x = DF.output[,self$date], format = "%Y"));
             DF.output[,'location_year'] <- base::apply(
-                X      = DF.output[,c(self$location.ID,'year')],
+                X      = DF.output[,c(self$location,'year')],
                 MARGIN = 1,
                 FUN    = function(x) {base::return(base::paste(x,collapse="_"))}
                 );
@@ -314,7 +332,7 @@ fpcFeatureEngine <- R6::R6Class(
                 }
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.output <- base::unique(DF.input[,c(self$location.ID,"year","location_year")]);
+            DF.output <- base::unique(DF.input[,c(self$location,"year","location_year")]);
             DF.output[,"dummy"] <- 1;
 
             DF.date.indexes <- base::data.frame(
