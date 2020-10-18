@@ -39,7 +39,7 @@ description.fields <- base::list(
     Description     = "This package implements functionalities to compute functional principal component (FPC) scores given a collection of SAR measurement time series.",
     Language        = "fr",
     Roxygen         = "list(markdown = TRUE)",
-    VignetteBuilder = "knitr" # "R.rsp"
+    VignetteBuilder = "R.rsp" # "knitr"
     );
 
 packages.import <- base::c(
@@ -77,6 +77,13 @@ files.R <- base::file.path( code.directory , files.R );
 # tests.R <- base::file.path( code.directory , tests.R );
 
 IW4.RData <- base::file.path( code.directory , "IW4.RData" );
+
+list.vignettes.Rmd <- list(
+    'vignette-fpc1-fpc2' = list(
+        file  = base::file.path( code.directory , 'vignette-fpc1-fpc2.Rmd'       ),
+        asis  = base::file.path( code.directory , 'vignette-fpc1-fpc2.html.asis' )
+        )
+    );
 
 # list.vignettes.Rmd <- list(
 #     'rwFV-protocol' = list(
@@ -152,71 +159,31 @@ install.packages(
     repos = NULL
     );
 
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# set.seed(13);
-
-# n.ecoregions    <-   3;
-# n.crops         <-   5;
-# n.predictors    <-   7;
-# avg.n.parcels   <- 100;
-# min.num.parcels <-  50;
-#
-# DF.synthetic <- stcCropYield::getData.synthetic(
-#     years         = seq(2011,2020),
-#     n.ecoregions  = n.ecoregions,
-#     n.crops       = n.crops,
-#     n.predictors  = n.predictors,
-#     avg.n.parcels = avg.n.parcels
-#     );
-#
-# stcCropYield::rollingWindowForwardValidation(
-#     training.window      = 2,
-#     validation.window    = 3,
-#     DF.input             = DF.synthetic,
-#     year                 = "my_year",
-#     ecoregion            = "my_ecoregion",
-#     crop                 = "my_crop",
-#     response.variable    = "my_yield",
-#     harvested.area       = "my_harvested_area",
-#     evaluation.weight    = "my_evaluation_weight",
-#     predictors           = grep(x = colnames(DF.synthetic), pattern = "x[0-9]*", value = TRUE),
-#     min.num.parcels      = min.num.parcels,
-#     learner              = "xgboost_multiphase",
-#     by.variables.phase01 = c("my_ecoregion","my_crop"),
-#     by.variables.phase02 = c("my_crop"),
-#     by.variables.phase03 = c("my_ecoregion"),
-#     search.grid = list(
-#         alpha  = c(1,12,23),
-#         lambda = c(1,12,23)
-#         ),
-#     output.directory = file.path(code.directory,"rwFV"),
-#     log.threshold    = logger::TRACE
-#     );
-#
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# if ( "windows" != base::.Platform[["OS.type"]] ) {
-#
-#     write.to.directory <- "build-vignettes";
-#
-#     package.path <- assemble.package(
-#         write.to.directory = write.to.directory,
-#         package.name       = package.name,
-#         copyright.holder   = "Kenneth Chu",
-#         description.fields = description.fields,
-#         packages.import    = packages.import,
-#         packages.suggest   = packages.suggest,
-#         files.R            = files.R,
-#         tests.R            = tests.R,
-#         list.vignettes.Rmd = list.vignettes.Rmd,
-#         list.vignettes.pdf = list.vignettes.pdf
-#         );
-#
-#     build.package(
-#         write.to.directory = write.to.directory,
-#         package.path       = package.path
-#         );
-#
-#     }
+if ( "windows" != base::.Platform[["OS.type"]] ) {
+
+    write.to.directory <- "build-vignettes";
+
+    package.path <- assemble.package(
+        write.to.directory = write.to.directory,
+        package.name       = package.name,
+        copyright.holder   = "Kenneth Chu",
+        description.fields = description.fields,
+        packages.import    = packages.import,
+        packages.suggest   = packages.suggest,
+        files.R            = files.R,
+        # tests.R          = tests.R,
+        IW4.RData          = IW4.RData,
+        list.vignettes.Rmd = list.vignettes.Rmd
+#      ,list.vignettes.pdf = list.vignettes.pdf
+        );
+
+    build.package(
+        write.to.directory = write.to.directory,
+        package.path       = package.path
+        );
+
+    }
 
 ###################################################
 ###################################################
