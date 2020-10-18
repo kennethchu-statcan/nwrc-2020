@@ -1,4 +1,26 @@
 
+#' R6 Class for FPC feature engine (for collections of annual SAR measurement time series)
+#'
+#' @description
+#' This R6 class implements an FPC feature engine for collections of annual SAR
+#' measurement time series.
+#'
+#' @details
+#' This R6 class implements an FPC feature engine for collections of annual SAR
+#' measurement time series.
+#' More precisely, this R6 class provides functionality to perform
+#' the following:
+#' *  compute the functional principal components (FPC) of given training data
+#'    (a collection of annual SAR measurement time series)
+#' *  compute functional principal component scores for new annual SAR
+#'    measurement time series data with resepct to the FPC's of the training
+#'    data.
+#'
+#' @importFrom R6 R6Class
+#' @import dplyr fda ggplot2 logger
+#'
+#' @export
+
 fpcFeatureEngine <- R6::R6Class(
 
     classname = 'fpcFeatureEngine',
@@ -21,6 +43,19 @@ fpcFeatureEngine <- R6::R6Class(
         standardized.bspline.basis = NULL,
         learned.fpca.parameters    = NULL,
 
+        #' @description
+        #' Create a fpcFeatureEngine object.
+        #' @param learner.metadata learner.metadata.
+        #' @param training.data data frame
+        #' @param location.ID location.ID
+        #' @param date date
+        #' @param variable variable
+        #' @param n.partition n.partition
+        #' @param n.order n.order
+        #' @param n.basis n.basis
+        #' @param smoothing.parameter smoothing.parameter
+        #' @param n.harmonics n.harmonics
+        #' @return A new `fpcFeatureEngine` object.
         initialize = function(
             learner.metadata    = NULL,
             training.data       = NULL,
@@ -45,6 +80,8 @@ fpcFeatureEngine <- R6::R6Class(
             self$n.harmonics         <- n.harmonics;
             },
 
+        #' @description
+        #' learn from training data (compute functional principal components).
         fit = function() {
 
             DF.temp <- private$add.auxiliary.columns(DF.input = self$training.data);
@@ -69,6 +106,10 @@ fpcFeatureEngine <- R6::R6Class(
 
             }, # fit()
 
+        #' @description
+        #' compute functional principal component scores for new data with respect to functional principale components of training data.
+        #' @param newdata newdata
+        #' @return A new `fpcFeatureEngine` object.
         transform = function(newdata = NULL) {
 
             DF.temp <- private$add.auxiliary.columns(DF.input = newdata);

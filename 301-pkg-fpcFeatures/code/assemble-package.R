@@ -10,6 +10,7 @@ assemble.package <- function(
     packages.enhance   = base::c(),
     files.R            = base::c(),
     tests.R            = base::c(),
+    IW4.RData          = NULL,
     list.vignettes.Rmd = base::list(),
     list.vignettes.pdf = base::list(),
     images.png         = base::c(),
@@ -67,7 +68,7 @@ assemble.package <- function(
 
     # ~~~~~~~~~~ #
     usethis::use_mit_license(name = copyright.holder);
-    usethis::use_testthat();
+    # usethis::use_testthat();
 
     # ~~~~~~~~~~ #
     logger::log_info('{this.function.name}(): packages.import:\n{ paste0(packages.import, collapse="\n")}');
@@ -99,11 +100,20 @@ assemble.package <- function(
         }
 
     # ~~~~~~~~~~ #
-    for ( temp.test.R in tests.R ) {
-        base::file.copy(
-            from = temp.test.R,
-            to   = base::file.path(".","tests","testthat")
-            );
+    if ( base::length(tests.R) > 0 ) {
+        usethis::use_testthat();
+        for ( temp.test.R in tests.R ) {
+            base::file.copy(
+                from = temp.test.R,
+                to   = base::file.path(".","tests","testthat")
+                );
+            }
+        }
+
+    # ~~~~~~~~~~ #
+    if ( !is.null(IW4.RData) ) {
+        IW4 <- base::readRDS(IW4.RData);
+        usethis::use_data(IW4);
         }
 
     # ~~~~~~~~~~ #
