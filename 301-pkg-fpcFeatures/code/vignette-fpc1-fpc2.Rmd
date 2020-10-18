@@ -1,0 +1,80 @@
+---
+title: "FPC1 and FPC2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fpc1-fpc2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+    )
+```
+The R package **stcCropYield** implements a number of model training procedures
+to build trained prediction models for early-season crop yield (parcel-level)
+prediction for the province of Manitoba, using parcel-level NDVI and CARS-level
+weather measurement time series as predictor variables.
+
+This vignette demonstrates how to use the function
+**stcCropYield::rollingWindowForwardValidation(.)**
+to train a crop yield prediction model,
+following the *rolling window forward validation* protocol,
+using XGBoost as the underlying prediction technique.
+
+First, load the **stcCropYield** R package.
+```{r setup}
+library(fpcFeatures)
+```
+Next, we generate a synthetic data set in the form of a single data frame
+that has the structure expected by
+**stcCropYield::rollingWindowForwardValidation(...)**:
+We examine the structure of the data frame DF.training
+```{r IW4}
+data(IW4);
+str(IW4);
+```
+
+Here are the first few rows of DF.training:
+```{r headIW4}
+knitr::kable(head(IW4), align = "c")
+```
+
+```{r fit}
+DF.VV <- IW4[,c("x","y","date","VV")];
+
+my.fpcFeatureEngine <- fpcFeatureEngine$new(
+    training.data       = DF.VV,
+    location.ID         = c('x','y'),
+    date                = 'date',
+    variable            = 'VV',
+    n.partition         = 100,
+    n.order             =   3,
+    n.basis             =   9,
+    smoothing.parameter =   0.1,
+    n.harmonics         =   7
+    );
+
+my.fpcFeatureEngine$fit();
+```
+
+```{r transform}
+DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
+rownames(DF.bspline.fpc) <- DF.bspline.fpc[,'location_year'];
+str(DF.bspline.fpc);
+```
+
+```{r fpc1fpc2}
+#png('temp.png', height = 8, width = 8, unit = 'in', res = 300);
+plot(
+    x    = DF.bspline.fpc[,'fpc_1'],
+    y    = DF.bspline.fpc[,'fpc_2'],
+    pch  = 19,
+    cex  =  0.1,
+    xlim = 300 * c(-1,1),
+    ylim = 150 * c(-1,1)
+    );
+#dev.off()
+```
