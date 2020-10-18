@@ -50,6 +50,12 @@ data.directory <- file.path(dir.data,data.snapshot,"Sentinal1","relative-orbit-n
 set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+n.partition         <- 100;
+n.order             <-   3;
+n.basis             <-   9;
+smoothing.parameter <-   0.1;
+n.harmonics         <-   7;
+
 DF.colour.scheme <- data.frame(
     land.cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
     colour     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
@@ -98,11 +104,11 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
     location            = 'x_y',
     date                = 'date',
     variable            = 'VV',
-    n.partition         = 100,
-    n.order             =   3,
-    n.basis             =   9,
-    smoothing.parameter =   0.1,
-    n.harmonics         =   7
+    n.partition         = n.partition,
+    n.order             = n.order,
+    n.basis             = n.basis,
+    smoothing.parameter = smoothing.parameter,
+    n.harmonics         = n.harmonics
     );
 
 my.fpcFeatureEngine$fit();
@@ -113,7 +119,17 @@ cat("\nstr(DF.bspline.fpc)\n");
 print( str(DF.bspline.fpc)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-png('temp.png', height = 8, width = 8, unit = 'in', res = 300);
+ggplot2::ggsave(
+    file   = "plot-harmonics.png",
+    plot   = my.fpcFeatureEngine$plot.harmonics(),
+    dpi    = 150,
+    height =   4 * n.harmonics,
+    width  =  16,
+    units  = 'in'
+    );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
 plot(
     x    = DF.bspline.fpc[,'fpc_1'],
     y    = DF.bspline.fpc[,'fpc_2'],
