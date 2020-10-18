@@ -9,6 +9,7 @@
 #'   \item{x}{x coordinate}
 #'   \item{y}{y coordinate}
 #'   \item{date}{date}
+#'   \item{land_cover}{land cover}
 #'   \item{VV}{VV polarization}
 #'   \item{VH}{VH polarization}
 #'   ...
