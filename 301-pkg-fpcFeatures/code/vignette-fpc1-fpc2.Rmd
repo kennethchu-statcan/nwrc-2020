@@ -44,10 +44,15 @@ knitr::kable(head(IW4), align = "c")
 
 ```{r fit}
 DF.VV <- IW4[,c("x","y","date","VV")];
+DF.VV[,"x_y"] <- apply(
+    X      = DF.VV[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
 
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
     training.data       = DF.VV,
-    location.ID         = c('x','y'),
+    location            = 'x_y',
     date                = 'date',
     variable            = 'VV',
     n.partition         = 100,
@@ -60,9 +65,12 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
 my.fpcFeatureEngine$fit();
 ```
 
+```{r harmonics, fig.height = 28, fig.width = 16}
+my.fpcFeatureEngine$plot.harmonics();
+```
+
 ```{r transform}
 DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
-rownames(DF.bspline.fpc) <- DF.bspline.fpc[,'location_year'];
 str(DF.bspline.fpc);
 ```
 
