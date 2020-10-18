@@ -1,25 +1,37 @@
 
 initializePlot <- function(
-    textsize.title = 30,
-    textsize.axis  = 20
+    textsize.title = 25,
+    textsize.axis  = 20,
+    title          = '',
+    subtitle       = '',
+    my.palette     = NULL # base::c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red","#D55E00","#CC79A7")
     ) {
 
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    output.ggplot <- ggplot2::ggplot(data = NULL) + ggplot2::theme_bw();
-    output.ggplot <- output.ggplot + ggplot2::theme(
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+    my.ggplot <- ggplot2::ggplot(data = NULL) + ggplot2::theme_bw();
+    my.ggplot <- my.ggplot + ggplot2::theme(
         title            = ggplot2::element_text(size = textsize.title, face = "bold"),
-        legend.text      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
-        axis.text.x      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
-        axis.text.y      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
-        #axis.title.x    = ggplot2::element_blank(),
-        #axis.title.y    = ggplot2::element_blank(),
+        axis.title.x     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+        axis.title.y     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+        axis.text.x      = ggplot2::element_text(size = textsize.axis, face = "bold"),
+        axis.text.y      = ggplot2::element_text(size = textsize.axis, face = "bold"),
+        strip.text.y     = ggplot2::element_text(size = textsize.axis, face = "bold"),
+        legend.text      = ggplot2::element_text(size = textsize.axis),
         panel.grid.major = ggplot2::element_line(colour="gray", linetype=2, size=0.25),
-        panel.grid.minor = ggplot2::element_line(colour="gray", linetype=2, size=0.25),
-        legend.position  = "bottom",
-        legend.key.width = ggplot2::unit(0.75,"in")
+        panel.grid.minor = ggplot2::element_line(colour="gray", linetype=2, size=0.25)
         );
 
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    base::return( output.ggplot );
+    my.ggplot <- my.ggplot + ggplot2::labs(
+        title    = title,
+        subtitle = subtitle
+        );
+
+    if ( !is.null(my.palette) ) {
+        my.ggplot <- my.ggplot + ggplot2::scale_colour_manual(values = my.palette);
+        my.ggplot <- my.ggplot + ggplot2::scale_fill_manual(  values = my.palette);
+        }
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+    base::return( my.ggplot );
 
     }

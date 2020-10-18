@@ -44,6 +44,7 @@ description.fields <- base::list(
 
 packages.import <- base::c(
     "base",
+    "cowplot",
     "dplyr",
     "fda",
     "ggplot2",

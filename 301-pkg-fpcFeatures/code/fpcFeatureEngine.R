@@ -16,8 +16,8 @@
 #'    measurement time series data with resepct to the FPC's of the training
 #'    data.
 #'
+#' @import cowplot dplyr fda ggplot2 logger
 #' @importFrom R6 R6Class
-#' @import dplyr fda ggplot2 logger
 #'
 #' @export
 
@@ -156,7 +156,112 @@ fpcFeatureEngine <- R6::R6Class(
 
             return( DF.output );
 
-            } # transform()
+            }, # transform()
+
+        #' @description
+        #' plot the harmonics (functional principal components) computed based on the training data.
+        plot.harmonics = function() {
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            temp.evalarg <- base::seq(
+                base::min(self$standardized.bspline.basis[["spline.grid"]]),
+                base::max(self$standardized.bspline.basis[["spline.grid"]]),
+                0.1
+                );
+
+            vector.meanfd <- fda::eval.fd(
+                evalarg = temp.evalarg,
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["meanfd"]]
+                );
+
+            DF.fpca.standardizedTimepoints <- fda::eval.fd(
+                evalarg = temp.evalarg,
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["harmonics"]]
+                );
+
+            DF.fpca.harmonics.plus  <- DF.fpca.standardizedTimepoints %*% diag(sqrt( self$learned.fpca.parameters[["training.pca.fd"]][["values"]][1:self$n.harmonics] ));
+
+            DF.fpca.harmonics.minus <- DF.fpca.harmonics.plus;
+            for ( j in base::seq(1,base::ncol(DF.fpca.harmonics.plus)) ) {
+                DF.fpca.harmonics.plus[, j] <- vector.meanfd + DF.fpca.harmonics.plus[, j];
+                DF.fpca.harmonics.minus[,j] <- vector.meanfd - DF.fpca.harmonics.minus[,j];
+                }
+            base::colnames(DF.fpca.harmonics.plus ) <- base::paste0("harmonic",base::seq(1,base::ncol(DF.fpca.harmonics.plus )));
+            base::colnames(DF.fpca.harmonics.minus) <- base::paste0("harmonic",base::seq(1,base::ncol(DF.fpca.harmonics.minus)));
+            DF.fpca.harmonics.plus  <- base::cbind("date_index" = temp.evalarg, DF.fpca.harmonics.plus );
+            DF.fpca.harmonics.minus <- base::cbind("date_index" = temp.evalarg, DF.fpca.harmonics.minus);
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            list.plots <- base::list();
+            temp.harmonics <- base::setdiff(base::colnames(DF.fpca.harmonics.plus),"date_index");
+            for ( temp.index in base::seq(1,base::length(temp.harmonics)) ) {
+
+                temp.harmonic <- temp.harmonics[temp.index];
+
+                temp.varprop <- self$learned.fpca.parameters[["training.pca.fd"]][["varprop"]][temp.index];
+                temp.varprop <- base::round(x = 100 * temp.varprop, digits = 3);
+
+                my.ggplot <- initializePlot(
+                    title    = NULL,
+                    subtitle = base::paste0(self$variable," (variability captured = ",temp.varprop,"%)")
+                    );
+
+                temp.xlab <- ifelse(temp.index == base::length(temp.harmonics),"date index","");
+                temp.ylab <- base::gsub(x = temp.harmonic, pattern = "harmonic", replacement = "FPC ");
+
+                my.ggplot <- my.ggplot + ggplot2::xlab( label = temp.xlab );
+                my.ggplot <- my.ggplot + ggplot2::ylab( label = temp.ylab );
+                my.ggplot <- my.ggplot + ggplot2::scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+
+                DF.temp <- base::as.data.frame(DF.fpca.harmonics.plus[,base::c("date_index",temp.harmonic)]);
+                base::colnames(DF.temp) <- base::gsub(x = base::colnames(DF.temp), pattern = temp.harmonic, replacement = "dummy.colname");
+                my.ggplot <- my.ggplot + ggplot2::geom_line(
+                    data     = DF.temp,
+                    mapping  = ggplot2::aes(x = date_index, y = dummy.colname),
+                    colour   = "#FF9700",
+                    linetype = "solid",
+                    size     = 2.0,
+                    alpha    = 0.8
+                    );
+
+                DF.temp <- base::data.frame("date_index" = temp.evalarg, "dummy.colname" = vector.meanfd);
+                base::colnames(DF.temp) <- base::gsub(x = base::colnames(DF.temp), pattern = "mean", replacement = "dummy.colname");
+                my.ggplot <- my.ggplot + ggplot2::geom_line(
+                    data     = DF.temp,
+                    mapping  = ggplot2::aes(x = date_index, y = dummy.colname),
+                    colour   = "gray",
+                    linetype = "solid",
+                    size     = 1.0,
+                    alpha    = 0.8
+                    );
+
+                DF.temp <-  base::as.data.frame(DF.fpca.harmonics.minus[,c("date_index",temp.harmonic)]);
+                base::colnames(DF.temp) <-  base::gsub(x =  base::colnames(DF.temp), pattern = temp.harmonic, replacement = "dummy.colname");
+                my.ggplot <- my.ggplot + ggplot2::geom_line(
+                    data     = DF.temp,
+                    mapping  = ggplot2::aes(x = date_index, y = dummy.colname),
+                    colour   = "#0068FF",
+                    linetype = "solid",
+                    size     = 2.0,
+                    alpha    = 0.8
+                    );
+
+                list.plots[[temp.harmonic]] <- my.ggplot;
+
+                }
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            my.cowplot <- cowplot::plot_grid(
+                plotlist = list.plots,
+                ncol     = 1,
+                align    = "v",
+                axis     = "lr"
+                );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            base::return( my.cowplot );
+
+            } # plot.harmonics()
 
         ), # public = base::list()
 
@@ -429,6 +534,7 @@ fpcFeatureEngine <- R6::R6Class(
 
             base::return(
                 base::list(
+                    training.pca.fd    = results.pca.fd,
                     training.row.means = training.row.means,
                     harmonics          = results.pca.fd[["harmonics"]]
                     )
@@ -469,7 +575,7 @@ fpcFeatureEngine <- R6::R6Class(
 
             results.inprod <- fda::inprod(
                 fdobj1 = t.DF.input.fd.centered,
-                fdobj2 = self$learned.fpca.parameters[["harmonics"]]
+                fdobj2 = self$learned.fpca.parameters[["training.pca.fd"]][["harmonics"]]
                 );
 
             DF.fpc <- results.inprod;
