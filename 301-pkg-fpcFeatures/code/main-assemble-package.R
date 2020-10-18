@@ -49,12 +49,12 @@ packages.import <- base::c(
     "fda",
     "ggplot2",
     "logger",
-#    "rlang",
-    "R6"
-#  ,"stats",
-#    "stringi",
-#    "stringr",
-#    "utils"
+    "R6",
+    "utils"
+#   "rlang",
+#   "stats",
+#   "stringi",
+#   "stringr",
     );
 
 packages.suggest <- base::c(
@@ -68,8 +68,8 @@ files.R <- base::c(
     "data.R",
     "fpcFeatureEngine.R",
     "initializePlot.R",
-#   "package-init.R",
     "utils-fpca.R"
+#   "package-init.R"
     );
 files.R <- base::file.path( code.directory , files.R );
 
