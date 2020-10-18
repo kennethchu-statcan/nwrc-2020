@@ -66,8 +66,9 @@ packages.suggest <- base::c(
 files.R <- base::c(
     "data.R",
     "fpcFeatureEngine.R",
-    "initializePlot.R"
-#  ,"package-init.R"
+    "initializePlot.R",
+#   "package-init.R",
+    "utils-fpca.R"
     );
 files.R <- base::file.path( code.directory , files.R );
 
