@@ -1,4 +1,5 @@
 
+#' @importFrom utils str
 reconstruct.fpca.scores <- function(
     week.indices   = NULL,
     time.series.fd = NULL,
@@ -57,7 +58,7 @@ reconstruct.fpca.scores <- function(
     attr(time.series.fd.centered[['coefs']],"dimnames") <- NULL;
 
     cat("\nstr(time.series.fd.centered):\n");
-    print( str(time.series.fd.centered)    );
+    print( utils::str(time.series.fd.centered)    );
 
     results.inprod <- fda::inprod(
         fdobj1 = time.series.fd.centered,
@@ -65,11 +66,11 @@ reconstruct.fpca.scores <- function(
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~ ###
-    cat("\nstr(results.inprod):\n");
-    print( str(results.inprod)    );
+    cat("\n       str(results.inprod):\n");
+    print( utils::str(results.inprod)    );
 
-    cat("\nstr(results.pca.fd[['scores']]):\n");
-    print( str(results.pca.fd[['scores']])    );
+    cat("\n       str(results.pca.fd[['scores']]):\n");
+    print( utils::str(results.pca.fd[['scores']])    );
 
     cat("\nmax(abs( results.inprod - results.pca.fd[['scores']] )):\n");
     print( max(abs( results.inprod - results.pca.fd[['scores']] ))    );
