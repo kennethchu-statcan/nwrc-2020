@@ -98,12 +98,14 @@ DF.VV[,"x_y"] <- apply(
     MARGIN = 1,
     FUN    = function(x) { return(paste(x,collapse="_")) }
     );
+colnames(DF.VV) <- paste0("my_",colnames(DF.VV));
 
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
     training.data       = DF.VV,
-    location            = 'x_y',
-    date                = 'date',
-    variable            = 'VV',
+    location            = 'my_x_y',
+    date                = 'my_date',
+    variable            = 'my_VV',
     n.partition         = n.partition,
     n.order             = n.order,
     n.basis             = n.basis,
@@ -141,7 +143,7 @@ plot(
 dev.off()
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('x_y','year'))];
+DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('my_x_y','year'))];
 DF.temp <- t(DF.temp);
 #DF.temp[,'date_index'] <- as.numeric(rownames(DF.temp));
 #DF.temp[,'date_index'] <- rep(-999,nrow(DF.temp));
