@@ -282,11 +282,11 @@ fpcFeatureEngine <- R6::R6Class(
 
         get.standardized.bspline.basis = function(DF.input = NULL) {
 
-            DF.yearly.endpoints <- base::unique(DF.input[,c("year","date","date_index")]) %>%
+            DF.yearly.endpoints <- base::unique(DF.input[,c("year",self$date,"date_index")]) %>%
                 dplyr::group_by(year) %>%
                 dplyr::mutate( start_index = min(date_index), end_index = max(date_index) );
             DF.yearly.endpoints <- base::as.data.frame(DF.yearly.endpoints);
-            DF.yearly.endpoints <- DF.yearly.endpoints[base::order(DF.yearly.endpoints[,"date"]),];
+            DF.yearly.endpoints <- DF.yearly.endpoints[base::order(DF.yearly.endpoints[,self$date]),];
 
             common.start.index <- base::max(DF.yearly.endpoints[,"start_index"]);
             common.end.index   <- base::min(DF.yearly.endpoints[,  "end_index"]);
