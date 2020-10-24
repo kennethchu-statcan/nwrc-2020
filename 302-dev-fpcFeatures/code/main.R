@@ -118,7 +118,7 @@ print( str(DF.VV.2)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VV.1,
+    training.data       = DF.VV.1,  # DF.VV.2,
     location            = 'my_x_y',
     date                = 'my_date',
     variable            = 'my_VV',
