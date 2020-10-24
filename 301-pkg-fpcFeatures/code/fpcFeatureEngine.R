@@ -172,6 +172,7 @@ fpcFeatureEngine <- R6::R6Class(
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             temp.year <- base::as.character(base::format(x = DF.input[1,date], format = "%Y"));
             temp.location <- DF.input[1,location];
+            temp.location_year <- paste0(temp.location,"_",temp.year);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             my.ggplot <- initializePlot(
@@ -284,6 +285,37 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.newdata.standardized.wide)\n");
             print( str(DF.newdata.standardized.wide)   );
 
+            DF.fpc <- private$apply.fpca.parameters(
+                DF.input  = DF.newdata.standardized.wide[,base::setdiff(base::colnames(DF.newdata.standardized.wide),base::c('location_year','year'))],
+                visualize = FALSE
+                );
+            base::rownames(DF.fpc) <- DF.newdata.standardized.wide[,'location_year'];
+            cat("\nstr(DF.fpc)\n");
+            print( str(DF.fpc)   );
+
+            vector.meanfd <- fda::eval.fd(
+                evalarg = temp.evalarg,
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["meanfd"]] #LIST.fpca[["target_variable_fpc"]][["meanfd"]]
+                );
+
+            DF.fpca.standardizedTimepoints <- fda::eval.fd(
+                evalarg = temp.evalarg,
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["harmonics"]] # LIST.fpca[["target_variable_fpc"]][["harmonics"]]
+                );
+
+            #DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
+            DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( DF.fpc );
+            for ( j in seq(1,ncol(DF.fpca.fit)) ) {
+                DF.fpca.fit[,j] <- DF.fpca.fit[,j] + vector.meanfd;
+                }
+            #colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
+            DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
+            colnames(DF.fpca.fit) <- gsub(x = colnames(DF.fpca.fit), pattern = temp.location_year, replacement = "dummy_colname");
+            DF.fpca.fit <- as.data.frame(DF.fpca.fit)
+
+            cat("\nstr(DF.fpca.fit)\n");
+            print( str(DF.fpca.fit)   );
+
             # DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
             # DF.temp <- as.data.frame(DF.temp);
             # colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
@@ -291,16 +323,13 @@ fpcFeatureEngine <- R6::R6Class(
             #     fdobj   = target.in.basis.fd[["fd"]],
             #     evalarg = temp.evalarg
             #     );
-            # my.ggplot <- my.ggplot + ggplot2::geom_line(
-            #     data    = data.frame(
-            #         date_index    = temp.evalarg,
-            #         dummy_colname = fpca.approximation
-            #         ),
-            #     mapping = ggplot2::aes(x = date_index, y = dummy.colname),
-            #     colour  = "red",
-            #     size    = 1.3,
-            #     alpha   = 0.8
-            #     );
+            my.ggplot <- my.ggplot + ggplot2::geom_line(
+                data    = DF.fpca.fit,
+                mapping = ggplot2::aes(x = date_index, y = dummy_colname),
+                colour  = "red",
+                size    = 1.3,
+                alpha   = 0.8
+                );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             return( my.ggplot );
