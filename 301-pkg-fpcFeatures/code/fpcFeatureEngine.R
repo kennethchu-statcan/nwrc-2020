@@ -158,6 +158,332 @@ fpcFeatureEngine <- R6::R6Class(
 
             }, # transform()
 
+        plot.approximations = function(
+            DF.input                     = NULL,
+            location                     = NULL,
+            date                         = NULL,
+            variable                     = NULL,
+            LIST.standardized_timepoints = NULL,
+            LIST.fpca                    = NULL
+            ) {
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            cat("\nstr(DF.data)\n");
+            print( str(DF.data)   );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            temp.year <- base::as.character(base::format(x = DF.input[1,date], format = "%Y"));
+            temp.location <- DF.input[1,location];
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            my.ggplot <- initializePlot(
+                title    = NULL,
+                subtitle = paste0("year: ", temp.year,", location: ",temp.location)
+                );
+
+            my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index (1 = New Year's Day)" );
+            my.ggplot <- my.ggplot + ggplot2::ylab( label = variable );
+            my.ggplot <- my.ggplot + ggplot2::scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+
+            my.ggplot <- my.ggplot + ggplot2::geom_vline(
+                xintercept = range(self$standardized.bspline.basis[['spline.grid']]),
+                colour     = "red",
+                alpha      = 0.5,
+                linetype   = 2,
+                size       = 0.8
+                );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            DF.raw <- private$add.auxiliary.columns(DF.input = DF.input, location = location, date = date);
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            DF.temp <- DF.raw[,c("date_index",variable)];
+            DF.temp <- as.data.frame(DF.temp);
+            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = variable, replacement = "dummy.colname");
+            my.ggplot <- my.ggplot + ggplot2::geom_point(
+                data    = DF.temp,
+                mapping = ggplot2::aes(x = date_index, y = dummy.colname),
+                alpha   = 0.8,
+                size    = 3,
+                colour  = "black"
+                );
+
+            my.ggplot <- my.ggplot + ggplot2::geom_line(
+                data    = DF.temp,
+                mapping = ggplot2::aes(x = date_index, y = dummy.colname),
+                colour  = "black",
+                alpha   = 0.5
+                );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            DF.temp   <- DF.raw[,c("date_index",variable)];
+            t.DF.temp <- t(DF.temp);
+
+            temp.evalarg <- seq(min(DF.temp[,"date_index"]),max(DF.temp[,"date_index"]),0.1);
+
+            temp.bspline.basis <- fda::create.bspline.basis(
+                rangeval    = base::range(DF.temp[,"date_index"]),
+                norder      = self$n.order,
+                nbasis      = self$n.basis,
+                dropind     = NULL,
+                quadvals    = NULL,
+                values      = NULL,
+                basisvalues = NULL,
+                names       = "bspl"
+                );
+
+            temp.bspline.basis.fdParObj <- fda::fdPar(
+                fdobj  = temp.bspline.basis,
+                Lfdobj = NULL,
+                lambda = self$smoothing.parameter,
+                penmat = NULL
+                );
+
+            # express target.variable as linear combinations
+            # of the B-spline basis functions
+            target.in.basis.fd <- fda::smooth.basis(
+                argvals      = base::as.integer(DF.temp[,"date_index"]),
+                y            = base::as.matrix(x = DF.temp[,variable], ncol = 1), # t.DF.temp,
+                fdParobj     = temp.bspline.basis.fdParObj,
+                wtvec        = NULL,
+                fdnames      = NULL,
+                covariates   = NULL,
+                method       = "chol",
+                dfscale      = 1,
+                returnMatrix = FALSE
+                );
+
+            # evaluate the B-spline approximations at grid points
+            # of the across-year common grid
+            bspline.approximation <- fda::eval.fd(
+                fdobj   = target.in.basis.fd[["fd"]],
+                evalarg = temp.evalarg
+                );
+
+            cat("\nstr(bspline.approximation)\n");
+            print( str(bspline.approximation)   );
+
+            # DF.temp <- data.frame(
+            #     date_index    = temp.evalarg,
+            #     dummy_colname = bspline.approximation
+            #     );
+            # DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
+            # DF.temp <- as.data.frame(DF.temp);
+            # colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+            my.ggplot <- my.ggplot + ggplot2::geom_line(
+                data    = data.frame(
+                    date_index    = temp.evalarg,
+                    dummy_colname = bspline.approximation
+                    ),
+                mapping = ggplot2::aes(x = date_index, y = dummy_colname),
+                colour  = "blue",
+                size    = 1.3,
+                alpha   = 0.8
+                );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            return( my.ggplot );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            initial.directory     <- getwd();
+            temp.output.directory <- file.path(initial.directory,"diagnostics-fpca-complete");
+            if ( !dir.exists(temp.output.directory) ) {
+                dir.create(path = temp.output.directory, recursive = TRUE);
+                }
+            setwd( temp.output.directory );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            DF.data <- private$add.auxiliary.columns(DF.input = DF.data);
+
+            years <- unique(DF.data[,"year"]);
+            for ( temp.year in years ) {
+
+                cat(paste0("\n# year: ",temp.year,"\n"));
+
+                is.selected   <- (DF.data[,"year"] == temp.year);
+                DF.year.type  <- DF.data[is.selected,c("location_year","date_index",self$variable)];
+                temp.XY.years <- sample(x = unique(DF.year.type[,"location_year"]), size = 10, replace = FALSE);
+
+                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.1);
+
+                temp.bspline.basis <- fda::create.bspline.basis(
+                    rangeval    = base::range(base::as.integer(base::colnames(DF.temp.year))),
+                    norder      = self$n.order,
+                    nbasis      = self$n.basis,
+                    dropind     = NULL,
+                    quadvals    = NULL,
+                    values      = NULL,
+                    basisvalues = NULL,
+                    names       = "bspl"
+                    );
+
+                temp.bspline.basis.fdParObj <- fda::fdPar(
+                    fdobj  = temp.bspline.basis,
+                    Lfdobj = NULL,
+                    lambda = self$smoothing.parameter,
+                    penmat = NULL
+                    );
+
+                # express target.variable as linear combinations
+                # of the B-spline basis functions
+                target.in.basis.fd <- fda::smooth.basis(
+                    argvals      = base::as.integer(base::colnames(DF.temp.year)),
+                    y            = t.DF.temp.year,
+                    fdParobj     = temp.bspline.basis.fdParObj,
+                    wtvec        = NULL,
+                    fdnames      = NULL,
+                    covariates   = NULL,
+                    method       = "chol",
+                    dfscale      = 1,
+                    returnMatrix = FALSE
+                    );
+
+                # evaluate the B-spline approximations at grid points
+                # of the across-year common grid
+                bspline.approximation <- fda::eval.fd(
+                    fdobj   = target.in.basis.fd[["fd"]],
+                    evalarg = self$standardized.bspline.basis[["spline.grid"]]
+                    );
+
+                DF.bsplines.original <- fda::eval.fd(
+                    evalarg = temp.evalarg,
+                    # fdobj = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
+                    fdobj   = standardized.bspline.basis[['bspline.basis']][["fd"]]
+                    );
+
+                temp.XY.years <- intersect(temp.XY.years,colnames(DF.bsplines.original));
+
+                DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
+                DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
+
+                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.1);
+
+                vector.meanfd <- fda::eval.fd(
+                    evalarg = temp.evalarg,
+                    fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
+                    );
+
+                DF.fpca.standardizedTimepoints <- fda::eval.fd(
+                    evalarg = temp.evalarg,
+                    fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
+                    );
+
+                DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
+                for ( j in seq(1,ncol(DF.fpca.fit)) ) {
+                    DF.fpca.fit[,j] <- DF.fpca.fit[,j] + vector.meanfd;
+                    }
+                colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
+                DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
+
+                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                for ( temp.XY.year in temp.XY.years ) {
+
+                    cat(paste0("\n# X_Y_year = ",temp.XY.year,"\n"));
+
+                    PNG.output <- paste0('fpca-fit-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
+
+                    XY.string  <- temp.XY.year;
+                    XY.string  <- gsub(x = XY.string, pattern = "_[0-9]{4}$", replacement = "" );
+                    XY.string  <- gsub(x = XY.string, pattern = "_",          replacement = ",");
+                    XY.string  <- paste0("(x,y) = (",XY.string,")");
+
+                    my.ggplot <- initializePlot(
+                        title    = NULL,
+                        subtitle = paste0(temp.year,", ",XY.string)
+                        );
+
+                    my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index"  );
+                    my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
+                    my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
+
+                    my.ggplot <- my.ggplot + geom_vline(
+                        xintercept = range(LIST.fpca[["spline_grid"]]),
+                        colour     = "red",
+                        alpha      = 0.5,
+                        linetype   = 2,
+                        size       = 0.8
+                        );
+
+                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                    DF.temp <- DF.year.type[DF.year.type[,"X_Y_year"] == temp.XY.year,c("date_index",fpca.variable)];
+                    DF.temp <- as.data.frame(DF.temp);
+                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = fpca.variable, replacement = "dummy.colname");
+                    my.ggplot <- my.ggplot + ggplot2::geom_point(
+                        data    = DF.temp,
+                        mapping = aes(x = date_index, y = dummy.colname),
+                        alpha   = 0.8,
+                        size    = 3,
+                        colour  = "black"
+                        );
+
+                    my.ggplot <- my.ggplot + ggplot2::geom_line(
+                        data    = DF.temp,
+                        mapping = aes(x = date_index, y = dummy.colname),
+                        colour  = "black",
+                        alpha   = 0.5
+                        );
+
+                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                    DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
+                    DF.temp <- as.data.frame(DF.temp);
+                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+                    my.ggplot <- my.ggplot + ggplot2::geom_line(
+                        data    = DF.temp,
+                        mapping = aes(x = date_index, y = dummy.colname),
+                        colour  = "blue",
+                        size    = 1.3,
+                        alpha   = 0.8
+                        );
+
+                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                    DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
+                    DF.temp <- as.data.frame(DF.temp);
+                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+                    my.ggplot <- my.ggplot + ggplot2::geom_line(
+                        data    = DF.temp,
+                        mapping = aes(x = date_index, y = dummy.colname),
+                        colour  = "red",
+                        size    = 1.3,
+                        alpha   = 0.8
+                        );
+
+                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                    ggplot2::ggsave(
+                        file   = PNG.output,
+                        plot   = my.ggplot,
+                        dpi    = 150,
+                        height =   6,
+                        width  =  16,
+                        units  = 'in'
+                        );
+
+                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+                    remove( list = c("my.ggplot") );
+
+                    }
+
+                remove(list = c(
+                    "DF.year.type",
+                    "DF.bsplines.original",
+                    "vector.meanfd",
+                    "DF.fpca.standardizedTimepoints",
+                    "DF.fpca.fit"
+                    ));
+
+                }
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            setwd( initial.directory );
+            return( NULL );
+
+            }, # plot.approximations()
+
         #' @description
         #' plot the harmonics (functional principal components) computed based on the training data.
         plot.harmonics = function() {
@@ -206,7 +532,7 @@ fpcFeatureEngine <- R6::R6Class(
                     subtitle = base::paste0(self$variable," (variability captured = ",temp.varprop,"%)")
                     );
 
-                temp.xlab <- ifelse(temp.index == base::length(temp.harmonics),"date index","");
+                temp.xlab <- ifelse(temp.index == base::length(temp.harmonics),"date index (1 = New Year's Day)","");
                 temp.ylab <- base::gsub(x = temp.harmonic, pattern = "harmonic", replacement = "FPC ");
 
                 my.ggplot <- my.ggplot + ggplot2::xlab( label = temp.xlab );
@@ -267,16 +593,16 @@ fpcFeatureEngine <- R6::R6Class(
 
     private = base::list(
 
-        add.auxiliary.columns = function(DF.input = self$training.data) {
+        add.auxiliary.columns = function(DF.input = self$training.data, date = self$date, location = self$location) {
             DF.output <- DF.input;
-            DF.output[,'year'] <- base::as.character(base::format(x = DF.output[,self$date], format = "%Y"));
+            DF.output[,'year'] <- base::as.character(base::format(x = DF.output[,date], format = "%Y"));
             DF.output[,'location_year'] <- base::apply(
-                X      = DF.output[,c(self$location,'year')],
+                X      = DF.output[,c(location,'year')],
                 MARGIN = 1,
                 FUN    = function(x) {base::return(base::paste(x,collapse="_"))}
                 );
             DF.output[,"new_year_day"] <- base::as.Date(base::paste0(DF.output[,"year"],"-01-01"));
-            DF.output[,"date_index"]   <- base::as.integer(DF.output[,self$date]) - base::as.integer(DF.output[,"new_year_day"]);
+            DF.output[,"date_index"]   <- base::as.integer(DF.output[,date]) - base::as.integer(DF.output[,"new_year_day"]) + 1;
             base::return( DF.output );
             },
 
@@ -346,7 +672,7 @@ fpcFeatureEngine <- R6::R6Class(
             print( str(DF.temp)   );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.stack      <- base::data.frame();
+            DF.stack <- base::data.frame();
 
             years <- base::unique(DF.input[,"year"]);
             for ( year in years ) {
