@@ -101,8 +101,24 @@ DF.VV[,"x_y"] <- apply(
 colnames(DF.VV) <- paste0("my_",colnames(DF.VV));
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+locations <- unique(DF.VV[,'my_x_y']);
+
+is.subset.1 <- sample(x = c(TRUE,FALSE), size = length(locations), replace = TRUE);
+locations.1 <- locations[ is.subset.1];
+locations.2 <- locations[!is.subset.1];
+
+DF.VV.1 <- DF.VV[DF.VV[,'my_x_y'] %in% locations.1,];
+DF.VV.2 <- DF.VV[DF.VV[,'my_x_y'] %in% locations.2,];
+
+cat("\nstr(DF.VV.1)\n");
+print( str(DF.VV.1)   );
+
+cat("\nstr(DF.VV.2)\n");
+print( str(DF.VV.2)   );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VV,
+    training.data       = DF.VV.1,
     location            = 'my_x_y',
     date                = 'my_date',
     variable            = 'my_VV',
@@ -126,20 +142,20 @@ ggplot2::ggsave(
     );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
-# cat("\nstr(DF.bspline.fpc)\n");
-# print( str(DF.bspline.fpc)   );
-#
-# png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
-# plot(
-#     x    = DF.bspline.fpc[,'fpc_1'],
-#     y    = DF.bspline.fpc[,'fpc_2'],
-#     pch  = 19,
-#     cex  =  0.1,
-#     xlim = 300 * c(-1,1),
-#     ylim = 150 * c(-1,1)
-#     );
-# dev.off()
+DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV.2);
+cat("\nstr(DF.bspline.fpc)\n");
+print( str(DF.bspline.fpc)   );
+
+png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
+plot(
+    x    = DF.bspline.fpc[,'fpc_1'],
+    y    = DF.bspline.fpc[,'fpc_2'],
+    pch  = 19,
+    cex  =  0.1,
+    xlim = 300 * c(-1,1),
+    ylim = 150 * c(-1,1)
+    );
+dev.off()
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('my_x_y','year'))];
@@ -154,9 +170,12 @@ ggplot2::ggsave(
 # print( DF.temp[,c(1,2)] );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.temp              <- DF.data[c("X","Y","year","date","VV")];
-is.selected.year     <- ("2017" == DF.temp[,'year']);
-DF.temp              <- DF.temp[is.selected.year,];
+temp.x_y <- DF.VV.2[1,"my_x_y"];
+print( temp.x_y );
+
+DF.temp          <- DF.data[c("X","Y","year","date","VV")];
+is.selected.year <- ("2017" == DF.temp[,'year']);
+DF.temp          <- DF.temp[is.selected.year,];
 
 DF.temp[,"x_y"] <- apply(
     X      = DF.temp[,c('X','Y')],
@@ -164,12 +183,13 @@ DF.temp[,"x_y"] <- apply(
     FUN    = function(x) { return(paste(x,collapse="_")) }
     );
 
-is.selected.location <- ("305296.039198242_4866461.06866592" == DF.temp[,'x_y']);
-DF.temp              <- DF.temp[is.selected.location,];
+# is.selected.location <- (temp.x_y == DF.temp[,'x_y']);
+# DF.temp              <- DF.temp[is.selected.location,];
 
+DF.temp <- DF.temp[temp.x_y == DF.temp[,'x_y'],];
 DF.temp <- DF.temp[,c("x_y","date","VV")];
-
 print( str(DF.temp) );
+print( DF.temp );
 
 my.ggplot <- my.fpcFeatureEngine$plot.approximations(
     DF.input = DF.temp,
