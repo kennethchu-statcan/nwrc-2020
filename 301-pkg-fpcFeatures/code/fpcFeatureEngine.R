@@ -120,9 +120,7 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.dictionary)\n");
             print( str(DF.dictionary)   );
 
-            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
-                DF.input = DF.temp
-                );
+            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(DF.input = DF.temp);
             base::rownames(DF.newdata.standardized.wide) <- base::sapply(
                 X   = base::rownames(DF.newdata.standardized.wide),
                 FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
@@ -197,9 +195,8 @@ fpcFeatureEngine <- R6::R6Class(
             DF.raw <- private$add.auxiliary.columns(DF.input = DF.input, location = location, date = date);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.temp <- DF.raw[,c("date_index",variable)];
-            DF.temp <- as.data.frame(DF.temp);
-            colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = variable, replacement = "dummy.colname");
+            DF.temp <- base::as.data.frame(DF.raw[,c("date_index",variable)]);
+            base::colnames(DF.temp) <- base::gsub(x = base::colnames(DF.temp), pattern = variable, replacement = "dummy.colname");
             my.ggplot <- my.ggplot + ggplot2::geom_point(
                 data    = DF.temp,
                 mapping = ggplot2::aes(x = date_index, y = dummy.colname),
@@ -216,9 +213,7 @@ fpcFeatureEngine <- R6::R6Class(
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.temp   <- DF.raw[,c("date_index",variable)];
-            t.DF.temp <- t(DF.temp);
-
+            DF.temp      <- DF.raw[,base::c("date_index",variable)];
             temp.evalarg <- seq(min(DF.temp[,"date_index"]),max(DF.temp[,"date_index"]),0.1);
 
             temp.bspline.basis <- fda::create.bspline.basis(
@@ -239,11 +234,9 @@ fpcFeatureEngine <- R6::R6Class(
                 penmat = NULL
                 );
 
-            # express target.variable as linear combinations
-            # of the B-spline basis functions
             target.in.basis.fd <- fda::smooth.basis(
                 argvals      = base::as.integer(DF.temp[,"date_index"]),
-                y            = base::as.matrix(x = DF.temp[,variable], ncol = 1), # t.DF.temp,
+                y            = base::as.matrix(x = DF.temp[,variable], ncol = 1),
                 fdParobj     = temp.bspline.basis.fdParObj,
                 wtvec        = NULL,
                 fdnames      = NULL,
@@ -253,23 +246,11 @@ fpcFeatureEngine <- R6::R6Class(
                 returnMatrix = FALSE
                 );
 
-            # evaluate the B-spline approximations at grid points
-            # of the across-year common grid
             bspline.approximation <- fda::eval.fd(
                 fdobj   = target.in.basis.fd[["fd"]],
                 evalarg = temp.evalarg
                 );
 
-            cat("\nstr(bspline.approximation)\n");
-            print( str(bspline.approximation)   );
-
-            # DF.temp <- data.frame(
-            #     date_index    = temp.evalarg,
-            #     dummy_colname = bspline.approximation
-            #     );
-            # DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
-            # DF.temp <- as.data.frame(DF.temp);
-            # colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = data.frame(
                     date_index    = temp.evalarg,
@@ -280,6 +261,46 @@ fpcFeatureEngine <- R6::R6Class(
                 size    = 1.3,
                 alpha   = 0.8
                 );
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            temp.evalarg <- base::seq(
+                base::min(self$standardized.bspline.basis[["spline.grid"]]),
+                base::max(self$standardized.bspline.basis[["spline.grid"]]),
+                0.1
+                );
+
+            DF.temp <- DF.raw[,base::c("location_year",location,"year","date_index",variable)];
+            cat("\nstr(DF.temp)\n");
+            print( str(DF.temp)   );
+            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
+                DF.input = DF.temp,
+                location = location,
+                variable = variable
+                );
+            base::rownames(DF.newdata.standardized.wide) <- base::sapply(
+                X   = base::rownames(DF.newdata.standardized.wide),
+                FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
+                );
+            cat("\nstr(DF.newdata.standardized.wide)\n");
+            print( str(DF.newdata.standardized.wide)   );
+
+            # DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
+            # DF.temp <- as.data.frame(DF.temp);
+            # colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
+            # fpca.approximation <- fda::eval.fd(
+            #     fdobj   = target.in.basis.fd[["fd"]],
+            #     evalarg = temp.evalarg
+            #     );
+            # my.ggplot <- my.ggplot + ggplot2::geom_line(
+            #     data    = data.frame(
+            #         date_index    = temp.evalarg,
+            #         dummy_colname = fpca.approximation
+            #         ),
+            #     mapping = ggplot2::aes(x = date_index, y = dummy.colname),
+            #     colour  = "red",
+            #     size    = 1.3,
+            #     alpha   = 0.8
+            #     );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             return( my.ggplot );
@@ -652,7 +673,9 @@ fpcFeatureEngine <- R6::R6Class(
             }, # get.standardized.bspline.basis()
 
         standardized.grid.interpolate = function(
-            DF.input = NULL
+            DF.input = NULL,
+            location = self$location,
+            variable = self$variable
             ) {
 
             cat("\nstandardized.grid.interpolate()\n");
@@ -661,10 +684,10 @@ fpcFeatureEngine <- R6::R6Class(
             print( str(DF.input)   );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.temp <- DF.input[,c("location_year","year","date_index",self$variable)];
+            DF.temp <- DF.input[,c("location_year","year","date_index",variable)];
             colnames(DF.temp) <- gsub(
                 x           = colnames(DF.temp),
-                pattern     = self$variable,
+                pattern     = variable,
                 replacement = "target_variable"
                 );
 
@@ -677,7 +700,7 @@ fpcFeatureEngine <- R6::R6Class(
             years <- base::unique(DF.input[,"year"]);
             for ( year in years ) {
 
-                cat(paste0("\nstandized.grid.interpolate() -- ",self$variable,", ",year,"\n"));
+                cat(paste0("\nstandized.grid.interpolate() -- ",variable,", ",year,"\n"));
 
                 DF.temp.year <- DF.temp[DF.temp[,"year"] == year,] %>%
                     tidyr::spread(key = date_index, value = target_variable);
@@ -737,12 +760,14 @@ fpcFeatureEngine <- R6::R6Class(
                     evalarg = self$standardized.bspline.basis[["spline.grid"]]
                     );
 
-                rownames(bspline.approximation) <- self$standardized.bspline.basis[["spline.grid"]];
-                bspline.approximation <- as.data.frame(t(bspline.approximation));
-                bspline.approximation[,"location_year"] <- rownames(bspline.approximation);
+                base::rownames(bspline.approximation) <- self$standardized.bspline.basis[["spline.grid"]];
+                bspline.approximation <- base::as.data.frame(t(bspline.approximation));
 
-                cat("\nstr(bspline.approximation)\n");
-                print( str(bspline.approximation)   );
+                if ( 1 == base::nrow(bspline.approximation) ) {
+                    base::rownames(bspline.approximation) <- base::rownames(DF.temp.year);
+                    }
+
+                bspline.approximation[,"location_year"] <- base::rownames(bspline.approximation);
 
                 bspline.approximation.long <- bspline.approximation %>%
                     tidyr::gather(key = date_index, value = target_variable, -location_year);
@@ -752,18 +777,15 @@ fpcFeatureEngine <- R6::R6Class(
                 base::colnames(bspline.approximation.long) <- base::gsub(
                     x           = base::colnames(bspline.approximation.long),
                     pattern     = "target_variable",
-                    replacement = self$variable
+                    replacement = variable
                     );
-
-                cat("\nstr(bspline.approximation.long)\n");
-                print( str(bspline.approximation.long)   );
 
                 DF.stack <- base::rbind(DF.stack,bspline.approximation.long);
 
                 }
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.output <- base::unique(DF.input[,c(self$location,"year","location_year")]);
+            DF.output <- base::unique(DF.input[,base::c(location,"year","location_year")]);
             DF.output[,"dummy"] <- 1;
 
             DF.date.indexes <- base::data.frame(
@@ -777,27 +799,27 @@ fpcFeatureEngine <- R6::R6Class(
             DF.output <- dplyr::left_join(
                 x  = DF.output,
                 y  = DF.stack,
-                by = c("location_year","date_index")
+                by = base::c("location_year","date_index")
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.output <- DF.output[,c("location_year","year","date_index",self$variable)];
-            colnames(DF.output) <- gsub(
-                x           = colnames(DF.output),
-                pattern     = self$variable,
+            DF.output <- DF.output[,base::c("location_year","year","date_index",variable)];
+
+            base::colnames(DF.output) <- base::gsub(
+                x           = base::colnames(DF.output),
+                pattern     = variable,
                 replacement = "target_variable"
                 );
 
             DF.output <- DF.output %>%
                 tidyr::spread(key = date_index, value = target_variable);
-            DF.output <- as.data.frame(DF.output);
-            rownames(DF.output) <- DF.output[,"location_year"];
+            DF.output <- base::as.data.frame(DF.output);
+            base::rownames(DF.output) <- DF.output[,"location_year"];
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.output <- DF.output[0 == rowSums(is.na(DF.output)),];
+            DF.output <- DF.output[0 == base::rowSums(base::is.na(DF.output)),];
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            # base::return( LIST.output );
             base::return( DF.output );
 
             }, # standardized.grid.interpolate()
