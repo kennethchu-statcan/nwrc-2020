@@ -115,11 +115,6 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
 
 my.fpcFeatureEngine$fit();
 
-DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
-
-cat("\nstr(DF.bspline.fpc)\n");
-print( str(DF.bspline.fpc)   );
-
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 ggplot2::ggsave(
     file   = "plot-harmonics.png",
@@ -131,28 +126,66 @@ ggplot2::ggsave(
     );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
-plot(
-    x    = DF.bspline.fpc[,'fpc_1'],
-    y    = DF.bspline.fpc[,'fpc_2'],
-    pch  = 19,
-    cex  =  0.1,
-    xlim = 300 * c(-1,1),
-    ylim = 150 * c(-1,1)
-    );
-dev.off()
+# DF.bspline.fpc <- my.fpcFeatureEngine$transform(newdata = DF.VV);
+# cat("\nstr(DF.bspline.fpc)\n");
+# print( str(DF.bspline.fpc)   );
+#
+# png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
+# plot(
+#     x    = DF.bspline.fpc[,'fpc_1'],
+#     y    = DF.bspline.fpc[,'fpc_2'],
+#     pch  = 19,
+#     cex  =  0.1,
+#     xlim = 300 * c(-1,1),
+#     ylim = 150 * c(-1,1)
+#     );
+# dev.off()
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('my_x_y','year'))];
-DF.temp <- t(DF.temp);
+# DF.temp <- DF.bspline.fpc[,setdiff(colnames(DF.bspline.fpc),c('my_x_y','year'))];
+# DF.temp <- t(DF.temp);
 #DF.temp[,'date_index'] <- as.numeric(rownames(DF.temp));
 #DF.temp[,'date_index'] <- rep(-999,nrow(DF.temp));
 #DF.temp <- DF.temp[,c('date_index',setdiff(colnames(DF.temp),'date_index'))];
 
-cat("\nstr(DF.temp)\n");
-print( str(DF.temp)   );
+# cat("\nstr(DF.temp)\n");
+# print( str(DF.temp)   );
+#
+# print( DF.temp[,c(1,2)] );
 
-print( DF.temp[,c(1,2)] );
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+DF.temp              <- DF.data[c("X","Y","year","date","VV")];
+is.selected.year     <- ("2017" == DF.temp[,'year']);
+DF.temp              <- DF.temp[is.selected.year,];
+
+DF.temp[,"x_y"] <- apply(
+    X      = DF.temp[,c('X','Y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+
+is.selected.location <- ("305296.039198242_4866461.06866592" == DF.temp[,'x_y']);
+DF.temp              <- DF.temp[is.selected.location,];
+
+DF.temp <- DF.temp[,c("x_y","date","VV")];
+
+print( str(DF.temp) );
+
+my.ggplot <- my.fpcFeatureEngine$plot.approximations(
+    DF.input = DF.temp,
+    location = "x_y",
+    date     = "date",
+    variable = "VV"
+    );
+
+ggplot2::ggsave(
+    file   = "plot-approximations.png",
+    plot   = my.ggplot,
+    dpi    = 150,
+    height =   6,
+    width  =  16,
+    units  = 'in'
+    );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
