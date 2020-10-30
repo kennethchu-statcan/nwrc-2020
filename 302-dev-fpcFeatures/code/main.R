@@ -119,8 +119,10 @@ cat("\nstr(DF.VV.2)\n");
 print( str(DF.VV.2)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+logger::log_threshold(level = logger::ERROR);
+
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VV.1,  # DF.VV.2,
+    training.data       = DF.VV.1,
     location            = 'my_x_y',
     date                = 'my_date',
     variable            = 'my_VV',
