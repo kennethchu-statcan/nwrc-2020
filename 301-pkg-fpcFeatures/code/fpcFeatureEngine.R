@@ -307,20 +307,18 @@ fpcFeatureEngine <- R6::R6Class(
 
             vector.meanfd <- fda::eval.fd(
                 evalarg = temp.evalarg,
-                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["meanfd"]] #LIST.fpca[["target_variable_fpc"]][["meanfd"]]
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["meanfd"]]
                 );
 
             DF.fpca.standardizedTimepoints <- fda::eval.fd(
                 evalarg = temp.evalarg,
-                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["harmonics"]] # LIST.fpca[["target_variable_fpc"]][["harmonics"]]
+                fdobj   = self$learned.fpca.parameters[["training.pca.fd"]][["harmonics"]]
                 );
 
-            #DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
             DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( DF.fpc );
             for ( j in seq(1,ncol(DF.fpca.fit)) ) {
                 DF.fpca.fit[,j] <- DF.fpca.fit[,j] + vector.meanfd;
                 }
-            #colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
             DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
             colnames(DF.fpca.fit) <- gsub(x = colnames(DF.fpca.fit), pattern = temp.location_year, replacement = "dummy_colname");
             DF.fpca.fit <- as.data.frame(DF.fpca.fit)
@@ -328,13 +326,6 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.fpca.fit)\n");
             print( str(DF.fpca.fit)   );
 
-            # DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
-            # DF.temp <- as.data.frame(DF.temp);
-            # colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
-            # fpca.approximation <- fda::eval.fd(
-            #     fdobj   = target.in.basis.fd[["fd"]],
-            #     evalarg = temp.evalarg
-            #     );
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = DF.fpca.fit,
                 mapping = ggplot2::aes(x = date_index, y = dummy_colname),
@@ -345,204 +336,6 @@ fpcFeatureEngine <- R6::R6Class(
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             return( my.ggplot );
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            initial.directory     <- getwd();
-            temp.output.directory <- file.path(initial.directory,"diagnostics-fpca-complete");
-            if ( !dir.exists(temp.output.directory) ) {
-                dir.create(path = temp.output.directory, recursive = TRUE);
-                }
-            setwd( temp.output.directory );
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            DF.data <- private$add.auxiliary.columns(DF.input = DF.data);
-
-            years <- unique(DF.data[,"year"]);
-            for ( temp.year in years ) {
-
-                cat(paste0("\n# year: ",temp.year,"\n"));
-
-                is.selected   <- (DF.data[,"year"] == temp.year);
-                DF.year.type  <- DF.data[is.selected,c("location_year","date_index",self$variable)];
-                temp.XY.years <- sample(x = unique(DF.year.type[,"location_year"]), size = 10, replace = FALSE);
-
-                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                temp.evalarg <- seq(min(DF.year.type[,"date_index"]),max(DF.year.type[,"date_index"]),0.1);
-
-                temp.bspline.basis <- fda::create.bspline.basis(
-                    rangeval    = base::range(base::as.integer(base::colnames(DF.temp.year))),
-                    norder      = self$n.order,
-                    nbasis      = self$n.basis,
-                    dropind     = NULL,
-                    quadvals    = NULL,
-                    values      = NULL,
-                    basisvalues = NULL,
-                    names       = "bspl"
-                    );
-
-                temp.bspline.basis.fdParObj <- fda::fdPar(
-                    fdobj  = temp.bspline.basis,
-                    Lfdobj = NULL,
-                    lambda = self$smoothing.parameter,
-                    penmat = NULL
-                    );
-
-                # express target.variable as linear combinations
-                # of the B-spline basis functions
-                target.in.basis.fd <- fda::smooth.basis(
-                    argvals      = base::as.integer(base::colnames(DF.temp.year)),
-                    y            = t.DF.temp.year,
-                    fdParobj     = temp.bspline.basis.fdParObj,
-                    wtvec        = NULL,
-                    fdnames      = NULL,
-                    covariates   = NULL,
-                    method       = "chol",
-                    dfscale      = 1,
-                    returnMatrix = FALSE
-                    );
-
-                # evaluate the B-spline approximations at grid points
-                # of the across-year common grid
-                bspline.approximation <- fda::eval.fd(
-                    fdobj   = target.in.basis.fd[["fd"]],
-                    evalarg = self$standardized.bspline.basis[["spline.grid"]]
-                    );
-
-                DF.bsplines.original <- fda::eval.fd(
-                    evalarg = temp.evalarg,
-                    # fdobj = LIST.standardized_timepoints[["list_bsplines"]][[fpca.variable]][[temp.year]][["target_in_basis_fd"]][["fd"]]
-                    fdobj   = standardized.bspline.basis[['bspline.basis']][["fd"]]
-                    );
-
-                temp.XY.years <- intersect(temp.XY.years,colnames(DF.bsplines.original));
-
-                DF.bsplines.original <- DF.bsplines.original[,temp.XY.years];
-                DF.bsplines.original <- cbind("date_index" = temp.evalarg, DF.bsplines.original);
-
-                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                temp.evalarg <- seq(min(LIST.fpca[["spline_grid"]]),max(LIST.fpca[["spline_grid"]]),0.1);
-
-                vector.meanfd <- fda::eval.fd(
-                    evalarg = temp.evalarg,
-                    fdobj   = LIST.fpca[["target_variable_fpc"]][["meanfd"]]
-                    );
-
-                DF.fpca.standardizedTimepoints <- fda::eval.fd(
-                    evalarg = temp.evalarg,
-                    fdobj   = LIST.fpca[["target_variable_fpc"]][["harmonics"]]
-                    );
-
-                DF.fpca.fit <- DF.fpca.standardizedTimepoints %*% t( LIST.fpca[["target_variable_fpc"]][["scores"]] );
-                for ( j in seq(1,ncol(DF.fpca.fit)) ) {
-                    DF.fpca.fit[,j] <- DF.fpca.fit[,j] + vector.meanfd;
-                    }
-                colnames(DF.fpca.fit) <- LIST.fpca[["target_variable_scores"]][,"X_Y_year"];
-                DF.fpca.fit <- cbind("date_index" = temp.evalarg, DF.fpca.fit);
-
-                ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                for ( temp.XY.year in temp.XY.years ) {
-
-                    cat(paste0("\n# X_Y_year = ",temp.XY.year,"\n"));
-
-                    PNG.output <- paste0('fpca-fit-',beam.swath,'-',temp.year,'-',temp.type,'-',fpca.variable,'-',temp.XY.year,'.png');
-
-                    XY.string  <- temp.XY.year;
-                    XY.string  <- gsub(x = XY.string, pattern = "_[0-9]{4}$", replacement = "" );
-                    XY.string  <- gsub(x = XY.string, pattern = "_",          replacement = ",");
-                    XY.string  <- paste0("(x,y) = (",XY.string,")");
-
-                    my.ggplot <- initializePlot(
-                        title    = NULL,
-                        subtitle = paste0(temp.year,", ",XY.string)
-                        );
-
-                    my.ggplot <- my.ggplot + ggplot2::xlab( label = "date index"  );
-                    my.ggplot <- my.ggplot + ggplot2::ylab( label = fpca.variable );
-                    my.ggplot <- my.ggplot + scale_x_continuous(limits=c(75,325),breaks=seq(100,300,50));
-
-                    my.ggplot <- my.ggplot + geom_vline(
-                        xintercept = range(LIST.fpca[["spline_grid"]]),
-                        colour     = "red",
-                        alpha      = 0.5,
-                        linetype   = 2,
-                        size       = 0.8
-                        );
-
-                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                    DF.temp <- DF.year.type[DF.year.type[,"X_Y_year"] == temp.XY.year,c("date_index",fpca.variable)];
-                    DF.temp <- as.data.frame(DF.temp);
-                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = fpca.variable, replacement = "dummy.colname");
-                    my.ggplot <- my.ggplot + ggplot2::geom_point(
-                        data    = DF.temp,
-                        mapping = aes(x = date_index, y = dummy.colname),
-                        alpha   = 0.8,
-                        size    = 3,
-                        colour  = "black"
-                        );
-
-                    my.ggplot <- my.ggplot + ggplot2::geom_line(
-                        data    = DF.temp,
-                        mapping = aes(x = date_index, y = dummy.colname),
-                        colour  = "black",
-                        alpha   = 0.5
-                        );
-
-                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                    DF.temp <- DF.bsplines.original[,c("date_index",temp.XY.year)];
-                    DF.temp <- as.data.frame(DF.temp);
-                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
-                    my.ggplot <- my.ggplot + ggplot2::geom_line(
-                        data    = DF.temp,
-                        mapping = aes(x = date_index, y = dummy.colname),
-                        colour  = "blue",
-                        size    = 1.3,
-                        alpha   = 0.8
-                        );
-
-                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                    DF.temp <- DF.fpca.fit[,c("date_index",temp.XY.year)];
-                    DF.temp <- as.data.frame(DF.temp);
-                    colnames(DF.temp) <- gsub(x = colnames(DF.temp), pattern = temp.XY.year, replacement = "dummy.colname");
-                    my.ggplot <- my.ggplot + ggplot2::geom_line(
-                        data    = DF.temp,
-                        mapping = aes(x = date_index, y = dummy.colname),
-                        colour  = "red",
-                        size    = 1.3,
-                        alpha   = 0.8
-                        );
-
-                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                    ggplot2::ggsave(
-                        file   = PNG.output,
-                        plot   = my.ggplot,
-                        dpi    = 150,
-                        height =   6,
-                        width  =  16,
-                        units  = 'in'
-                        );
-
-                    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-                    remove( list = c("my.ggplot") );
-
-                    }
-
-                remove(list = c(
-                    "DF.year.type",
-                    "DF.bsplines.original",
-                    "vector.meanfd",
-                    "DF.fpca.standardizedTimepoints",
-                    "DF.fpca.fit"
-                    ));
-
-                }
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            setwd( initial.directory );
-            return( NULL );
 
             }, # plot.approximations()
 
@@ -904,27 +697,6 @@ fpcFeatureEngine <- R6::R6Class(
                 FUN    = function(x) { mean(x) }
                 );
 
-            if ( visualize == TRUE ) {
-
-                private$visualize.bslpine.fit(
-                    week.indices     = week.indices,
-                    spline.grid      = seq(min(week.indices),max(week.indices),0.1),
-                    t.DF.time.series = transposed.df.value,
-                    time.series.fd   = time.series.fd,
-                    prefix           = paste0("fit-",self$variable)
-                    );
-
-                private$visualize.fpca.fit(
-                    week.indices     = week.indices,
-                    spline.grid      = seq(min(week.indices),max(week.indices),0.1),
-                    t.DF.time.series = transposed.df.value,
-                    time.series.fd   = time.series.fd,
-                    results.pca.fd   = results.pca.fd,
-                    prefix           = paste0("fit-",self$variable)
-                    );
-
-                }
-
             base::return(
                 base::list(
                     training.pca.fd    = results.pca.fd,
@@ -940,17 +712,15 @@ fpcFeatureEngine <- R6::R6Class(
             visualize = FALSE
             ) {
 
-            #t.DF.time.series <- t(DF.input);
             t.DF.input <- base::t(DF.input);
 
             cat('\nstr(t.DF.input)\n');
             print( str(t.DF.input)   );
 
-            #time.series.fd <- fda::smooth.basis(
             t.DF.input.fd <- fda::smooth.basis(
                 argvals      = self$standardized.bspline.basis[['spline.grid']],
-                y            = t.DF.input, # t.DF.time.series,
-                fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']], #self$learned.fpca.parameters[["week.fdParObj"]],
+                y            = t.DF.input,
+                fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']],
                 method       = 'cho1',
                 dfscale      = 1,
                 returnMatrix = FALSE
@@ -972,123 +742,13 @@ fpcFeatureEngine <- R6::R6Class(
                 );
 
             DF.fpc <- results.inprod;
-            #colnames(DF.fpc)<- paste0(paste0('fpc_',variable.series,'_'),seq(1,ncol(DF.fpc)));
             colnames(DF.fpc) <- paste0('fpc_',seq(1,ncol(DF.fpc)));
             rownames(DF.fpc) <- rownames(DF.input);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            if ( visualize == TRUE ) {
-
-                time.series.fd <- fda::smooth.basis(
-                    argvals      = self$standardized.bspline.basis[['spline.grid']], #week.indices,
-                    y            = t.DF.input, #t.DF.time.series,
-                    fdParobj     = self$standardized.bspline.basis[['bspline.basis.fdParObj']], #self$learned.fpca.parameters[[variable.series]][["week.fdParObj"]],
-                    method       = 'cho1',
-                    dfscale      = 1,
-                    returnMatrix = FALSE
-                    );
-
-                private$visualize.bslpine.fit(
-                    week.indices     = self$standardized.bspline.basis[['spline.grid']], #week.indices,
-                    spline.grid      = seq(min(week.indices),max(week.indices),0.1),
-                    t.DF.time.series = t.DF.input, #t.DF.time.series,
-                    time.series.fd   = time.series.fd,
-                    prefix           = "transform"
-                    );
-
-                # private$visualize.fpca.fit(
-                #     week.indices     = week.indices,
-                #     spline.grid      = seq(min(week.indices),max(week.indices),0.1),
-                #     t.DF.time.series = t.DF.time.series,
-                #     time.series.fd   = time.series.fd,
-                #     results.pca.fd   = results.pca.fd,
-                #     prefix           = "transform"
-                #     );
-
-                }
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             return( DF.fpc );
 
-            }, # apply.fpca.parameters()
-
-        visualize.bslpine.fit =  function(
-            week.indices     = NULL,
-            spline.grid      = NULL,
-            t.DF.time.series = NULL,
-            time.series.fd   = NULL,
-            prefix           = NULL
-            ) {
-
-            time.series.bspline <- fda::eval.fd(
-                evalarg = spline.grid,
-                fdobj   = time.series.fd[["fd"]]
-                );
-
-            cat("\nstr(time.series.bspline):\n");
-            print( str(time.series.bspline)    );
-
-            temp.columns <- sample(x = seq(1,ncol(t.DF.time.series)), size = 10);
-            for ( temp.column in temp.columns ) {
-                temp.file <- paste0("plot-bspline-",prefix,"-",temp.column,".png");
-                png(temp.file, height = 12, width = 18, units = "in", res = 300);
-                plot( x = week.indices, y = t.DF.time.series[   ,temp.column], type = "b", col = "black", lwd = 2);
-                lines(x = spline.grid,  y = time.series.bspline[,temp.column], type = "l", col = "red",   lwd = 1);
-                dev.off();
-                }
-
-            return( NULL );
-
-            }, # visualize.bslpine.fit()
-
-        visualize.fpca.fit = function(
-            week.indices     = NULL,
-            spline.grid      = NULL,
-            t.DF.time.series = NULL,
-            time.series.fd   = NULL,
-            results.pca.fd   = NULL,
-            prefix           = NULL
-            ) {
-
-            time.series.bspline <- fda::eval.fd(
-                evalarg = spline.grid,
-                fdobj   = time.series.fd[["fd"]]
-                );
-
-            time.series.meanfd <- fda::eval.fd(
-                evalarg = spline.grid, #week.indices,
-                fdobj   = results.pca.fd[["meanfd"]]
-                );
-
-            time.series.harmonics <- fda::eval.fd(
-                evalarg = spline.grid, #week.indices,
-                fdobj   = results.pca.fd[["harmonics"]]
-                );
-
-            # cat("\nstr(time.series.harmonics):\n");
-            # print( str(time.series.harmonics)    );
-
-            time.series.fpca.fit <- time.series.harmonics %*% t( results.pca.fd[["scores"]] );
-            for ( j in seq(1,ncol(time.series.fpca.fit)) ) {
-                time.series.fpca.fit[,j] <- time.series.fpca.fit[,j] + time.series.meanfd;
-                }
-
-            # cat("\nstr(time.series.fpca.fit):\n");
-            # print( str(time.series.fpca.fit)    );
-
-            temp.columns <- sample(x = seq(1,ncol(t.DF.time.series)), size = 10);
-            for ( temp.column in temp.columns ) {
-                temp.file <- paste0("plot-fpca-",prefix,"-",temp.column,".png");
-                png(temp.file, height = 12, width = 18, units = "in", res = 300);
-                plot( x = week.indices, y = t.DF.time.series[    ,temp.column], type = "b", col = "black",lwd = 2);
-                lines(x = spline.grid,  y = time.series.bspline[ ,temp.column], type = "l", col = "red",  lwd = 1);
-                lines(x = spline.grid,  y = time.series.fpca.fit[,temp.column], type = "l", col = "blue", lwd = 1);
-                dev.off();
-                }
-
-            return( NULL );
-
-            } # visualize.fpca.fit()
+            } # apply.fpca.parameters()
 
         ) # private = list()
 
