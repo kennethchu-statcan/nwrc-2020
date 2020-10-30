@@ -109,18 +109,34 @@ fpcFeatureEngine <- R6::R6Class(
         #' @description
         #' compute functional principal component scores for new data with respect to functional principale components of training data.
         #' @param newdata newdata
+        #' @param location location
+        #' @param date date
+        #' @param variable variable
         #' @return A new `fpcFeatureEngine` object.
-        transform = function(newdata = NULL) {
+        transform = function(
+            newdata  = NULL,
+            location = NULL,
+            date     = NULL,
+            variable = NULL
+            ) {
 
-            DF.temp <- private$add.auxiliary.columns(DF.input = newdata);
+            DF.temp <- private$add.auxiliary.columns(
+                DF.input = newdata,
+                location = location,
+                date     = date
+                );
             cat("\nstr(DF.temp)\n");
             print( str(DF.temp)   );
 
-            DF.dictionary <- unique(DF.temp[,c('location_year',self$location,'year')]);
+            DF.dictionary <- unique(DF.temp[,c('location_year',location,'year')]);
             cat("\nstr(DF.dictionary)\n");
             print( str(DF.dictionary)   );
 
-            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(DF.input = DF.temp);
+            DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
+                DF.input = DF.temp,
+                location = location,
+                variable = variable
+                );
             base::rownames(DF.newdata.standardized.wide) <- base::sapply(
                 X   = base::rownames(DF.newdata.standardized.wide),
                 FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
@@ -140,7 +156,7 @@ fpcFeatureEngine <- R6::R6Class(
 
             DF.output <- base::merge(
                 x     = DF.output,
-                y     = DF.dictionary[,base::c('location_year',self$location)],
+                y     = DF.dictionary[,base::c('location_year',location)],
                 by    = "location_year",
                 all.x = TRUE
                 );
@@ -149,8 +165,8 @@ fpcFeatureEngine <- R6::R6Class(
             cat("\nstr(DF.output)\n");
             print( str(DF.output)   );
 
-            colnames.to.delete <- base::c('location_year',self$location,'year');
-            DF.output <- DF.output[,base::c(self$location,'year',base::setdiff(base::colnames(DF.output),colnames.to.delete))];
+            colnames.to.delete <- base::c('location_year',location,'year');
+            DF.output <- DF.output[,base::c(location,'year',base::setdiff(base::colnames(DF.output),colnames.to.delete))];
 
             return( DF.output );
 
@@ -164,10 +180,6 @@ fpcFeatureEngine <- R6::R6Class(
             LIST.standardized_timepoints = NULL,
             LIST.fpca                    = NULL
             ) {
-
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-            cat("\nstr(DF.data)\n");
-            print( str(DF.data)   );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             temp.year <- base::as.character(base::format(x = DF.input[1,date], format = "%Y"));
@@ -643,7 +655,11 @@ fpcFeatureEngine <- R6::R6Class(
 
     private = base::list(
 
-        add.auxiliary.columns = function(DF.input = self$training.data, date = self$date, location = self$location) {
+        add.auxiliary.columns = function(
+            DF.input = self$training.data,
+            date     = self$date,
+            location = self$location
+            ) {
             DF.output <- DF.input;
             DF.output[,'year'] <- base::as.character(base::format(x = DF.output[,date], format = "%Y"));
             DF.output[,'location_year'] <- base::apply(
