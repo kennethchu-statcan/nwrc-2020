@@ -63,6 +63,7 @@ DF.VV[,"x_y"] <- apply(
 ```{r}
 locations <- unique(DF.VV[,'x_y']);
 
+set.seed(7654321);
 is.subset.1 <- sample(x = c(TRUE,FALSE), size = length(locations), replace = TRUE);
 locations.1 <- locations[ is.subset.1];
 locations.2 <- locations[!is.subset.1];
@@ -75,6 +76,8 @@ colnames(DF.VV.2) <- paste0("your_",colnames(DF.VV.2));
 ```
 
 ```{r}
+logger::log_threshold(level = logger::ERROR);
+
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
     training.data       = DF.VV.1,
     location            = 'my_x_y',

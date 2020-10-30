@@ -82,27 +82,33 @@ fpcFeatureEngine <- R6::R6Class(
 
         #' @description
         #' learn from training data (compute functional principal components).
-        fit = function() {
+        #' @param log.threshold log threshold. Must be one of the log levels supported by the \code{logger} package. Default: logger::log_threshold()
+        #' @return NULL
+        fit = function(
+            log.threshold = logger::log_threshold()
+            ) {
+
+            log.threshold.original <- logger::log_threshold();
+            logger::log_threshold(level = log.threshold);
 
             DF.temp <- private$add.auxiliary.columns(DF.input = self$training.data);
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            logger::log_debug('str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
 
             self$standardized.bspline.basis <- private$get.standardized.bspline.basis(
                 DF.input = DF.temp
                 );
-            cat("\nstr(self$standardized.bspline.basis)\n");
-            print( str(self$standardized.bspline.basis)   );
+            logger::log_debug('str(self$standardized.bspline.basis):\n{paste0(capture.output(str(self$standardized.bspline.basis)),collapse="\n")}');
 
             DF.temp <- private$standardized.grid.interpolate(
                 DF.input = DF.temp
                 );
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            logger::log_debug('str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
 
             self$learned.fpca.parameters <- private$learn.fpca.parameters(DF.input = DF.temp);
-            cat("\nstr(self$learned.fpca.parameters)\n");
-            print( str(self$learned.fpca.parameters)   );
+            logger::log_debug('str(self$learned.fpca.parameters):\n{paste0(capture.output(str(self$learned.fpca.parameters)),collapse="\n")}');
+
+            logger::log_threshold(level = log.threshold.original);
+            base::return( NULL );
 
             }, # fit()
 
@@ -112,25 +118,29 @@ fpcFeatureEngine <- R6::R6Class(
         #' @param location location
         #' @param date date
         #' @param variable variable
-        #' @return A new `fpcFeatureEngine` object.
+        #' @param log.threshold log threshold. Must be one of the log levels supported by the \code{logger} package. Default: logger::log_threshold()
+        #' @return matrix of FPC scores
         transform = function(
-            newdata  = NULL,
-            location = NULL,
-            date     = NULL,
-            variable = NULL
+            newdata       = NULL,
+            location      = NULL,
+            date          = NULL,
+            variable      = NULL,
+            log.threshold = logger::log_threshold()
             ) {
 
+            log.threshold.original <- logger::log_threshold();
+            logger::log_threshold(level = log.threshold);
+
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.temp <- private$add.auxiliary.columns(
                 DF.input = newdata,
                 location = location,
                 date     = date
                 );
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            logger::log_debug('str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
 
             DF.dictionary <- unique(DF.temp[,c('location_year',location,'year')]);
-            cat("\nstr(DF.dictionary)\n");
-            print( str(DF.dictionary)   );
+            logger::log_debug('str(DF.dictionary):\n{paste0(capture.output(str(DF.dictionary)),collapse="\n")}');
 
             DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
                 DF.input = DF.temp,
@@ -141,8 +151,7 @@ fpcFeatureEngine <- R6::R6Class(
                 X   = base::rownames(DF.newdata.standardized.wide),
                 FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
                 );
-            cat("\nstr(DF.newdata.standardized.wide)\n");
-            print( str(DF.newdata.standardized.wide)   );
+            logger::log_debug('str(DF.newdata.standardized.wide):\n{paste0(capture.output(str(DF.newdata.standardized.wide)),collapse="\n")}');
 
             DF.fpc <- private$apply.fpca.parameters(
                 DF.input  = DF.newdata.standardized.wide[,base::setdiff(base::colnames(DF.newdata.standardized.wide),base::c('location_year','year'))],
@@ -162,24 +171,35 @@ fpcFeatureEngine <- R6::R6Class(
                 );
             base::rownames(DF.output) <- DF.output[,'location_year'];
 
-            cat("\nstr(DF.output)\n");
-            print( str(DF.output)   );
+            logger::log_debug('str(DF.output):\n{paste0(capture.output(str(DF.output)),collapse="\n")}');
 
             colnames.to.delete <- base::c('location_year',location,'year');
             DF.output <- DF.output[,base::c(location,'year',base::setdiff(base::colnames(DF.output),colnames.to.delete))];
 
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_threshold(level = log.threshold.original);
             return( DF.output );
 
             }, # transform()
 
+        #' @description
+        #' plot input time series, its B-spline approximnation and its FPcA approximations
+        #' @param DF.input DF.input
+        #' @param location location
+        #' @param date date
+        #' @param variable variable
+        #' @param log.threshold log threshold. Must be one of the log levels supported by the \code{logger} package. Default: logger::log_threshold()
+        #' @return plot of bslpine and FPCA approximations
         plot.approximations = function(
-            DF.input                     = NULL,
-            location                     = NULL,
-            date                         = NULL,
-            variable                     = NULL,
-            LIST.standardized_timepoints = NULL,
-            LIST.fpca                    = NULL
+            DF.input      = NULL,
+            location      = NULL,
+            date          = NULL,
+            variable      = NULL,
+            log.threshold = logger::log_threshold()
             ) {
+
+            log.threshold.original <- logger::log_threshold();
+            logger::log_threshold(level = log.threshold);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             temp.year <- base::as.character(base::format(x = DF.input[1,date], format = "%Y"));
@@ -283,8 +303,8 @@ fpcFeatureEngine <- R6::R6Class(
                 );
 
             DF.temp <- DF.raw[,base::c("location_year",location,"year","date_index",variable)];
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            logger::log_debug('str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
+
             DF.newdata.standardized.wide <- private$standardized.grid.interpolate(
                 DF.input = DF.temp,
                 location = location,
@@ -294,16 +314,14 @@ fpcFeatureEngine <- R6::R6Class(
                 X   = base::rownames(DF.newdata.standardized.wide),
                 FUN = function(x) { base::paste0(base::sample(x=letters,size=20,replace=TRUE),collapse="") }
                 );
-            cat("\nstr(DF.newdata.standardized.wide)\n");
-            print( str(DF.newdata.standardized.wide)   );
+            logger::log_debug('str(DF.newdata.standardized.wide):\n{paste0(capture.output(str(DF.newdata.standardized.wide)),collapse="\n")}');
 
             DF.fpc <- private$apply.fpca.parameters(
                 DF.input  = DF.newdata.standardized.wide[,base::setdiff(base::colnames(DF.newdata.standardized.wide),base::c('location_year','year'))],
                 visualize = FALSE
                 );
             base::rownames(DF.fpc) <- DF.newdata.standardized.wide[,'location_year'];
-            cat("\nstr(DF.fpc)\n");
-            print( str(DF.fpc)   );
+            logger::log_debug('str(DF.fpc):\n{paste0(capture.output(str(DF.fpc)),collapse="\n")}');
 
             vector.meanfd <- fda::eval.fd(
                 evalarg = temp.evalarg,
@@ -323,8 +341,7 @@ fpcFeatureEngine <- R6::R6Class(
             colnames(DF.fpca.fit) <- gsub(x = colnames(DF.fpca.fit), pattern = temp.location_year, replacement = "dummy_colname");
             DF.fpca.fit <- as.data.frame(DF.fpca.fit)
 
-            cat("\nstr(DF.fpca.fit)\n");
-            print( str(DF.fpca.fit)   );
+            logger::log_debug('str(DF.fpca.fit):\n{paste0(capture.output(str(DF.fpca.fit)),collapse="\n")}');
 
             my.ggplot <- my.ggplot + ggplot2::geom_line(
                 data    = DF.fpca.fit,
@@ -335,13 +352,21 @@ fpcFeatureEngine <- R6::R6Class(
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_threshold(level = log.threshold.original);
             return( my.ggplot );
 
             }, # plot.approximations()
 
         #' @description
         #' plot the harmonics (functional principal components) computed based on the training data.
-        plot.harmonics = function() {
+        #' @param log.threshold log threshold. Must be one of the log levels supported by the \code{logger} package. Default: logger::log_threshold()
+        #' @return plot of FPCA harmonics
+        plot.harmonics = function(
+            log.threshold = logger::log_threshold()
+            ) {
+
+            log.threshold.original <- logger::log_threshold();
+            logger::log_threshold(level = log.threshold);
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             temp.evalarg <- base::seq(
@@ -440,6 +465,7 @@ fpcFeatureEngine <- R6::R6Class(
                 );
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_threshold(level = log.threshold.original);
             base::return( my.cowplot );
 
             } # plot.harmonics()
@@ -453,6 +479,9 @@ fpcFeatureEngine <- R6::R6Class(
             date     = self$date,
             location = self$location
             ) {
+            this.function.name <- "add.auxiliary.columns";
+            logger::log_debug('{this.function.name}(): starts');
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.output <- DF.input;
             DF.output[,'year'] <- base::as.character(base::format(x = DF.output[,date], format = "%Y"));
             DF.output[,'location_year'] <- base::apply(
@@ -462,10 +491,16 @@ fpcFeatureEngine <- R6::R6Class(
                 );
             DF.output[,"new_year_day"] <- base::as.Date(base::paste0(DF.output[,"year"],"-01-01"));
             DF.output[,"date_index"]   <- base::as.integer(DF.output[,date]) - base::as.integer(DF.output[,"new_year_day"]) + 1;
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_debug('{this.function.name}(): exits');
             base::return( DF.output );
             },
 
         get.standardized.bspline.basis = function(DF.input = NULL) {
+
+            this.function.name <- "get.standardized.bspline.basis";
+            logger::log_debug('{this.function.name}(): starts');
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
             DF.yearly.endpoints <- base::unique(DF.input[,c("year",self$date,"date_index")]) %>%
                 dplyr::group_by(year) %>%
@@ -506,6 +541,8 @@ fpcFeatureEngine <- R6::R6Class(
                 bspline.basis.fdParObj = my.bspline.basis.fdParObj
                 );
 
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_debug('{this.function.name}(): exits');
             base::return( list.output );
 
             }, # get.standardized.bspline.basis()
@@ -516,10 +553,11 @@ fpcFeatureEngine <- R6::R6Class(
             variable = self$variable
             ) {
 
-            cat("\nstandardized.grid.interpolate()\n");
+            this.function.name <- "standardized.grid.interpolate";
+            logger::log_debug('{this.function.name}(): starts');
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
-            cat("\nstr(DF.input)\n");
-            print( str(DF.input)   );
+            logger::log_debug('{this.function.name}(): str(DF.input):\n{paste0(capture.output(str(DF.input)),collapse="\n")}');
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.temp <- DF.input[,c("location_year","year","date_index",variable)];
@@ -529,8 +567,7 @@ fpcFeatureEngine <- R6::R6Class(
                 replacement = "target_variable"
                 );
 
-            cat("\nstr(DF.temp)\n");
-            print( str(DF.temp)   );
+            logger::log_debug('{this.function.name}(): str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             DF.stack <- base::data.frame();
@@ -538,26 +575,21 @@ fpcFeatureEngine <- R6::R6Class(
             years <- base::unique(DF.input[,"year"]);
             for ( year in years ) {
 
-                cat(paste0("\nstandized.grid.interpolate() -- ",variable,", ",year,"\n"));
+                logger::log_debug('{this.function.name}(): variable = {variable}, year = {year}');
 
                 DF.temp.year <- DF.temp[DF.temp[,"year"] == year,] %>%
                     tidyr::spread(key = date_index, value = target_variable);
                 DF.temp.year <- base::as.data.frame(DF.temp.year);
                 base::rownames(DF.temp.year) <- DF.temp.year[,"location_year"];
-                DF.temp.year <- DF.temp.year[,base::setdiff(base::colnames(DF.temp.year),base::c("location_year","year"))];
 
-                cat("\nstr(DF.temp.year)\n");
-                print( str(DF.temp.year)   );
+                DF.temp.year <- DF.temp.year[,base::setdiff(base::colnames(DF.temp.year),base::c("location_year","year"))];
+                logger::log_debug('{this.function.name}(): str(DF.temp.year):\n{paste0(capture.output(str(DF.temp.year)),collapse="\n")}');
 
                 DF.temp.year <- DF.temp.year[0 == base::rowSums(base::is.na(DF.temp.year)),];
-
-                cat("\nstr(DF.temp.year)\n");
-                print( str(DF.temp.year)   );
+                logger::log_debug('{this.function.name}(): str(DF.temp.year):\n{paste0(capture.output(str(DF.temp.year)),collapse="\n")}');
 
                 t.DF.temp.year <- t(DF.temp.year);
-
-                # cat("\nstr(t.DF.temp.year)\n");
-                # print( str(t.DF.temp.year)   );
+                logger::log_debug('{this.function.name}(): str(t.DF.temp.year):\n{paste0(capture.output(str(t.DF.temp.year)),collapse="\n")}');
 
                 temp.bspline.basis <- fda::create.bspline.basis(
                     rangeval    = base::range(base::as.integer(base::colnames(DF.temp.year))),
@@ -658,6 +690,7 @@ fpcFeatureEngine <- R6::R6Class(
             DF.output <- DF.output[0 == base::rowSums(base::is.na(DF.output)),];
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_debug('{this.function.name}(): exits');
             base::return( DF.output );
 
             }, # standardized.grid.interpolate()
@@ -667,10 +700,12 @@ fpcFeatureEngine <- R6::R6Class(
             visualize = FALSE
             ) {
 
+            this.function.name <- "learn.fpca.parameters";
+            logger::log_debug('{this.function.name}(): starts');
+
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             t.DF.input <- base::t(DF.input[,base::as.character(self$standardized.bspline.basis[['spline.grid']])]);
-            cat("\nstr(t.DF.input)\n");
-            print( str(t.DF.input)   );
+            logger::log_debug('{this.function.name}(): str(t.DF.input):\n{paste0(capture.output(str(t.DF.input)),collapse="\n")}');
 
             # express standardized-grid time series as linear combinations
             # of the standardized-grid B-spline basis
@@ -697,6 +732,9 @@ fpcFeatureEngine <- R6::R6Class(
                 FUN    = function(x) { mean(x) }
                 );
 
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_debug('{this.function.name}(): exits');
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             base::return(
                 base::list(
                     training.pca.fd    = results.pca.fd,
@@ -712,10 +750,12 @@ fpcFeatureEngine <- R6::R6Class(
             visualize = FALSE
             ) {
 
-            t.DF.input <- base::t(DF.input);
+            this.function.name <- "learn.fpca.parameters";
+            logger::log_debug('{this.function.name}(): starts');
 
-            cat('\nstr(t.DF.input)\n');
-            print( str(t.DF.input)   );
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            t.DF.input <- base::t(DF.input);
+            logger::log_debug('{this.function.name}(): str(t.DF.input):\n{paste0(capture.output(str(t.DF.input)),collapse="\n")}');
 
             t.DF.input.fd <- fda::smooth.basis(
                 argvals      = self$standardized.bspline.basis[['spline.grid']],
@@ -745,7 +785,8 @@ fpcFeatureEngine <- R6::R6Class(
             colnames(DF.fpc) <- paste0('fpc_',seq(1,ncol(DF.fpc)));
             rownames(DF.fpc) <- rownames(DF.input);
 
-            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+            logger::log_debug('{this.function.name}(): exits');
             return( DF.fpc );
 
             } # apply.fpca.parameters()
