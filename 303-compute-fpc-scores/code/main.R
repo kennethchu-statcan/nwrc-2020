@@ -48,13 +48,16 @@ data.directory <- file.path(dir.data,data.snapshot);
 set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-DF.2017 <- getData(
-    data.directory = file.path(data.directory,"2017"),
-    output.file    = "raw-2017.RData"
-    );
-
-cat("\nstr(DF.2017)\n");
-print( str(DF.2017)   );
+years <- c("2017","2018","2019");
+for ( temp.year in years ) {
+    DF.temp.year <- getData(
+        data.directory = file.path(data.directory,temp.year),
+        output.file    = paste0("raw-",temp.year,".RData")
+        );
+    cat("\nstr(DF.temp.year)\n");
+    print( str(DF.temp.year)   );
+    remove( list = "DF.temp.year" );
+    }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
