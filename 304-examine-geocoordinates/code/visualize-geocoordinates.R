@@ -77,11 +77,18 @@ visualize.geocoordinates_get.geocoordinates <- function(
         DF.lon <- DF.lon[selected.rows,selected.cols];
         DF.lat <- DF.lat[selected.rows,selected.cols];
 
+        matrix.all.ones  <- matrix(rep(x=1,times=nrow(DF.lon)*ncol(DF.lon)),nrow=nrow(DF.lon));
+        matrix.row.index <- diag(seq(1,nrow(matrix.all.ones))) %*% matrix.all.ones;
+        matrix.col.index <- matrix.all.ones %*% diag(seq(1,ncol(matrix.all.ones)));
+
         DF.temp <- data.frame(
-            lon = as.vector(as.matrix(DF.lon)),
-            lat = as.vector(as.matrix(DF.lat))
+            lon       = as.vector(as.matrix(DF.lon)),
+            lat       = as.vector(as.matrix(DF.lat)),
+            row.index = as.vector(matrix.row.index),
+            col.index = as.vector(matrix.col.index)
             );
         DF.temp[,'date'] <- rep(as.Date(temp.date,format="%Y%m%d"),nrow(DF.temp));
+        DF.temp <- DF.temp[,c('date','row.index','col.index','lat','lon')];
 
         DF.output <- rbind(DF.output,DF.temp);
 
@@ -99,22 +106,40 @@ visualize.geocoordinates_plot.geocoordinates <- function(
 
     my.ggplot <- initializePlot();
 
-    # my.ggplot <- my.ggplot + ggplot2::ggtitle(
-    #     label    = NULL,
-    #     subtitle = year
-    #     );
+    my.ggplot <- my.ggplot + ggplot2::ggtitle(
+        label    = NULL,
+        subtitle = year
+        );
 
-    DF.input[,'date'] <- as.character(DF.input[,'date']);
+    DF.input[,'date']     <- as.character(DF.input[,'date']);
+    DF.input[,'parity']   <- as.character((DF.input[,'row.index'] + DF.input[,'col.index']) %% 2);
+    DF.input[,'position'] <- apply(
+        X      = DF.input[,c('row.index','col.index')],
+        MARGIN = 1,
+        FUN    = function(x) { paste0('(',paste(x,collapse='_'),')') }
+        );
 
     my.ggplot <- my.ggplot + ggplot2::geom_point(
         data    = DF.input,
         mapping = ggplot2::aes(
             x      = lon,
             y      = lat,
-            colour = date
+            colour = parity # date
             ),
         alpha = 0.9,
         size  = 1.5
+        );
+
+    my.ggplot <- my.ggplot + ggplot2::geom_line(
+        data    = DF.input,
+        mapping = ggplot2::aes(
+            x      = lon,
+            y      = lat,
+            colour = parity,
+            group  = position
+            ),
+        alpha = 0.50,
+        size  = 0.25
         );
 
     ggplot2::ggsave(
