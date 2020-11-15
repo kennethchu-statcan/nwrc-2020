@@ -23,6 +23,7 @@ require(rlang);
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 code.files <- c(
     "initializePlot.R",
+    "geo-standardize.R",
     "visualize-geocoordinates.R"
     # "getData.R",
     # "getData-beam-mode.R",
@@ -51,10 +52,14 @@ set.seed(7654321);
 data.snapshot  <- "2020-10-13.01";
 data.directory <- file.path(dir.data,data.snapshot);
 
-visualize.geocoordinates(
-    data.directory = data.directory,
-    selected.rows  = seq(1, 4),
-    selected.cols  = seq(1,10)
+# visualize.geocoordinates(
+#     data.directory = data.directory,
+#     selected.rows  = seq(1, 4),
+#     selected.cols  = seq(1,10)
+#     );
+
+geo.standardize(
+    data.directory = data.directory
     );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###

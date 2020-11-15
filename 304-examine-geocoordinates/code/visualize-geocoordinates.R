@@ -20,7 +20,8 @@ visualize.geocoordinates <- function(
         DF.geocoordinates <- visualize.geocoordinates_get.geocoordinates(
             data.directory = file.path(data.directory,temp.year),
             selected.rows  = selected.rows,
-            selected.cols  = selected.cols
+            selected.cols  = selected.cols,
+            year           = temp.year
             );
 
         cat("\nstr(DF.geocoordinates)\n");
@@ -45,7 +46,8 @@ visualize.geocoordinates <- function(
 visualize.geocoordinates_get.geocoordinates <- function(
     data.directory = NULL,
     selected.rows  = NULL,
-    selected.cols  = NULL
+    selected.cols  = NULL,
+    year           = NULL
     ) {
 
     files.lat.lon <- list.files(data.directory, pattern = "(Lat|Lon)\\.csv");
@@ -56,7 +58,8 @@ visualize.geocoordinates_get.geocoordinates <- function(
         replacement = ""
         ));
 
-    DF.output <- data.frame();
+    DF.output     <- data.frame();
+    DF.dimensions <- data.frame();
     for ( temp.date in temp.dates ) {
 
         file.lon <- grep(x = files.lat.lon, pattern = paste0(temp.date,".+Lon"), value = TRUE);
@@ -64,6 +67,13 @@ visualize.geocoordinates_get.geocoordinates <- function(
             file   = file.path(data.directory,file.lon),
             header = FALSE
             );
+
+        DF.temp.dimensions <- data.frame(
+            date   = temp.date,
+            n.rows = nrow(DF.lon),
+            n.cols = ncol(DF.lon)
+            );
+        DF.dimensions <- rbind(DF.dimensions,DF.temp.dimensions);
 
         file.lat <- grep(x = files.lat.lon, pattern = paste0(temp.date,".+Lat"), value = TRUE);
         DF.lat   <- read.csv(
@@ -93,6 +103,12 @@ visualize.geocoordinates_get.geocoordinates <- function(
         DF.output <- rbind(DF.output,DF.temp);
 
         }
+
+    write.csv(
+        file      = paste0("dimensions-",year,".csv"),
+        x         = DF.dimensions,
+        row.names = FALSE
+        );
 
     return( DF.output );
 
