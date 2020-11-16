@@ -22,10 +22,10 @@ require(rlang);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 code.files <- c(
-    "initializePlot.R",
     "geo-standardize.R",
+    "getData.R",
+    "initializePlot.R",
     "visualize-geocoordinates.R"
-    # "getData.R",
     # "getData-beam-mode.R",
     # "getData-beam-mode-helper.R",
     # "reshapeData.R",
@@ -49,8 +49,8 @@ for ( code.file in code.files ) {
 set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-10-13.01";
-data.directory <- file.path(dir.data,data.snapshot);
+# data.snapshot  <- "2020-10-13.01";
+# data.directory <- file.path(dir.data,data.snapshot);
 
 # visualize.geocoordinates(
 #     data.directory = data.directory,
@@ -58,9 +58,23 @@ data.directory <- file.path(dir.data,data.snapshot);
 #     selected.cols  = seq(1,10)
 #     );
 
-geo.standardize(
-    data.directory = data.directory
+# geo.standardize(
+#     data.directory = data.directory
+#     );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+data.snapshot  <- "2020-10-13.01";
+data.directory <- file.path(dir.data,data.snapshot);
+years          <- c("2017","2018","2019");
+n.batches      <- 500;
+
+temp.year <- years[1];
+DF.temp.year <- getData(
+    data.directory = file.path(data.directory,temp.year),
+    output.file    = paste0("data-unlabelled-",temp.year,".RData")
     );
+
+print( str(DF.temp.year) );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # DF.colour.scheme <- data.frame(
