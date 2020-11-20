@@ -60,13 +60,17 @@ getData_given.date <- function(
     DF.metadata    = NULL,
     data.directory = NULL
     ) {
+
     DF.metadata <- DF.metadata[DF.metadata[,'date'] == given.date,];
+
     DF.output <- NULL;
     for ( i in seq(1,nrow(DF.metadata))) {
         # DF.temp <- read.csv(file = file.path(data.directory,DF.metadata[i,'data.file']), header = FALSE);
         DF.temp <- getData_read.csv(
             input.file = file.path(data.directory,DF.metadata[i,'data.file'])
             );
+        nrow.DF.temp <- nrow(DF.temp);
+        ncol.DF.temp <- ncol(DF.temp);
         if ( is.null(DF.output) ) {
             DF.output <- data.frame(temp_colname = as.vector(as.matrix(DF.temp)));
         } else {
@@ -75,9 +79,19 @@ getData_given.date <- function(
         DF.output <- as.data.frame(DF.output);
         colnames(DF.output) <- gsub(x = colnames(DF.output), pattern = 'temp_colname', replacement = DF.metadata[i,'variable']);
         }
+
     DF.output[,'date'] <- given.date;
-    DF.output <- DF.output[,c('date',setdiff(colnames(DF.output),'date'))];
+
+    DF.row.index <- matrix(data = rep(1:nrow.DF.temp,ncol.DF.temp), nrow = nrow.DF.temp, byrow = FALSE);
+    DF.col.index <- matrix(data = rep(1:ncol.DF.temp,nrow.DF.temp), ncol = ncol.DF.temp, byrow = TRUE );
+    DF.output[,'row_index'] <- as.vector(as.matrix(DF.row.index));
+    DF.output[,'col_index'] <- as.vector(as.matrix(DF.col.index));
+
+    leading.colnames <- c('date','row_index','col_index');
+    DF.output <- DF.output[,c(leading.colnames,setdiff(colnames(DF.output),leading.colnames))];
+
     return( DF.output );
+
     }
 
 getData_read.csv <- function(
