@@ -51,41 +51,6 @@ for ( pkg.file in pkg.files ) {
 set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# data.snapshot  <- "2020-10-13.01";
-# data.directory <- file.path(dir.data,data.snapshot);
-
-# visualize.geocoordinates(
-#     data.directory = data.directory,
-#     selected.rows  = seq(1, 4),
-#     selected.cols  = seq(1,10)
-#     );
-
-# geo.standardize(
-#     data.directory = data.directory
-#     );
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# data.snapshot  <- "2020-10-13.01";
-# data.directory <- file.path(dir.data,data.snapshot);
-# years          <- c("2017","2018","2019");
-# n.batches      <- 500;
-#
-# temp.year <- years[1];
-# DF.temp.year <- getData(
-#     data.directory = file.path(data.directory,temp.year),
-#     output.file    = paste0("data-unlabelled-",temp.year,".RData")
-#     );
-#
-# print( str(DF.temp.year) );
-#
-# DF.temp.year <- coregisterData(
-#     DF.input    = DF.temp.year,
-#     output.file = paste0("data-unlabelled-",temp.year,"-coregistered.RData")
-#     );
-#
-# print( str(DF.temp.year) );
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 DF.colour.scheme <- data.frame(
     land.cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
     colour     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
@@ -139,37 +104,12 @@ n.basis             <-   9;
 smoothing.parameter <-   0.1;
 n.harmonics         <-   7;
 
-my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VV,
-    location            = 'x_y',
-    date                = 'date',
-    variable            = 'VV',
-    n.partition         = n.partition,
-    n.order             = n.order,
-    n.basis             = n.basis,
-    smoothing.parameter = smoothing.parameter,
-    n.harmonics         = n.harmonics
-    );
-
-my.fpcFeatureEngine$fit();
-
-ggplot2::ggsave(
-    file   = "plot-harmonics.png",
-    plot   = my.fpcFeatureEngine$plot.harmonics(),
-    dpi    = 150,
-    height =   4 * n.harmonics,
-    width  =  16,
-    units  = 'in'
-    );
-
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 data.snapshot  <- "2020-10-13.01";
 data.directory <- file.path(dir.data,data.snapshot);
-years          <- c("2017","2018","2019");
 n.batches      <- 10;
 
-#for ( temp.year in years[c(1,3)] ) {
-for ( temp.year in c("2017","2019") ) {
+for ( temp.year in c("2017","2018","2019") ) {
 
     DF.temp.year <- getData(
         data.directory = file.path(data.directory,temp.year),
@@ -182,9 +122,6 @@ for ( temp.year in c("2017","2019") ) {
         );
 
     DF.temp.year <- DF.temp.year[,setdiff(colnames(DF.temp.year),c('row_index','col_index','lat','lon'))];
-
-    cat("\nstr(DF.temp.year)\n");
-    print( str(DF.temp.year)   );
 
     DF.lat.lon <- unique(DF.temp.year[,c('master_lat','master_lon')]);
     DF.lat.lon[,"batch"] <- sample(
@@ -201,6 +138,45 @@ for ( temp.year in c("2017","2019") ) {
 
     remove( list = c("DF.lat.lon") );
 
+    cat("\nstr(DF.temp.year)\n");
+    print( str(DF.temp.year)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    temp.date.range <- range(DF.temp.year[,'date']);
+    cat("\nstr(temp.date.range)\n");
+    print( str(temp.date.range)   );
+
+    my.fpcFeatureEngine <- fpcFeatureEngine$new(
+        training.data       = DF.VV,
+        location            = 'x_y',
+        date                = 'date',
+        variable            = 'VV',
+        min.date            = min(temp.date.range),
+        max.date            = max(temp.date.range),
+        n.partition         = n.partition,
+        n.order             = n.order,
+        n.basis             = n.basis,
+        smoothing.parameter = smoothing.parameter,
+        n.harmonics         = n.harmonics
+        );
+
+    my.fpcFeatureEngine$fit();
+
+    saveRDS(
+        object = my.fpcFeatureEngine,
+        file   = paste0("fpc-",temp.year,"-FeatureEngine.RData")
+        );
+
+    ggplot2::ggsave(
+        file   = paste0("fpc-",temp.year,"-harmonics.png"),
+        plot   = my.fpcFeatureEngine$plot.harmonics(),
+        dpi    = 150,
+        height =   4 * n.harmonics,
+        width  =  16,
+        units  = 'in'
+        );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     for ( temp.batch in seq(1,n.batches,1) ) {
 
         DF.temp.batch <- DF.temp.year[temp.batch == DF.temp.year[,'batch'],];
@@ -211,7 +187,7 @@ for ( temp.year in c("2017","2019") ) {
             FUN    = function(x) { return(paste(x,collapse="_")) }
             );
 
-        cat(paste0("\nstr(DF.temp.batch) -- ",temp.year," -- ",temp.batch,"\n"));
+        cat(paste0("\nstr(DF.temp.batch): year = ",temp.year,", batch = ",temp.batch,"\n"));
         print( str(DF.temp.batch)   );
 
         DF.bspline.fpc <- my.fpcFeatureEngine$transform(
@@ -244,7 +220,7 @@ for ( temp.year in c("2017","2019") ) {
 
         saveRDS(
             object = DF.fpc,
-            file   = paste0("fpc-unlabelled-",temp.year,"-batch-",temp.batch.string,".RData")
+            file   = paste0("fpc-",temp.year,"-scores-batch-",temp.batch.string,".RData")
             );
 
         # png('plot-scatter-fpc1-fpc2.png', height = 8, width = 8, unit = 'in', res = 300);
@@ -262,7 +238,7 @@ for ( temp.year in c("2017","2019") ) {
 
         }
 
-    remove( list = c("DF.temp.year") );
+    remove( list = c("DF.temp.year","my.fpcFeatureEngine") );
 
     }
 
