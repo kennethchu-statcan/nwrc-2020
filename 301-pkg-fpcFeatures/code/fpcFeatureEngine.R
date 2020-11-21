@@ -650,8 +650,8 @@ fpcFeatureEngine <- R6::R6Class(
                     returnMatrix = FALSE
                     );
 
-                logger::log_debug('{this.function.name}(): base::as.integer(base::colnames(DF.temp.year)):\n{paste0(capture.output(base::as.integer(base::colnames(DF.temp.year))),collapse="\n")}');
-                logger::log_debug('{this.function.name}(): self$standardized.bspline.basis[["spline.grid"]]:\n{paste0(capture.output(self$standardized.bspline.basis[["spline.grid"]]),collapse="\n")}');
+                logger::log_debug('{this.function.name}(): base::as.integer(base::colnames(DF.temp.year)):\n{paste(capture.output(base::as.integer(base::colnames(DF.temp.year))),collapse="\n")}');
+                logger::log_debug('{this.function.name}(): self$standardized.bspline.basis[["spline.grid"]]:\n{paste(capture.output(self$standardized.bspline.basis[["spline.grid"]]),collapse="\n")}');
 
                 # evaluate the B-spline approximations at grid points
                 # of the across-year common grid
