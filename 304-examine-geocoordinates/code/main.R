@@ -166,9 +166,10 @@ ggplot2::ggsave(
 data.snapshot  <- "2020-10-13.01";
 data.directory <- file.path(dir.data,data.snapshot);
 years          <- c("2017","2018","2019");
-n.batches      <- 50;
+n.batches      <- 10;
 
-for ( temp.year in years[c(3)] ) {
+#for ( temp.year in years[c(1,3)] ) {
+for ( temp.year in c("2017","2019") ) {
 
     DF.temp.year <- getData(
         data.directory = file.path(data.directory,temp.year),
