@@ -780,7 +780,7 @@ fpcFeatureEngine <- R6::R6Class(
             visualize = FALSE
             ) {
 
-            this.function.name <- "learn.fpca.parameters";
+            this.function.name <- "apply.fpca.parameters";
             logger::log_debug('{this.function.name}(): starts');
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
