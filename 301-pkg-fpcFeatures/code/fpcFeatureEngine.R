@@ -33,6 +33,8 @@ fpcFeatureEngine <- R6::R6Class(
         location            = NULL,
         date                = NULL,
         variable            = NULL,
+        min.date            = NULL,
+        max.date            = NULL,
         n.partition         = NULL,
         n.order             = NULL,
         n.basis             = NULL,
@@ -50,6 +52,8 @@ fpcFeatureEngine <- R6::R6Class(
         #' @param location location
         #' @param date date
         #' @param variable variable
+        #' @param min.date min.date
+        #' @param max.date max.date
         #' @param n.partition n.partition
         #' @param n.order n.order
         #' @param n.basis n.basis
@@ -62,6 +66,8 @@ fpcFeatureEngine <- R6::R6Class(
             location            = NULL,
             date                = NULL,
             variable            = NULL,
+            min.date            = NULL,
+            max.date            = NULL,
             n.partition         = 100,
             n.order             =   3,
             n.basis             =   9,
@@ -73,6 +79,8 @@ fpcFeatureEngine <- R6::R6Class(
             self$location            <- location;
             self$date                <- date;
             self$variable            <- variable;
+            self$min.date            <- min.date;
+            self$max.date            <- max.date;
             self$n.partition         <- n.partition;
             self$n.order             <- n.order;
             self$n.basis             <- n.basis;
@@ -95,7 +103,9 @@ fpcFeatureEngine <- R6::R6Class(
             logger::log_debug('str(DF.temp):\n{paste0(capture.output(str(DF.temp)),collapse="\n")}');
 
             self$standardized.bspline.basis <- private$get.standardized.bspline.basis(
-                DF.input = DF.temp
+                DF.input = DF.temp,
+                min.date = self$min.date,
+                max.date = self$max.date
                 );
             logger::log_debug('str(self$standardized.bspline.basis):\n{paste0(capture.output(str(self$standardized.bspline.basis)),collapse="\n")}');
 
@@ -496,7 +506,11 @@ fpcFeatureEngine <- R6::R6Class(
             base::return( DF.output );
             },
 
-        get.standardized.bspline.basis = function(DF.input = NULL) {
+        get.standardized.bspline.basis = function(
+            DF.input = NULL,
+            min.date = NULL,
+            max.date = NULL
+            ) {
 
             this.function.name <- "get.standardized.bspline.basis";
             logger::log_debug('{this.function.name}(): starts');
@@ -509,7 +523,20 @@ fpcFeatureEngine <- R6::R6Class(
             DF.yearly.endpoints <- DF.yearly.endpoints[base::order(DF.yearly.endpoints[,self$date]),];
 
             common.start.index <- base::max(DF.yearly.endpoints[,"start_index"]);
+            if ( !base::is.null(min.date) ) {
+                min.date.year      <- base::as.character(base::format(x = min.date, format = "%Y"));
+                new.year.day       <- base::as.Date(base::paste0(min.date.year,"-01-01"));
+                min.date.index     <- base::as.integer(min.date) - base::as.integer(new.year.day) + 1;
+                common.start.index <- base::max(common.start.index,min.date.index);
+                }
+
             common.end.index   <- base::min(DF.yearly.endpoints[,  "end_index"]);
+            if ( !base::is.null(max.date) ) {
+                max.date.year    <- base::as.character(base::format(x = max.date, format = "%Y"));
+                new.year.day     <- base::as.Date(base::paste0(max.date.year,"-01-01"));
+                max.date.index   <- base::as.integer(max.date) - base::as.integer(new.year.day) + 1;
+                common.end.index <- base::min(common.end.index,max.date.index);
+                }
 
             step.size   <- base::round( (common.end.index - common.start.index) / self$n.partition );
             spline.grid <- base::seq(common.start.index, common.end.index, step.size);
@@ -622,6 +649,9 @@ fpcFeatureEngine <- R6::R6Class(
                     dfscale      = 1,
                     returnMatrix = FALSE
                     );
+
+                logger::log_debug('{this.function.name}(): base::as.integer(base::colnames(DF.temp.year)): {paste0(capture.output(base::as.integer(base::colnames(DF.temp.year))),collapse=",")}');
+                logger::log_debug('{this.function.name}(): self$standardized.bspline.basis[["spline.grid"]]: {paste0(capture.output(self$standardized.bspline.basis[["spline.grid"]]),collapse=",")}');
 
                 # evaluate the B-spline approximations at grid points
                 # of the across-year common grid
