@@ -836,9 +836,9 @@ fpcFeatureEngine <- R6::R6Class(
             logger::log_debug('{this.function.name}(): exits');
             return( DF.fpc );
 
-            } # apply.fpca.parameters()
+            }, # apply.fpca.parameters()
 
-        input.validity.checks(
+        input.validity.checks = function(
             learner.metadata    = NULL,
             training.data       = NULL,
             location            = NULL,
@@ -853,13 +853,16 @@ fpcFeatureEngine <- R6::R6Class(
             n.harmonics         = NULL
             ) {
 
-            input.validity.checks_data.structure(
-                DF.input = training.data
+            private$input.validity.checks_data.structure(
+                DF.input = training.data,
+                location = location,
+                date     = date,
+                variable = variable
                 );
 
-            } # input.validity.checks()
+            }, # input.validity.checks()
 
-        input.validity.checks_data.structure <- function(
+        input.validity.checks_data.structure = function(
             DF.input = NULL,
             location = NULL,
             date     = NULL,
@@ -869,19 +872,12 @@ fpcFeatureEngine <- R6::R6Class(
             base::stopifnot(
                 base::identical( base::class(DF.input) , "data.frame" ),
                 base::all( base::c(location,date,variable) %in% base::colnames(DF.input) ),
-                base::identical( base::class( DF.input[,'location'] ) , "character" ),
-                base::identical( base::class( DF.input[,'date'    ] ) , "Date"      ),
-                base::identical( base::class( DF.input[,'variable'] ) , "numeric"   )
+                base::identical( base::class( DF.input[,location] ) , "character" ),
+                base::identical( base::class( DF.input[,date    ] ) , "Date"      ),
+                base::identical( base::class( DF.input[,variable] ) , "numeric"   )
                 );
 
-            base::stopifnot(
-                base::is.numeric(training.window),
-                base::length(training.window) == 1,
-                training.window == base::as.integer(training.window),
-                training.window > 0
-                );
-
-            } # input.validity.checks_data()
+            } # input.validity.checks_data.structure()
 
         ) # private = list()
 
