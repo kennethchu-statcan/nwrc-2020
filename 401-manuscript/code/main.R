@@ -20,6 +20,7 @@ require(dplyr);
 require(foreach);
 require(magrittr);
 require(rlang);
+require(fpcFeatures);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 code.files <- c(
@@ -38,14 +39,14 @@ for ( code.file in code.files ) {
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-pkg.files <- c(
-    "fpcFeatureEngine.R",
-    "initializePlot.R"
-    );
-
-for ( pkg.file in pkg.files ) {
-    source(file.path(dir.pkg,pkg.file));
-    }
+# pkg.files <- c(
+#     "fpcFeatureEngine.R",
+#     "initializePlot.R"
+#     );
+#
+# for ( pkg.file in pkg.files ) {
+#     source(file.path(dir.pkg,pkg.file));
+#     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 set.seed(7654321);
@@ -62,12 +63,11 @@ satellites      <- "sentinel";
 beam.mode       <- "IW4";
 colname.pattern <- "V";
 
-data.snapshot       <- "2020-12-18.01";
-data.directory      <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
-beam.mode.directory <- file.path(data.directory,beam.mode);
+data.snapshot  <- "2020-12-18.01";
+data.directory <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
 
 DF.IW4 <- getData.labelled(
-    data.directory  = beam.mode.directory,
+    data.directory  = data.directory,
     satellites      = satellites,
     beam.mode       = beam.mode,
     colname.pattern = colname.pattern,
@@ -75,24 +75,67 @@ DF.IW4 <- getData.labelled(
     RData.output    = paste0("data-labelled-",beam.mode,".RData")
     );
 
-is.not.2016 <- ("2016" != DF.IW4[,'year']);
-DF.IW4 <- DF.IW4[is.not.2016,c(c("X","Y","date","type","VV","VH"))];
-colnames(DF.IW4) <- gsub(x = colnames(DF.IW4), pattern = "^X$",    replacement = "x");
-colnames(DF.IW4) <- gsub(x = colnames(DF.IW4), pattern = "^Y$",    replacement = "y");
-colnames(DF.IW4) <- gsub(x = colnames(DF.IW4), pattern = "^type$", replacement = "land_cover");
-
 cat("\nstr(DF.IW4)\n");
 print( str(DF.IW4)   );
 
-DF.VV <- DF.IW4[,c("x","y","date","VV")];
-DF.VV[,"x_y"] <- apply(
-    X      = DF.VV[,c('x','y')],
-    MARGIN = 1,
-    FUN    = function(x) { return(paste(x,collapse="_")) }
-    );
+# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#logger::log_threshold(level = logger::ERROR);
+logger::log_threshold(level = logger::TRACE);
 
-cat("\nstr(DF.VV)\n");
-print( str(DF.VV)   );
+n.partition         <- 100;
+n.order             <-   3;
+n.basis             <-   9;
+smoothing.parameter <-   0.1;
+n.harmonics         <-   7;
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+polarizations <- c("VV","VH");
+
+for ( temp.polarization in polarizations ) {
+
+    DF.polarization <- DF.IW4[,c("X","Y","date",temp.polarization)];
+    DF.polarization[,"X_Y"] <- apply(
+        X      = DF.polarization[,c('X','Y')],
+        MARGIN = 1,
+        FUN    = function(x) { return(paste(x,collapse="_")) }
+        );
+
+    cat("\nstr(DF.polarization)\n");
+    print( str(DF.polarization)   );
+
+    my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
+        training.data       = DF.polarization,
+        location            = 'X_Y',
+        date                = 'date',
+        variable            = temp.polarization,
+        # min.date          = min(temp.date.range),
+        # max.date          = max(temp.date.range),
+        n.partition         = n.partition,
+        n.order             = n.order,
+        n.basis             = n.basis,
+        smoothing.parameter = smoothing.parameter,
+        n.harmonics         = n.harmonics
+        );
+
+    my.fpcFeatureEngine$fit();
+
+    saveRDS(
+        object = my.fpcFeatureEngine,
+        # file = paste0("fpc-",temp.year,"-FeatureEngine.RData")
+        file = paste0("fpc-",temp.polarization,"-FeatureEngine.RData")
+        );
+
+    ggplot2::ggsave(
+        # file = paste0("fpc-",temp.year,"-harmonics.png"),
+        file   = paste0("fpc-",temp.polarization,"-harmonics.png"),
+        plot   = my.fpcFeatureEngine$plot.harmonics(),
+        dpi    = 150,
+        height =   4 * n.harmonics,
+        width  =  16,
+        units  = 'in'
+        );
+
+    }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -118,6 +161,9 @@ cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
 stop.proc.time <- proc.time();
 cat("\n##### stop.proc.time - start.proc.time:\n");
 print(       stop.proc.time - start.proc.time    );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+quit(save = "no");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###

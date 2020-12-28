@@ -1,5 +1,5 @@
 
-getData.beam.mode <- function(
+getData.labelled <- function(
     data.directory     = NULL,
     satellites         = NULL,
     beam.mode          = NULL,
@@ -10,10 +10,10 @@ getData.beam.mode <- function(
     RData.output       = paste0("data-",beam.mode,".RData")
     ) {
 
-    thisFunctionName <- "getData.beam.mode";
+    thisFunctionName <- "getData.labelled";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
-    cat(paste0("\n",thisFunctionName,"() starts.\n"));
+    cat(paste0("\n# ",thisFunctionName,"() starts.\n"));
     cat(paste0("\nbeam.mode: ",beam.mode,"\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -39,10 +39,13 @@ getData.beam.mode <- function(
         exclude.years  = exclude.years
         );
 
+    cat(paste0("\n# ",thisFunctionName,"(): years:","\n"));
+    print( years );
+
     DF.output <- data.frame();
     for ( temp.year in years ) {
 
-        list.data <- getData.beam.mode_helper(
+        list.data <- getData.labelled_helper(
             data.directory     = data.directory,
             satellites         = satellites,
             beam.mode          = beam.mode,
@@ -78,7 +81,7 @@ getData.beam.mode <- function(
     remove(list = c("list.data"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat(paste0("\n",thisFunctionName,"() exits."));
+    cat(paste0("\n# ",thisFunctionName,"() exits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
     return( DF.output );
 

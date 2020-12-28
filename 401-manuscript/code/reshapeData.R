@@ -24,28 +24,28 @@ reshapeData <- function(
     } else {
 
         list.data <- list();
-        for ( temp.name in names(list.input) ) {
-            list.data[[ temp.name ]] <- reshapeData_long(
-                DF.input        = list.input[[ temp.name ]],
-                land.type       = temp.name,
+        for ( temp.cover in names(list.input) ) {
+            list.data[[ temp.cover ]] <- reshapeData_long(
+                DF.input        = list.input[[ temp.cover ]],
+                land.cover      = temp.cover,
                 beam.mode       = beam.mode,
                 colname.pattern = colname.pattern
                 );
             }
 
         DF.output <- data.frame();
-        for ( temp.name in names(list.data) ) {
+        for ( temp.cover in names(list.data) ) {
             DF.output <- rbind(
                 DF.output,
-                list.data[[ temp.name ]]
+                list.data[[ temp.cover ]]
                 );
             }
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
         DF.output[,"X_Y_year" ] <- paste(DF.output[,"X"],DF.output[,"Y"],DF.output[,"year"],sep = "_");
 
-        DF.output[,"type"] <- factor(
-            x       = as.character(DF.output[,"type"]),
+        DF.output[,"land_cover"] <- factor(
+            x       = as.character(DF.output[,"land_cover"]),
             levels  = land.cover,
             ordered = FALSE
             );
@@ -187,7 +187,7 @@ reshapeData_attachScaledVariable <- function(
 
 reshapeData_long <- function(
     DF.input        = NULL,
-    land.type       = NULL,
+    land.cover      = NULL,
     beam.mode       = NULL,
     colname.pattern = NULL
     ) {
@@ -203,8 +203,8 @@ reshapeData_long <- function(
 
     DF.temp <- DF.input[,c("X","Y",temp.colnames)];
     #DF.temp       <- DF.input[,temp.colnames];
-    #DF.temp[,"X"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
-    #DF.temp[,"Y"] <- paste0(land.type,"_",seq(1,nrow(DF.temp)));
+    #DF.temp[,"X"] <- paste0(land.cover,"_",seq(1,nrow(DF.temp)));
+    #DF.temp[,"Y"] <- paste0(land.cover,"_",seq(1,nrow(DF.temp)));
 
     DF.temp <- DF.temp %>%
         tidyr::gather(column.name,value,-X,-Y);
@@ -226,8 +226,8 @@ reshapeData_long <- function(
         dplyr::select(X,Y,date,variable,value) %>%
         tidyr::spread(key=variable,value=value);
 
-    DF.output[,"type"] <- as.character(land.type);
-    DF.output[,"date"] <- as.Date(x = DF.output[,"date"], tryFormats = c("%Y%m%d"));
+    DF.output[,"land_cover"] <- as.character(land.cover);
+    DF.output[,"date"]       <- as.Date(x = DF.output[,"date"], tryFormats = c("%Y%m%d"));
 
     temp.colnames <- grep(
         x       = colnames(DF.output),
@@ -243,7 +243,7 @@ reshapeData_long <- function(
     DF.output[,"new_year_day"] <- as.Date(paste0(DF.output[,"year"],"-01-01"));
     DF.output[,"date_index"]   <- as.integer(DF.output[,"date"]) - as.integer(DF.output[,"new_year_day"]);
 
-    first.colnames     <- c("X","Y","year","type","new_year_day","date","date_index");
+    first.colnames     <- c("X","Y","year","land_cover","new_year_day","date","date_index");
     colnames.reordered <- c(first.colnames,setdiff(colnames(DF.output),first.colnames));
     DF.output          <- DF.output[,colnames.reordered];
 

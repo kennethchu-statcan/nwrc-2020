@@ -1,5 +1,5 @@
 
-getData.beam.mode_helper <- function(
+getData.labelled_helper <- function(
     data.directory     = NULL,
     satellites         = c("sentinel","radarsat"),
     beam.mode          = NULL,
@@ -8,10 +8,10 @@ getData.beam.mode_helper <- function(
     output.file        = NULL
     ) {
 
-    thisFunctionName <- "getData";
+    thisFunctionName <- "getData.labelled_helper";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
-    cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
+    cat(paste0("\n# ",thisFunctionName,"() starts.\n\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     require(readr);
@@ -28,17 +28,27 @@ getData.beam.mode_helper <- function(
     } else {
 
         temp.files.given.year <- list.files(path = data.directory, pattern = year);
-        temp.files.given.year <- grep(
-            x       = temp.files.given.year,
-            pattern = beam.mode,
-            value   = TRUE
-            );
+
+        cat(paste0("\n# ",thisFunctionName,"(): temp.files.given.year:\n"));
+        print( temp.files.given.year );
+
+        # temp.files.given.year <- grep(
+        #     x       = temp.files.given.year,
+        #     pattern = beam.mode,
+        #     value   = TRUE
+        #     );
+        #
+        # cat(paste0("\n# ",thisFunctionName,"(): temp.files.given.year:\n"));
+        # print( temp.files.given.year );
 
         land.types <- unique(gsub(
             x           = temp.files.given.year,
-            pattern     = "_[0-9]{4}_.+",
+            pattern     = "_IW_20[0-9]{2}_.+",
             replacement = ""
             ));
+
+        cat(paste0("\n# ",thisFunctionName,"(): land.types:\n"));
+        print( land.types );
 
         if ( !is.null(exclude.land.types) ) {
             land.types <- setdiff( land.types, exclude.land.types );
@@ -46,6 +56,7 @@ getData.beam.mode_helper <- function(
 
         list.data.raw <- list();
         for ( land.type in land.types ) {
+
             temp.file <- grep(x = temp.files.given.year, pattern = land.type, value = TRUE);
             DF.temp <- as.data.frame(readr::read_csv(
                 file = file.path(data.directory,temp.file)
@@ -54,11 +65,10 @@ getData.beam.mode_helper <- function(
             cat("\nfile.path(data.directory,temp.file)\n");
             print( file.path(data.directory,temp.file)   );
 
-            if ( "sentinel" == tolower(satellites) ) {
-                colnames(DF.temp) <- getData_fixColnames_Sentinel( input.colnames = colnames(DF.temp) );
-            } else if ( "radarsat" == tolower(satellites) ) {
-                colnames(DF.temp) <- getData_fixColnames_RADARSAT( input.colnames = colnames(DF.temp) );
-                }
+            cat("\nstr(DF.temp)\n");
+            print( str(DF.temp)   );
+
+            colnames(DF.temp) <- getData.labelled_fix.colnames( input.colnames = colnames(DF.temp) );
 
             cat("\nstr(DF.temp)\n");
             print( str(DF.temp)   );
@@ -74,17 +84,18 @@ getData.beam.mode_helper <- function(
             # The following patch is to add this timepoint for the 2017 agricultural
             # lands, and the value of the tree variables at the added timepoint is simply
             # the mean of the preceding and following timepoints.
-            if ( beam.mode == "IW106" & land.type == "ag" & year == "2017" ) {
-                DF.temp[,"S1_IW106_20170902_VH"   ] <- (DF.temp[,"S1_IW106_20170821_VH"   ] + DF.temp[,"S1_IW106_20170914_VH"   ])/2;
-                DF.temp[,"S1_IW106_20170902_VV"   ] <- (DF.temp[,"S1_IW106_20170821_VV"   ] + DF.temp[,"S1_IW106_20170914_VV"   ])/2;
-                DF.temp[,"S1_IW106_20170902_angle"] <- (DF.temp[,"S1_IW106_20170821_angle"] + DF.temp[,"S1_IW106_20170914_angle"])/2;
-                }
+            # if ( beam.mode == "IW106" & land.type == "ag" & year == "2017" ) {
+            #     DF.temp[,"S1_IW106_20170902_VH"   ] <- (DF.temp[,"S1_IW106_20170821_VH"   ] + DF.temp[,"S1_IW106_20170914_VH"   ])/2;
+            #     DF.temp[,"S1_IW106_20170902_VV"   ] <- (DF.temp[,"S1_IW106_20170821_VV"   ] + DF.temp[,"S1_IW106_20170914_VV"   ])/2;
+            #     DF.temp[,"S1_IW106_20170902_angle"] <- (DF.temp[,"S1_IW106_20170821_angle"] + DF.temp[,"S1_IW106_20170914_angle"])/2;
+            #     }
 
-            if ( "radarsat" == tolower(satellites) ) {
-                 DF.temp <- getData_add.dBZ.variables(DF.input = DF.temp);
-                 }
+            # if ( "radarsat" == tolower(satellites) ) {
+            #      DF.temp <- getData_add.dBZ.variables(DF.input = DF.temp);
+            #      }
 
             list.data.raw[[ land.type ]] <- DF.temp;
+
             }
 
         if (!is.null(output.file)) {
@@ -94,46 +105,16 @@ getData.beam.mode_helper <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat(paste0("\n",thisFunctionName,"() quits."));
+    cat(paste0("\n# ",thisFunctionName,"() quits."));
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
     return( list.data.raw );
 
     }
 
 ##################################################
-getData_add.dBZ.variables <- function(DF.input = NULL) {
-    DF.output <- DF.input;
-    temp.colnames <- grep(x = colnames(DF.output), pattern = "cov_matrix_real_comp", value = TRUE);
-    for ( temp.colname in temp.colnames ) {
-        new.colname <- paste0(temp.colname,"_dBZ");
-        DF.output[,new.colname] <- 10 * log10(DF.output[,temp.colname]);
-        }
-    colnames(DF.output) <- gsub(
-        x           = colnames(DF.output),
-        pattern     = "cov_matrix_real_comp_1_dBZ",
-        replacement = "dBZ_cov_comp_1"
-        );
-    colnames(DF.output) <- gsub(
-        x           = colnames(DF.output),
-        pattern     = "cov_matrix_real_comp_2_dBZ",
-        replacement = "dBZ_cov_comp_2"
-        );
-    colnames(DF.output) <- gsub(
-        x           = colnames(DF.output),
-        pattern     = "cov_matrix_real_comp_3_dBZ",
-        replacement = "dBZ_cov_comp_3"
-        );
-    colnames(DF.output) <- gsub(
-        x           = colnames(DF.output),
-        pattern     = "cov_matrix_real_comp_4_dBZ",
-        replacement = "dBZ_cov_comp_4"
-        );
-    return(DF.output);
-    }
+getData.labelled_fix.colnames <- function(input.colnames = NULL) {
 
-getData_fixColnames_Sentinel <- function(input.colnames = NULL) {
-
-    thisFunctionName <- "getData_fixColnames_Sentinel";
+    thisFunctionName <- "getData.labelled_fix.colnames";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
@@ -152,84 +133,7 @@ getData_fixColnames_Sentinel <- function(input.colnames = NULL) {
         replacement = "Y"
         );
 
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "X2",
-        replacement = "X"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "X3",
-        replacement = "Y"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_1_1",
-        replacement = "_1"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_2_2",
-        replacement = "_2"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_3_3",
-        replacement = "_3"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_4_4",
-        replacement = "_4"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "Yamaguchi_double_bounc$",
-        replacement = "Yamaguchi_double_bounce"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_re$",
-        replacement = "_real"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_im$",
-        replacement = "_imag"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "S_par$",
-        replacement = "S_param"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "Helicit$",
-        replacement = "Helicity"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "TouzDisc_diff_maxmin_r$",
-        replacement = "TouzDisc_diff_maxmin_res"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_pol_respo$",
-        replacement = "_pol_respons"
-        );
-
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     # standardize order of components in column names
     output.colnames <- as.character(sapply(
         X   = output.colnames,
@@ -244,109 +148,10 @@ getData_fixColnames_Sentinel <- function(input.colnames = NULL) {
         ));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    cat(paste0("\n",thisFunctionName,"() quits."));
-    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
-    return( output.colnames );
-
-    }
-
-getData_fixColnames_RADARSAT <- function(input.colnames = NULL) {
-
-    thisFunctionName <- "getData_fixColnames_RADARSAT";
-
-    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
-    cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
-
-    output.colnames <- input.colnames;
-
     output.colnames <- gsub(
         x           = output.colnames,
-        pattern     = "POINT_X",
-        replacement = "X"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "POINT_Y",
-        replacement = "Y"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "X2",
-        replacement = "X"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "X3",
-        replacement = "Y"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_1_1",
-        replacement = "_1"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_2_2",
-        replacement = "_2"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_3_3",
-        replacement = "_3"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_4_4",
-        replacement = "_4"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "Yamaguchi_double_bounc$",
-        replacement = "Yamaguchi_double_bounce"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_re$",
-        replacement = "_real"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_im$",
-        replacement = "_imag"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "S_par$",
-        replacement = "S_param"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "Helicit$",
-        replacement = "Helicity"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "TouzDisc_diff_maxmin_r$",
-        replacement = "TouzDisc_diff_maxmin_res"
-        );
-
-    output.colnames <- gsub(
-        x           = output.colnames,
-        pattern     = "_pol_respo$",
-        replacement = "_pol_respons"
+        pattern     = "X1",
+        replacement = "row_index"
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -355,3 +160,158 @@ getData_fixColnames_RADARSAT <- function(input.colnames = NULL) {
     return( output.colnames );
 
     }
+
+# getData.labelled_fix.colnames_DELETEME <- function(input.colnames = NULL) {
+#
+#     thisFunctionName <- "getData.labelled_fix.colnames";
+#
+#     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
+#     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
+#
+#     output.colnames <- input.colnames;
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "POINT_X",
+#         replacement = "X"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "POINT_Y",
+#         replacement = "Y"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "X2",
+#         replacement = "X"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "X3",
+#         replacement = "Y"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "_1_1",
+#         replacement = "_1"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "_2_2",
+#         replacement = "_2"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "_3_3",
+#         replacement = "_3"
+#         );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "_4_4",
+#         replacement = "_4"
+#         );
+#
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "Yamaguchi_double_bounc$",
+#     #     replacement = "Yamaguchi_double_bounce"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "_re$",
+#     #     replacement = "_real"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "_im$",
+#     #     replacement = "_imag"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "S_par$",
+#     #     replacement = "S_param"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "Helicit$",
+#     #     replacement = "Helicity"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "TouzDisc_diff_maxmin_r$",
+#     #     replacement = "TouzDisc_diff_maxmin_res"
+#     #     );
+#     #
+#     # output.colnames <- gsub(
+#     #     x           = output.colnames,
+#     #     pattern     = "_pol_respo$",
+#     #     replacement = "_pol_respons"
+#     #     );
+#
+#     output.colnames <- gsub(
+#         x           = output.colnames,
+#         pattern     = "X1",
+#         replacement = "row_index"
+#         );
+#
+#     # standardize order of components in column names
+#     output.colnames <- as.character(sapply(
+#         X   = output.colnames,
+#         FUN = function(x) {
+#             y <- unlist(strsplit(x = x, split = "_"));
+#             if ( length(y) > 1 ) {
+#                 y <- c(y[1],paste0(y[2],y[5]),paste0(y[3],y[4]),y[6]);
+#                 y <- paste(y,collapse = "_");
+#                 }
+#             return(y);
+#             }
+#         ));
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     cat(paste0("\n",thisFunctionName,"() quits."));
+#     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
+#     return( output.colnames );
+#
+#     }
+
+# getData_add.dBZ.variables <- function(DF.input = NULL) {
+#     DF.output <- DF.input;
+#     temp.colnames <- grep(x = colnames(DF.output), pattern = "cov_matrix_real_comp", value = TRUE);
+#     for ( temp.colname in temp.colnames ) {
+#         new.colname <- paste0(temp.colname,"_dBZ");
+#         DF.output[,new.colname] <- 10 * log10(DF.output[,temp.colname]);
+#         }
+#     colnames(DF.output) <- gsub(
+#         x           = colnames(DF.output),
+#         pattern     = "cov_matrix_real_comp_1_dBZ",
+#         replacement = "dBZ_cov_comp_1"
+#         );
+#     colnames(DF.output) <- gsub(
+#         x           = colnames(DF.output),
+#         pattern     = "cov_matrix_real_comp_2_dBZ",
+#         replacement = "dBZ_cov_comp_2"
+#         );
+#     colnames(DF.output) <- gsub(
+#         x           = colnames(DF.output),
+#         pattern     = "cov_matrix_real_comp_3_dBZ",
+#         replacement = "dBZ_cov_comp_3"
+#         );
+#     colnames(DF.output) <- gsub(
+#         x           = colnames(DF.output),
+#         pattern     = "cov_matrix_real_comp_4_dBZ",
+#         replacement = "dBZ_cov_comp_4"
+#         );
+#     return(DF.output);
+#     }
