@@ -26,8 +26,8 @@ code.files <- c(
     "coregisterData.R",
     "geo-standardize.R",
     "getData.R",
-    "getData-beam-mode.R",
-    "getData-beam-mode-helper.R",
+    "getData-labelled.R",
+    "getData-labelled-helper.R",
     "initializePlot.R",
     "reshapeData.R",
     "visualize-geocoordinates.R"
@@ -62,11 +62,11 @@ satellites      <- "sentinel";
 beam.mode       <- "IW4";
 colname.pattern <- "V";
 
-data.snapshot       <- "2020-02-24.03";
-data.directory      <- file.path(dir.data,data.snapshot,"Sentinal1","relative-orbit-number");
+data.snapshot       <- "2020-12-18.01";
+data.directory      <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
 beam.mode.directory <- file.path(data.directory,beam.mode);
 
-DF.IW4 <- getData.beam.mode(
+DF.IW4 <- getData.labelled(
     data.directory  = beam.mode.directory,
     satellites      = satellites,
     beam.mode       = beam.mode,
@@ -93,6 +93,36 @@ DF.VV[,"x_y"] <- apply(
 
 cat("\nstr(DF.VV)\n");
 print( str(DF.VV)   );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
+cat("\n##################################################\n");
+cat("\n##### warnings():\n");
+print(       warnings()    );
+
+cat("\n##### getOption('repos'):\n");
+print(       getOption('repos')    );
+
+cat("\n##### .libPaths():\n");
+print(       .libPaths()    );
+
+cat("\n##### sessionInfo():\n");
+print(       sessionInfo()    );
+
+# print system time to log
+cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
+
+# print elapsed time to log
+stop.proc.time <- proc.time();
+cat("\n##### stop.proc.time - start.proc.time:\n");
+print(       stop.proc.time - start.proc.time    );
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 #logger::log_threshold(level = logger::ERROR);
