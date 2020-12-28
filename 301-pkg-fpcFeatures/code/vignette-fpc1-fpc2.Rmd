@@ -1,0 +1,151 @@
+---
+title: "FPC1 and FPC2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fpc1-fpc2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+    )
+```
+The R package **stcCropYield** implements a number of model training procedures
+to build trained prediction models for early-season crop yield (parcel-level)
+prediction for the province of Manitoba, using parcel-level NDVI and CARS-level
+weather measurement time series as predictor variables.
+
+This vignette demonstrates how to use the function
+**stcCropYield::rollingWindowForwardValidation(.)**
+to train a crop yield prediction model,
+following the *rolling window forward validation* protocol,
+using XGBoost as the underlying prediction technique.
+
+First, load the **stcCropYield** R package.
+```{r setup}
+library(fpcFeatures)
+```
+Next, we generate a synthetic data set in the form of a single data frame
+that has the structure expected by
+**stcCropYield::rollingWindowForwardValidation(...)**:
+We examine the structure of the data frame DF.training
+```{r IW4}
+data(IW4);
+str(IW4);
+```
+
+Here are the first few rows of DF.training:
+```{r headIW4}
+knitr::kable(head(IW4), align = "c")
+```
+
+```{r fit}
+DF.VV <- IW4[,c("x","y","date","VV")];
+DF.VV[,"x_y"] <- apply(
+    X      = DF.VV[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+```
+
+```{r}
+DF.VV <- IW4[,c("x","y","date","VV")];
+DF.VV[,"x_y"] <- apply(
+    X      = DF.VV[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+```
+
+```{r}
+locations <- unique(DF.VV[,'x_y']);
+
+set.seed(7654321);
+is.subset.1 <- sample(x = c(TRUE,FALSE), size = length(locations), replace = TRUE);
+locations.1 <- locations[ is.subset.1];
+locations.2 <- locations[!is.subset.1];
+
+DF.VV.1 <- DF.VV[DF.VV[,'x_y'] %in% locations.1,];
+colnames(DF.VV.1) <- paste0("my_",colnames(DF.VV.1));
+
+DF.VV.2 <- DF.VV[DF.VV[,'x_y'] %in% locations.2,];
+colnames(DF.VV.2) <- paste0("your_",colnames(DF.VV.2));
+```
+
+```{r}
+logger::log_threshold(level = logger::ERROR);
+
+my.fpcFeatureEngine <- fpcFeatureEngine$new(
+    training.data       = DF.VV.1,
+    location            = 'my_x_y',
+    date                = 'my_date',
+    variable            = 'my_VV',
+    n.partition         = 100,
+    n.order             =   3,
+    n.basis             =   9,
+    smoothing.parameter =   0.1,
+    n.harmonics         =   7
+    );
+
+my.fpcFeatureEngine$fit();
+```
+
+```{r harmonics, fig.height = 28, fig.width = 16}
+my.fpcFeatureEngine$plot.harmonics();
+```
+
+```{r transform}
+DF.bspline.fpc <- my.fpcFeatureEngine$transform(
+    newdata  = DF.VV.2,
+    location = 'your_x_y',
+    date     = 'your_date',
+    variable = 'your_VV'
+    );
+str(DF.bspline.fpc);
+```
+
+```{r fpc1fpc2, fig.width = 16, fig.height = 16}
+plot(
+    x    = DF.bspline.fpc[,'fpc_1'],
+    y    = DF.bspline.fpc[,'fpc_2'],
+    pch  = 19,
+    cex  =  0.1,
+    xlim = 300 * c(-1,1),
+    ylim = 150 * c(-1,1),
+    asp  = 2
+    );
+```
+
+```{r}
+temp.x_y <- DF.VV.2[1,"your_x_y"];
+print( temp.x_y );
+
+DF.temp <- IW4[c("x","y","date","VV")];
+
+DF.temp[,"year"] <- format(x = IW4[,'date'], format = "%Y");
+is.selected.year <- ("2017" == DF.temp[,'year']);
+DF.temp          <- DF.temp[is.selected.year,];
+
+DF.temp[,"x_y"] <- apply(
+    X      = DF.temp[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+colnames(DF.temp) <- paste0("their_",colnames(DF.temp));
+
+DF.temp <- DF.temp[temp.x_y == DF.temp[,'their_x_y'],];
+DF.temp <- DF.temp[,c("their_x_y","their_date","their_VV")];
+knitr::kable(DF.temp, align = "c", row.names = FALSE);
+```
+
+```{r, fig.width = 16}
+my.fpcFeatureEngine$plot.approximations(
+    DF.input = DF.temp,
+    location = "their_x_y",
+    date     = "their_date",
+    variable = "their_VV"
+    )
+```

@@ -49,13 +49,13 @@ getDataStandardizedTimepoints <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     target.variables <- grep(
         x       = colnames(DF.input),
-	pattern = colname.pattern,
-	value   = TRUE
-	);
+        pattern = colname.pattern,
+        value   = TRUE
+        );
 
     DF.output <- getDataStandardizedTimepoints_initializeOutput(
         DF.input           = DF.input,
-	list.bspline.basis = list.bspline.basis
+	      list.bspline.basis = list.bspline.basis
         );
 
     LIST.bsplines <- list();
@@ -63,15 +63,15 @@ getDataStandardizedTimepoints <- function(
 
         LIST.temp <- getDataStandardizedTimepoints_attachVariable(
             DF.input            = DF.input,
-	    DF.current          = DF.output,
+	          DF.current          = DF.output,
             target.variable     = target.variable,
             n.order             = n.order,
             n.basis             = n.basis,
             smoothing.parameter = smoothing.parameter,
-	    list.bspline.basis  = list.bspline.basis
+            list.bspline.basis  = list.bspline.basis
             );
 
-	LIST.bsplines[[target.variable]] <- LIST.temp[["list_bsplines"]];
+        LIST.bsplines[[target.variable]] <- LIST.temp[["list_bsplines"]];
         DF.output                        <- LIST.temp[["df_standardized_timepoints"]];
 
         }
@@ -143,7 +143,7 @@ getDataStandardizedTimepoints_diagnostics <- function(
             dev.off();
 
             }}
-    
+
         }
 
 
@@ -274,7 +274,7 @@ getDataStandardizedTimepoints_attachVariable <- function(
             input_timeseries       = DF.temp.year,
             bspline_basis          = temp.bspline.basis,
             bspline_basis_fdParObj = temp.bspline.basis.fdParObj,
-	    target_in_basis_fd     = target.in.basis.fd 
+	    target_in_basis_fd     = target.in.basis.fd
             );
 
         }
@@ -381,4 +381,3 @@ getDataStandardizedTimepoints_getBsplineBasis <- function(
     return( list.output );
 
     }
-
