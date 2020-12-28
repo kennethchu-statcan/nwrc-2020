@@ -74,6 +74,22 @@ fpcFeatureEngine <- R6::R6Class(
             smoothing.parameter =   0.1,
             n.harmonics         =   7
             ) {
+
+            private$input.validity.checks(
+                learner.metadata    = learner.metadata,
+                training.data       = training.data,
+                location            = location,
+                date                = date,
+                variable            = variable,
+                min.date            = min.date,
+                max.date            = max.date,
+                n.partition         = n.partition,
+                n.order             = n.order,
+                n.basis             = n.basis,
+                smoothing.parameter = smoothing.parameter,
+                n.harmonics         = n.harmonics
+                );
+
             self$learner.metadata    <- learner.metadata;
             self$training.data       <- training.data;
             self$location            <- location;
@@ -86,6 +102,7 @@ fpcFeatureEngine <- R6::R6Class(
             self$n.basis             <- n.basis;
             self$smoothing.parameter <- smoothing.parameter;
             self$n.harmonics         <- n.harmonics;
+
             },
 
         #' @description
@@ -820,6 +837,51 @@ fpcFeatureEngine <- R6::R6Class(
             return( DF.fpc );
 
             } # apply.fpca.parameters()
+
+        input.validity.checks(
+            learner.metadata    = NULL,
+            training.data       = NULL,
+            location            = NULL,
+            date                = NULL,
+            variable            = NULL,
+            min.date            = NULL,
+            max.date            = NULL,
+            n.partition         = NULL,
+            n.order             = NULL,
+            n.basis             = NULL,
+            smoothing.parameter = NULL,
+            n.harmonics         = NULL
+            ) {
+
+            input.validity.checks_data.structure(
+                DF.input = training.data
+                );
+
+            } # input.validity.checks()
+
+        input.validity.checks_data.structure <- function(
+            DF.input = NULL,
+            location = NULL,
+            date     = NULL,
+            variable = NULL
+            ) {
+
+            base::stopifnot(
+                base::identical( base::class(DF.input) , "data.frame" ),
+                base::all( base::c(location,date,variable) %in% base::colnames(DF.input) ),
+                base::identical( base::class( DF.input[,'location'] ) , "character" ),
+                base::identical( base::class( DF.input[,'date'    ] ) , "Date"      ),
+                base::identical( base::class( DF.input[,'variable'] ) , "numeric"   )
+                );
+
+            base::stopifnot(
+                base::is.numeric(training.window),
+                base::length(training.window) == 1,
+                training.window == base::as.integer(training.window),
+                training.window > 0
+                );
+
+            } # input.validity.checks_data()
 
         ) # private = list()
 
