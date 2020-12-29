@@ -244,7 +244,7 @@ for ( temp.variable in c("VH","VV") ) {
             training.data       = DF.variable,
             location            = 'X_Y',
             date                = 'date',
-            variable            = 'VV',
+            variable            = temp.variable,
             min.date            = min(temp.date.range),
             max.date            = max(temp.date.range),
             n.partition         = n.partition,
@@ -288,7 +288,7 @@ for ( temp.variable in c("VH","VV") ) {
                 newdata  = DF.temp.batch,
                 location = 'master_lat_lon',
                 date     = 'date',
-                variable = 'vv'
+                variable = tolower(temp.variable)
                 );
 
             cat("\nstr(DF.bspline.fpc)\n");
