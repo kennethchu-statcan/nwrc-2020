@@ -67,10 +67,10 @@ cat("\nstr(DF.labelled)\n");
 print( str(DF.labelled)   );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# visualizeData.labelled(
-#     DF.input        = DF.labelled,
-#     colname.pattern = colname.pattern
-#     );
+visualizeData.labelled(
+    DF.input        = DF.labelled,
+    colname.pattern = colname.pattern
+    );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # logger::log_threshold(level = logger::TRACE);
