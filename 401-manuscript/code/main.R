@@ -197,7 +197,7 @@ print( num.cores   );
 
 doParallel::registerDoParallel(cores = num.cores);
 
-n.batches <- num.cores;
+n.batches <- 10; # num.cores;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 for ( temp.variable in c("VH","VV") ) {
@@ -282,8 +282,8 @@ for ( temp.variable in c("VH","VV") ) {
             );
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        # for ( temp.batch in seq(1,n.batches,1) ) {
-        foreach ( temp.batch = 1:n.batches ) %dopar% {
+        # foreach ( temp.batch = 1:n.batches ) %dopar% {
+        for ( temp.batch in seq(1,n.batches,1) ) {
 
             DF.temp.batch <- DF.temp.year[temp.batch == DF.temp.year[,'batch'],];
 
