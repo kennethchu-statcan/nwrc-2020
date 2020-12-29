@@ -31,6 +31,7 @@ code.files <- c(
     "getData-labelled-helper.R",
     "initializePlot.R",
     "reshapeData.R",
+    "visualize-fpc-scores.R",
     "visualize-geocoordinates.R",
     "visualizeData-labelled.R"
     );
@@ -66,14 +67,14 @@ cat("\nstr(DF.labelled)\n");
 print( str(DF.labelled)   );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-visualizeData.labelled(
-    DF.input        = DF.labelled,
-    colname.pattern = colname.pattern
-    );
+# visualizeData.labelled(
+#     DF.input        = DF.labelled,
+#     colname.pattern = colname.pattern
+#     );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-#logger::log_threshold(level = logger::ERROR);
-logger::log_threshold(level = logger::TRACE);
+# logger::log_threshold(level = logger::TRACE);
+logger::log_threshold(level = logger::ERROR);
 
 n.partition         <- 100;
 n.order             <-   3;
@@ -82,27 +83,27 @@ smoothing.parameter <-   0.1;
 n.harmonics         <-   7;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-polarizations <- c("VV","VH");
+my.variables <- c("VV","VH");
 
-for ( temp.polarization in polarizations ) {
+for ( temp.variable in my.variables ) {
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.polarization <- DF.labelled[,c("X","Y","date",temp.polarization)];
-    DF.polarization[,"X_Y"] <- apply(
-        X      = DF.polarization[,c('X','Y')],
+    DF.variable <- DF.labelled[,c("X","Y","date","land_cover",temp.variable)];
+    DF.variable[,"X_Y"] <- apply(
+        X      = DF.variable[,c('X','Y')],
         MARGIN = 1,
         FUN    = function(x) { return(paste(x,collapse="_")) }
         );
 
-    cat("\nstr(DF.polarization)\n");
-    print( str(DF.polarization)   );
+    cat("\nstr(DF.variable)\n");
+    print( str(DF.variable)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
-        training.data       = DF.polarization,
+        training.data       = DF.variable,
         location            = 'X_Y',
         date                = 'date',
-        variable            = temp.polarization,
+        variable            = temp.variable,
         n.partition         = n.partition,
         n.order             = n.order,
         n.basis             = n.basis,
@@ -114,12 +115,12 @@ for ( temp.polarization in polarizations ) {
 
     saveRDS(
         object = my.fpcFeatureEngine,
-        file = paste0("fpc-",temp.polarization,"-FeatureEngine.RData")
+        file = paste0("fpc-",temp.variable,"-FeatureEngine.RData")
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ggplot2::ggsave(
-        file   = paste0("fpc-",temp.polarization,"-harmonics.png"),
+        file   = paste0("fpc-",temp.variable,"-harmonics.png"),
         plot   = my.fpcFeatureEngine$plot.harmonics(),
         dpi    = 150,
         height =   4 * n.harmonics,
@@ -129,14 +130,36 @@ for ( temp.polarization in polarizations ) {
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.bspline.fpc <- my.fpcFeatureEngine$transform(
-        newdata  = DF.polarization,
+        newdata  = DF.variable,
         location = 'X_Y',
         date     = 'date',
-        variable = temp.polarization
+        variable = temp.variable
         );
 
-    cat("\nstr(DF.polarization)\n");
-    print( str(DF.bspline.fpc)    );
+    selected.colnames <- grep(x = colnames(DF.bspline.fpc), pattern = "^[0-9]+$", invert = TRUE);
+    DF.fpc.scores     <- DF.bspline.fpc[,selected.colnames];
+
+    cat("\nstr(DF.fpc.scores)\n");
+    print( str(DF.fpc.scores)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    DF.land.cover <- unique(DF.variable[,c("X_Y","land_cover")]);
+
+    DF.fpc.scores <- merge(
+        x  = DF.fpc.scores,
+        y  = DF.land.cover,
+        by = "X_Y"
+        );
+
+    cat("\nstr(DF.fpc.scores)\n");
+    print( str(DF.fpc.scores)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    visualize.fpc.scores(
+        variable         = temp.variable,
+        DF.fpc.scores    = DF.fpc.scores,
+        DF.colour.scheme = DF.colour.scheme
+        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
