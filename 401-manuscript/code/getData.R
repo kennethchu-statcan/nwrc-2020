@@ -21,7 +21,7 @@ getData <- function(
 
     } else {
 
-        temp.files <- list.files(path = data.directory);
+        temp.files <- list.files(path = data.directory, pattern = "^_[0-9]{8}.+\\.csv");
 
         DF.metadata <- getData_metadata(
             data.files = temp.files
@@ -61,7 +61,7 @@ getData_given.date <- function(
     data.directory = NULL
     ) {
 
-    thisFunctionName <- "getData";
+    thisFunctionName <- "getData_given.date";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n# ",thisFunctionName,"() starts: given.date: ",given.date,"\n\n"));
@@ -69,6 +69,10 @@ getData_given.date <- function(
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.metadata <- DF.metadata[DF.metadata[,'date'] == given.date,];
 
+    cat(paste0("\n# ",thisFunctionName,"(): DF.metadata\n"));
+    print( DF.metadata )
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.output <- NULL;
     for ( i in seq(1,nrow(DF.metadata))) {
         # DF.temp <- read.csv(file = file.path(data.directory,DF.metadata[i,'data.file']), header = FALSE);
@@ -77,7 +81,7 @@ getData_given.date <- function(
             );
         nrow.DF.temp <- nrow(DF.temp);
         ncol.DF.temp <- ncol(DF.temp);
-        cat(paste0("\n# ",thisFunctionName,"(): c(nrow.DF.temp,ncol.DF.temp) = c(",nrow.DF.temp,", ",ncol.DF.temp,")\n"));
+        cat(paste0("\n# ",thisFunctionName,"(): c(nrow,ncol) = c(",nrow.DF.temp,", ",ncol.DF.temp,"): ",DF.metadata[i,'data.file'],"\n"));
         if ( is.null(DF.output) ) {
             DF.output <- data.frame(temp_colname = as.vector(as.matrix(DF.temp)));
         } else {
