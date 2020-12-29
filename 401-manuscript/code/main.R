@@ -67,108 +67,108 @@ cat("\nstr(DF.labelled)\n");
 print( str(DF.labelled)   );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-visualizeData.labelled(
-    DF.input        = DF.labelled,
-    colname.pattern = colname.pattern
-    );
-
+# visualizeData.labelled(
+#     DF.input        = DF.labelled,
+#     colname.pattern = colname.pattern
+#     );
+#
+# # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+# # logger::log_threshold(level = logger::TRACE);
+# logger::log_threshold(level = logger::ERROR);
+#
+# n.partition         <- 100;
+# n.order             <-   3;
+# n.basis             <-   9;
+# smoothing.parameter <-   0.1;
+# n.harmonics         <-   7;
+#
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# logger::log_threshold(level = logger::TRACE);
-logger::log_threshold(level = logger::ERROR);
-
-n.partition         <- 100;
-n.order             <-   3;
-n.basis             <-   9;
-smoothing.parameter <-   0.1;
-n.harmonics         <-   7;
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-my.variables <- c(
-    "VH",           "VV",
-    "VH_scaled",    "VV_scaled",
-    "V_opc1",       "V_opc2",
-    "V_opc1_scaled","V_opc2_scaled"
-    );
-
-for ( temp.variable in my.variables ) {
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.variable <- DF.labelled[,c("X","Y","date","land_cover",temp.variable)];
-    DF.variable[,"X_Y"] <- apply(
-        X      = DF.variable[,c('X','Y')],
-        MARGIN = 1,
-        FUN    = function(x) { return(paste(x,collapse="_")) }
-        );
-
-    cat("\nstr(DF.variable)\n");
-    print( str(DF.variable)   );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
-        training.data       = DF.variable,
-        location            = 'X_Y',
-        date                = 'date',
-        variable            = temp.variable,
-        n.partition         = n.partition,
-        n.order             = n.order,
-        n.basis             = n.basis,
-        smoothing.parameter = smoothing.parameter,
-        n.harmonics         = n.harmonics
-        );
-
-    my.fpcFeatureEngine$fit();
-
-    saveRDS(
-        object = my.fpcFeatureEngine,
-        file = paste0("fpc-",temp.variable,"-FeatureEngine.RData")
-        );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    ggplot2::ggsave(
-        file   = paste0("fpc-",temp.variable,"-harmonics.png"),
-        plot   = my.fpcFeatureEngine$plot.harmonics(),
-        dpi    = 150,
-        height =   4 * n.harmonics,
-        width  =  16,
-        units  = 'in'
-        );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.bspline.fpc <- my.fpcFeatureEngine$transform(
-        newdata  = DF.variable,
-        location = 'X_Y',
-        date     = 'date',
-        variable = temp.variable
-        );
-
-    selected.colnames <- grep(x = colnames(DF.bspline.fpc), pattern = "^[0-9]+$", invert = TRUE);
-    DF.fpc.scores     <- DF.bspline.fpc[,selected.colnames];
-
-    cat("\nstr(DF.fpc.scores)\n");
-    print( str(DF.fpc.scores)   );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.land.cover <- unique(DF.variable[,c("X_Y","land_cover")]);
-
-    DF.fpc.scores <- merge(
-        x  = DF.fpc.scores,
-        y  = DF.land.cover,
-        by = "X_Y"
-        );
-
-    cat("\nstr(DF.fpc.scores)\n");
-    print( str(DF.fpc.scores)   );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    visualize.fpc.scores(
-        variable         = temp.variable,
-        DF.fpc.scores    = DF.fpc.scores,
-        DF.colour.scheme = DF.colour.scheme
-        );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-    }
+# my.variables <- c(
+#     "VH",           "VV",
+#     "VH_scaled",    "VV_scaled",
+#     "V_opc1",       "V_opc2",
+#     "V_opc1_scaled","V_opc2_scaled"
+#     );
+#
+# for ( temp.variable in my.variables ) {
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     DF.variable <- DF.labelled[,c("X","Y","date","land_cover",temp.variable)];
+#     DF.variable[,"X_Y"] <- apply(
+#         X      = DF.variable[,c('X','Y')],
+#         MARGIN = 1,
+#         FUN    = function(x) { return(paste(x,collapse="_")) }
+#         );
+#
+#     cat("\nstr(DF.variable)\n");
+#     print( str(DF.variable)   );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
+#         training.data       = DF.variable,
+#         location            = 'X_Y',
+#         date                = 'date',
+#         variable            = temp.variable,
+#         n.partition         = n.partition,
+#         n.order             = n.order,
+#         n.basis             = n.basis,
+#         smoothing.parameter = smoothing.parameter,
+#         n.harmonics         = n.harmonics
+#         );
+#
+#     my.fpcFeatureEngine$fit();
+#
+#     saveRDS(
+#         object = my.fpcFeatureEngine,
+#         file = paste0("fpc-",temp.variable,"-FeatureEngine.RData")
+#         );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     ggplot2::ggsave(
+#         file   = paste0("fpc-",temp.variable,"-harmonics.png"),
+#         plot   = my.fpcFeatureEngine$plot.harmonics(),
+#         dpi    = 150,
+#         height =   4 * n.harmonics,
+#         width  =  16,
+#         units  = 'in'
+#         );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     DF.bspline.fpc <- my.fpcFeatureEngine$transform(
+#         newdata  = DF.variable,
+#         location = 'X_Y',
+#         date     = 'date',
+#         variable = temp.variable
+#         );
+#
+#     selected.colnames <- grep(x = colnames(DF.bspline.fpc), pattern = "^[0-9]+$", invert = TRUE);
+#     DF.fpc.scores     <- DF.bspline.fpc[,selected.colnames];
+#
+#     cat("\nstr(DF.fpc.scores)\n");
+#     print( str(DF.fpc.scores)   );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     DF.land.cover <- unique(DF.variable[,c("X_Y","land_cover")]);
+#
+#     DF.fpc.scores <- merge(
+#         x  = DF.fpc.scores,
+#         y  = DF.land.cover,
+#         by = "X_Y"
+#         );
+#
+#     cat("\nstr(DF.fpc.scores)\n");
+#     print( str(DF.fpc.scores)   );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#     visualize.fpc.scores(
+#         variable         = temp.variable,
+#         DF.fpc.scores    = DF.fpc.scores,
+#         DF.colour.scheme = DF.colour.scheme
+#         );
+#
+#     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+#
+#     }
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # logger::log_threshold(level = logger::TRACE);
@@ -186,7 +186,7 @@ data.directory <- file.path(dir.data,data.snapshot,"micro-mission-2");
 n.batches      <- 10;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-for ( temp.variable in c("VH","VV")            ) {
+for ( temp.variable in c("VH","VV") ) {
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.variable <- DF.labelled[,c("X","Y","date","land_cover",temp.variable)];
@@ -200,17 +200,17 @@ for ( temp.variable in c("VH","VV")            ) {
     print( str(DF.variable)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    for ( temp.year     in c("2017","2018","2019") ) {
+    for ( temp.year in c("2017","2018","2019") ) {
 
         DF.temp.year <- getData(
             data.directory = file.path(data.directory,temp.year),
             output.file    = paste0("data-unlabelled-",temp.variable,"-",temp.year,".RData")
             );
 
-        # DF.temp.year <- coregisterData(
-        #     DF.input    = DF.temp.year,
-        #     output.file = paste0("data-unlabelled-",temp.year,"-coregistered.RData")
-        #     );
+        DF.temp.year <- coregisterData(
+            DF.input    = DF.temp.year,
+            output.file = paste0("data-unlabelled-",temp.variable,"-",temp.year,"-coregistered.RData")
+            );
 
         DF.temp.year <- DF.temp.year[,setdiff(colnames(DF.temp.year),c('row_index','col_index','lat','lon'))];
 
@@ -238,7 +238,7 @@ for ( temp.variable in c("VH","VV")            ) {
         print( str(temp.date.range)   );
 
         my.fpcFeatureEngine <- fpcFeatureEngine$new(
-            training.data       = DF.variable, # DF.VV,
+            training.data       = DF.variable,
             location            = 'Y_Y',
             date                = 'date',
             variable            = 'VV',
