@@ -1,7 +1,6 @@
 
 reshapeData <- function(
     list.input      = NULL,
-    beam.mode       = NULL,
     colname.pattern = NULL,
     land.cover      = NULL,
     output.file     = NULL
@@ -28,7 +27,6 @@ reshapeData <- function(
             list.data[[ temp.cover ]] <- reshapeData_long(
                 DF.input        = list.input[[ temp.cover ]],
                 land.cover      = temp.cover,
-                beam.mode       = beam.mode,
                 colname.pattern = colname.pattern
                 );
             }
@@ -188,7 +186,6 @@ reshapeData_attachScaledVariable <- function(
 reshapeData_long <- function(
     DF.input        = NULL,
     land.cover      = NULL,
-    beam.mode       = NULL,
     colname.pattern = NULL
     ) {
 

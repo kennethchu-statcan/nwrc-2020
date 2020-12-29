@@ -1,20 +1,17 @@
 
 getData.labelled <- function(
     data.directory     = NULL,
-    satellites         = NULL,
-    beam.mode          = NULL,
     colname.pattern    = NULL,
     exclude.years      = NULL,
     exclude.land.types = NULL,
     land.cover         = NULL,
-    RData.output       = paste0("data-",beam.mode,".RData")
+    RData.output       = paste0("data-labelled-raw.RData")
     ) {
 
     thisFunctionName <- "getData.labelled";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n# ",thisFunctionName,"() starts.\n"));
-    cat(paste0("\nbeam.mode: ",beam.mode,"\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     if ( file.exists(RData.output) ) {
@@ -34,7 +31,7 @@ getData.labelled <- function(
         }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    years <- getData.beam.mode_getYears(
+    years <- getData.labelled_getYears(
         data.directory = data.directory,
         exclude.years  = exclude.years
         );
@@ -47,11 +44,9 @@ getData.labelled <- function(
 
         list.data <- getData.labelled_helper(
             data.directory     = data.directory,
-            satellites         = satellites,
-            beam.mode          = beam.mode,
             year               = temp.year,
             exclude.land.types = exclude.land.types,
-            output.file        = file.path(temp.directory,paste0("data-",beam.mode,"-",temp.year,"-raw.RData"))
+            output.file        = file.path(temp.directory,paste0("data-",temp.year,"-raw.RData"))
             );
 
         cat(paste0("\nstr(list.data) -- ",temp.year,"\n"));
@@ -59,13 +54,12 @@ getData.labelled <- function(
 
         DF.data.reshaped <- reshapeData(
             list.input      = list.data,
-            beam.mode       = beam.mode,
             colname.pattern = colname.pattern,
             land.cover      = land.cover,
-            output.file     = file.path(temp.directory,paste0("data-",beam.mode,"-",temp.year,"-reshaped.RData"))
+            output.file     = file.path(temp.directory,paste0("data-",temp.year,"-reshaped.RData"))
             );
 
-        cat(paste0("\nstr(DF.data.reshaped) -- ",beam.mode,", ",temp.year,"\n"));
+        cat(paste0("\nstr(DF.data.reshaped) -- ",temp.year,"\n"));
         print(        str(DF.data.reshaped) );
 
         DF.output <- rbind(DF.output,DF.data.reshaped);
@@ -87,7 +81,7 @@ getData.labelled <- function(
 
     }
 
-getData.beam.mode_getYears <- function(data.directory = NULL, exclude.years = NULL) {
+getData.labelled_getYears <- function(data.directory = NULL, exclude.years = NULL) {
     require(stringr);
     temp.files <- list.files(path = data.directory);
     if ( !is.null(exclude.years) ) {

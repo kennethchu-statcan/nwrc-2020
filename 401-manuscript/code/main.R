@@ -31,7 +31,8 @@ code.files <- c(
     "getData-labelled-helper.R",
     "initializePlot.R",
     "reshapeData.R",
-    "visualize-geocoordinates.R"
+    "visualize-geocoordinates.R",
+    "visualizeData-labelled.R"
     );
 
 for ( code.file in code.files ) {
@@ -53,30 +54,32 @@ set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 DF.colour.scheme <- data.frame(
-    land.cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
+    land_cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
     colour     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
     );
-rownames(DF.colour.scheme) <- DF.colour.scheme[,"land.cover"];
+rownames(DF.colour.scheme) <- DF.colour.scheme[,"land_cover"];
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-satellites      <- "sentinel";
-beam.mode       <- "IW4";
 colname.pattern <- "V";
 
 data.snapshot  <- "2020-12-18.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
 
-DF.IW4 <- getData.labelled(
+DF.labelled <- getData.labelled(
     data.directory  = data.directory,
-    satellites      = satellites,
-    beam.mode       = beam.mode,
     colname.pattern = colname.pattern,
-    land.cover      = DF.colour.scheme[,'land.cover'],
-    RData.output    = paste0("data-labelled-",beam.mode,".RData")
+    land.cover      = DF.colour.scheme[,'land_cover'],
+    RData.output    = paste0("data-labelled-raw.RData")
     );
 
-cat("\nstr(DF.IW4)\n");
-print( str(DF.IW4)   );
+cat("\nstr(DF.labelled)\n");
+print( str(DF.labelled)   );
+
+# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+visualizeData.labelled(
+    DF.input        = DF.labelled,
+    colname.pattern = "V"
+    );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 #logger::log_threshold(level = logger::ERROR);
@@ -93,7 +96,8 @@ polarizations <- c("VV","VH");
 
 for ( temp.polarization in polarizations ) {
 
-    DF.polarization <- DF.IW4[,c("X","Y","date",temp.polarization)];
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    DF.polarization <- DF.labelled[,c("X","Y","date",temp.polarization)];
     DF.polarization[,"X_Y"] <- apply(
         X      = DF.polarization[,c('X','Y')],
         MARGIN = 1,
@@ -103,13 +107,12 @@ for ( temp.polarization in polarizations ) {
     cat("\nstr(DF.polarization)\n");
     print( str(DF.polarization)   );
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
         training.data       = DF.polarization,
         location            = 'X_Y',
         date                = 'date',
         variable            = temp.polarization,
-        # min.date          = min(temp.date.range),
-        # max.date          = max(temp.date.range),
         n.partition         = n.partition,
         n.order             = n.order,
         n.basis             = n.basis,
@@ -121,12 +124,11 @@ for ( temp.polarization in polarizations ) {
 
     saveRDS(
         object = my.fpcFeatureEngine,
-        # file = paste0("fpc-",temp.year,"-FeatureEngine.RData")
         file = paste0("fpc-",temp.polarization,"-FeatureEngine.RData")
         );
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ggplot2::ggsave(
-        # file = paste0("fpc-",temp.year,"-harmonics.png"),
         file   = paste0("fpc-",temp.polarization,"-harmonics.png"),
         plot   = my.fpcFeatureEngine$plot.harmonics(),
         dpi    = 150,
@@ -134,6 +136,19 @@ for ( temp.polarization in polarizations ) {
         width  =  16,
         units  = 'in'
         );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    DF.bspline.fpc <- my.fpcFeatureEngine$transform(
+        newdata  = DF.polarization,
+        location = 'X_Y',
+        date     = 'date',
+        variable = temp.polarization
+        );
+
+    cat("\nstr(DF.polarization)\n");
+    print( str(DF.bspline.fpc)    );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
     }
 

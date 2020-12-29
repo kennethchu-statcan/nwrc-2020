@@ -1,8 +1,6 @@
 
 getData.labelled_helper <- function(
     data.directory     = NULL,
-    satellites         = c("sentinel","radarsat"),
-    beam.mode          = NULL,
     year               = NULL,
     exclude.land.types = NULL,
     output.file        = NULL
@@ -31,15 +29,6 @@ getData.labelled_helper <- function(
 
         cat(paste0("\n# ",thisFunctionName,"(): temp.files.given.year:\n"));
         print( temp.files.given.year );
-
-        # temp.files.given.year <- grep(
-        #     x       = temp.files.given.year,
-        #     pattern = beam.mode,
-        #     value   = TRUE
-        #     );
-        #
-        # cat(paste0("\n# ",thisFunctionName,"(): temp.files.given.year:\n"));
-        # print( temp.files.given.year );
 
         land.types <- unique(gsub(
             x           = temp.files.given.year,
@@ -89,10 +78,6 @@ getData.labelled_helper <- function(
             #     DF.temp[,"S1_IW106_20170902_VV"   ] <- (DF.temp[,"S1_IW106_20170821_VV"   ] + DF.temp[,"S1_IW106_20170914_VV"   ])/2;
             #     DF.temp[,"S1_IW106_20170902_angle"] <- (DF.temp[,"S1_IW106_20170821_angle"] + DF.temp[,"S1_IW106_20170914_angle"])/2;
             #     }
-
-            # if ( "radarsat" == tolower(satellites) ) {
-            #      DF.temp <- getData_add.dBZ.variables(DF.input = DF.temp);
-            #      }
 
             list.data.raw[[ land.type ]] <- DF.temp;
 
