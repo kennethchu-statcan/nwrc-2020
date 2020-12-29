@@ -84,9 +84,9 @@ n.harmonics         <-   7;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 my.variables <- c(
-    "VH","VV",
-    "VH_scaled","VV_scaled",
-    "V_opc1","V_opc2",
+    "VH",           "VV",
+    "VH_scaled",    "VV_scaled",
+    "V_opc1",       "V_opc2",
     "V_opc1_scaled","V_opc2_scaled"
     );
 
