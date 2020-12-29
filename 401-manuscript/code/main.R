@@ -242,7 +242,7 @@ for ( temp.variable in c("VH","VV") ) {
 
         my.fpcFeatureEngine <- fpcFeatureEngine$new(
             training.data       = DF.variable,
-            location            = 'Y_Y',
+            location            = 'X_Y',
             date                = 'date',
             variable            = 'VV',
             min.date            = min(temp.date.range),
