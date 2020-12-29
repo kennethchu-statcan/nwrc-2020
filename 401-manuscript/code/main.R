@@ -340,13 +340,9 @@ for ( temp.variable in c("VH","VV") ) {
             #     );
             # dev.off()
 
-            remove( list = c("DF.temp.batch","DF.bspline.fpc","DF.fpc") );
-
             }
 
         }
-
-    remove( list = c("DF.temp.year","my.fpcFeatureEngine") );
 
     }
 
