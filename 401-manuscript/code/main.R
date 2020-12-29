@@ -40,16 +40,6 @@ for ( code.file in code.files ) {
     }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# pkg.files <- c(
-#     "fpcFeatureEngine.R",
-#     "initializePlot.R"
-#     );
-#
-# for ( pkg.file in pkg.files ) {
-#     source(file.path(dir.pkg,pkg.file));
-#     }
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 set.seed(7654321);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -60,16 +50,16 @@ DF.colour.scheme <- data.frame(
 rownames(DF.colour.scheme) <- DF.colour.scheme[,"land_cover"];
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-colname.pattern <- "V";
-
 data.snapshot  <- "2020-12-18.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
+
+colname.pattern <- "V";
 
 DF.labelled <- getData.labelled(
     data.directory  = data.directory,
     colname.pattern = colname.pattern,
     land.cover      = DF.colour.scheme[,'land_cover'],
-    RData.output    = paste0("data-labelled-raw.RData")
+    RData.output    = paste0("data-labelled.RData")
     );
 
 cat("\nstr(DF.labelled)\n");
@@ -78,7 +68,7 @@ print( str(DF.labelled)   );
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 visualizeData.labelled(
     DF.input        = DF.labelled,
-    colname.pattern = "V"
+    colname.pattern = colname.pattern
     );
 
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###

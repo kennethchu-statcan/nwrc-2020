@@ -5,7 +5,7 @@ getData.labelled <- function(
     exclude.years      = NULL,
     exclude.land.types = NULL,
     land.cover         = NULL,
-    RData.output       = paste0("data-labelled-raw.RData")
+    RData.output       = paste0("data-labelled.RData")
     ) {
 
     thisFunctionName <- "getData.labelled";

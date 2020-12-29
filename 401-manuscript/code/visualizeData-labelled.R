@@ -24,6 +24,15 @@ visualizeData.labelled <- function(
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    initial.directory <- getwd();
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    temp.directory <- file.path(initial.directory,"diagnostics");
+    if ( !dir.exists(temp.directory) ) {
+        dir.create(path = temp.directory, recursive = TRUE);
+        }
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     land.covers <- DF.colour.scheme[,"land_cover"];
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -32,13 +41,15 @@ visualizeData.labelled <- function(
         visualizeData.labelled_plotGroupedTimeSeries(
             DF.input         = DF.input,
             colname.pattern  = colname.pattern,
-            DF.colour.scheme = DF.colour.scheme
+            DF.colour.scheme = DF.colour.scheme,
+            output.directory = temp.directory
             );
 
         visualizeData.labelled_TimeSeriesRibbonPlots(
             DF.input         = DF.input,
             colname.pattern  = colname.pattern,
-            DF.colour.scheme = DF.colour.scheme
+            DF.colour.scheme = DF.colour.scheme,
+            output.directory = temp.directory
             );
 
         }
@@ -54,7 +65,8 @@ visualizeData.labelled <- function(
 visualizeData.labelled_TimeSeriesRibbonPlots <- function(
     DF.input         = NULL,
     colname.pattern  = NULL,
-    DF.colour.scheme = NULL
+    DF.colour.scheme = NULL,
+    output.directory = NULL
     ) {
 
     require(ggplot2);
@@ -69,7 +81,8 @@ visualizeData.labelled_TimeSeriesRibbonPlots <- function(
     for ( year            in years            ) {
     for ( target.variable in target.variables ) {
 
-        PNG.output <- paste0('tmp-ribbon-',year,'-',target.variable,'.png');
+        PNG.output <- paste0('ribbon-',year,'-',target.variable,'.png');
+        PNG.output <- file.path(output.directory,PNG.output);
 
         is.current.year   <- (DF.input[,"year"] == year);
         DF.temp           <- DF.input[is.current.year,c("date","land_cover",target.variable)];
@@ -144,7 +157,8 @@ visualizeData.labelled_TimeSeriesRibbonPlots <- function(
             );
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        PNG.output <- paste0('tmp-ribbon-',year,'-',target.variable,'-fixed.png');
+        PNG.output <- paste0('ribbon-',year,'-',target.variable,'-fixed.png');
+        PNG.output <- file.path(output.directory,PNG.output);
 
         if ( grepl(x = target.variable, pattern = "_scaled$") ) {
             my.ggplot <- my.ggplot + scale_y_continuous(
@@ -178,7 +192,8 @@ visualizeData.labelled_TimeSeriesRibbonPlots <- function(
 visualizeData.labelled_plotGroupedTimeSeries <- function(
     DF.input         = NULL,
     colname.pattern  = NULL,
-    DF.colour.scheme = NULL
+    DF.colour.scheme = NULL,
+    output.directory = NULL
     ) {
 
     require(ggplot2);
@@ -192,7 +207,8 @@ visualizeData.labelled_plotGroupedTimeSeries <- function(
     for ( year            in years            ) {
     for ( target.variable in target.variables ) {
 
-        PNG.output <- paste0('tmp-timeseries-',year,'-',target.variable,'.png');
+        PNG.output <- paste0('timeseries-',year,'-',target.variable,'.png');
+        PNG.output <- file.path(output.directory,PNG.output);
 
         is.current.year   <- (DF.input[,"year"] == year);
         DF.temp           <- DF.input[is.current.year,c("X_Y_year","date","land_cover",target.variable)];
