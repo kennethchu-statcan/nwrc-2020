@@ -174,6 +174,7 @@ for ( temp.variable in my.variables ) {
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
+# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # logger::log_threshold(level = logger::TRACE);
 logger::log_threshold(level = logger::ERROR);
 
@@ -186,7 +187,15 @@ n.harmonics         <-   7;
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 data.snapshot  <- "2020-12-18.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-2");
-n.batches      <- 10;
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+num.cores <- max(1,parallel::detectCores() - 1);
+cat("\nnum.cores\n");
+print( num.cores   );
+
+registerDoParallel(cores = num.cores);
+
+n.batches <- num.cores;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 for ( temp.variable in c("VH","VV") ) {
@@ -271,7 +280,8 @@ for ( temp.variable in c("VH","VV") ) {
             );
 
         ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-        for ( temp.batch in seq(1,n.batches,1) ) {
+        # for ( temp.batch in seq(1,n.batches,1) ) {
+        foreach ( temp.batch = 1:n.batches ) %dopar% {
 
             DF.temp.batch <- DF.temp.year[temp.batch == DF.temp.year[,'batch'],];
 
