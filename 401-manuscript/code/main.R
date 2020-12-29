@@ -17,8 +17,10 @@ setwd( dir.out );
 
 cat("\n##################################################\n");
 require(dplyr);
+require(doParallel);
 require(foreach);
 require(magrittr);
+require(parallel);
 require(rlang);
 require(fpcFeatures);
 
@@ -193,7 +195,7 @@ num.cores <- max(1,parallel::detectCores() - 1);
 cat("\nnum.cores\n");
 print( num.cores   );
 
-registerDoParallel(cores = num.cores);
+doParallel::registerDoParallel(cores = num.cores);
 
 n.batches <- num.cores;
 
