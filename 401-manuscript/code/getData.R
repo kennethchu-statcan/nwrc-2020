@@ -61,6 +61,12 @@ getData_given.date <- function(
     data.directory = NULL
     ) {
 
+    thisFunctionName <- "getData";
+
+    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
+    cat(paste0("\n# ",thisFunctionName,"() starts: given.date: ",given.date,"\n\n"));
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     DF.metadata <- DF.metadata[DF.metadata[,'date'] == given.date,];
 
     DF.output <- NULL;
@@ -71,6 +77,7 @@ getData_given.date <- function(
             );
         nrow.DF.temp <- nrow(DF.temp);
         ncol.DF.temp <- ncol(DF.temp);
+        cat(paste0("\n# ",thisFunctionName,"(): c(nrow.DF.temp,ncol.DF.temp) = c(",nrow.DF.temp,", ",ncol.DF.temp,")\n"));
         if ( is.null(DF.output) ) {
             DF.output <- data.frame(temp_colname = as.vector(as.matrix(DF.temp)));
         } else {
@@ -90,6 +97,9 @@ getData_given.date <- function(
     leading.colnames <- c('date','row_index','col_index');
     DF.output <- DF.output[,c(leading.colnames,setdiff(colnames(DF.output),leading.colnames))];
 
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    cat(paste0("\n# ",thisFunctionName,"() quits."));
+    cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###\n");
     return( DF.output );
 
     }
@@ -99,15 +109,15 @@ getData_read.csv <- function(
     ) {
     cat(paste0("\n# getData_read.csv(): input.file: ",input.file,"\n"));
     DF.output <- read.csv(file = input.file, header = FALSE);
-    if ( grepl(x = input.file, pattern = getData_dates.xrm) ) {
-        DF.output <- DF.output[seq(1,nrow(DF.output)-1),];
-    } else if ( grepl(x = input.file, pattern = getData_dates.xc1) ) {
-        DF.output <- DF.output[,seq(2,ncol(DF.output))];
-    } else if ( grepl(x = input.file, pattern = getData_dates.xcn) ) {
-        DF.output <- DF.output[,seq(1,ncol(DF.output)-1)];
-    } else if ( grepl(x = input.file, pattern = getData_dates.xrm_xcn) ) {
-        DF.output <- DF.output[seq(1,nrow(DF.output)-1),seq(1,ncol(DF.output)-1)];
-        }
+    # if ( grepl(x = input.file, pattern = getData_dates.xrm) ) {
+    #     DF.output <- DF.output[seq(1,nrow(DF.output)-1),];
+    # } else if ( grepl(x = input.file, pattern = getData_dates.xc1) ) {
+    #     DF.output <- DF.output[,seq(2,ncol(DF.output))];
+    # } else if ( grepl(x = input.file, pattern = getData_dates.xcn) ) {
+    #     DF.output <- DF.output[,seq(1,ncol(DF.output)-1)];
+    # } else if ( grepl(x = input.file, pattern = getData_dates.xrm_xcn) ) {
+    #     DF.output <- DF.output[seq(1,nrow(DF.output)-1),seq(1,ncol(DF.output)-1)];
+    #     }
     return( DF.output );
     }
 
@@ -131,43 +141,43 @@ getData_metadata <- function(
 
 ### ~~~~~~~~~~~ ####
 ### ~~~~~~~~~~~ ####
-getData_dates.xrm <- c(
-    "20170404", # dimensions-2017.csv:"20170404",1679,2488
-    "20170416", # dimensions-2017.csv:"20170416",1679,2488
-    "20170709", # dimensions-2017.csv:"20170709",1679,2488
-    "20170826", # dimensions-2017.csv:"20170826",1679,2488
-    "20190406", # dimensions-2019.csv:"20190406",1679,2488
-    "20190629", # dimensions-2019.csv:"20190629",1679,2488
-    "20190711", # dimensions-2019.csv:"20190711",1679,2488
-    "20190804", # dimensions-2019.csv:"20190804",1679,2488
-    "20190816", # dimensions-2019.csv:"20190816",1679,2488
-    "20190921"  # dimensions-2019.csv:"20190921",1679,2488
-    );
-getData_dates.xrm <- paste0("(",paste(getData_dates.xrm,collapse="|"),")");
-
-### ~~~~~~~~~~~ ####
-getData_dates.xc1 <- c(
-    "20191003", # dimensions-2019.csv:"20191003",1678,2489
-    "20191027", # dimensions-2019.csv:"20191027",1678,2489
-    "20190430", # dimensions-2019.csv:"20190430",1678,2489
-    "20190617"  # dimensions-2019.csv:"20190617",1678,2489
-    );
-getData_dates.xc1 <- paste0("(",paste(getData_dates.xc1,collapse="|"),")");
-
-getData_dates.xcn <- c(
-    "20170615", # dimensions-2017.csv:"20170615",1678,2489
-    "20180423", # dimensions-2018.csv:"20180423",1678,2489
-    "20180517", # dimensions-2018.csv:"20180517",1678,2489
-    "20180610"  # dimensions-2018.csv:"20180610",1678,2489
-    );
-getData_dates.xcn <- paste0("(",paste(getData_dates.xcn,collapse="|"),")");
-
-### ~~~~~~~~~~~ ####
-getData_dates.xrm_xcn <- c(
-    "20180622", # dimensions-2018.csv:"20180622",1679,2489
-    "20170814", # dimensions-2017.csv:"20170814",1679,2489
-    "20180809", # dimensions-2018.csv:"20180809",1679,2489
-    "20181020", # dimensions-2018.csv:"20181020",1679,2489
-    "20190723"  # dimensions-2019.csv:"20190723",1679,2489
-    );
-getData_dates.xrm_xcn <- paste0("(",paste(getData_dates.xrm_xcn,collapse="|"),")");
+# getData_dates.xrm <- c(
+#     "20170404", # dimensions-2017.csv:"20170404",1679,2488
+#     "20170416", # dimensions-2017.csv:"20170416",1679,2488
+#     "20170709", # dimensions-2017.csv:"20170709",1679,2488
+#     "20170826", # dimensions-2017.csv:"20170826",1679,2488
+#     "20190406", # dimensions-2019.csv:"20190406",1679,2488
+#     "20190629", # dimensions-2019.csv:"20190629",1679,2488
+#     "20190711", # dimensions-2019.csv:"20190711",1679,2488
+#     "20190804", # dimensions-2019.csv:"20190804",1679,2488
+#     "20190816", # dimensions-2019.csv:"20190816",1679,2488
+#     "20190921"  # dimensions-2019.csv:"20190921",1679,2488
+#     );
+# getData_dates.xrm <- paste0("(",paste(getData_dates.xrm,collapse="|"),")");
+#
+# ### ~~~~~~~~~~~ ####
+# getData_dates.xc1 <- c(
+#     "20191003", # dimensions-2019.csv:"20191003",1678,2489
+#     "20191027", # dimensions-2019.csv:"20191027",1678,2489
+#     "20190430", # dimensions-2019.csv:"20190430",1678,2489
+#     "20190617"  # dimensions-2019.csv:"20190617",1678,2489
+#     );
+# getData_dates.xc1 <- paste0("(",paste(getData_dates.xc1,collapse="|"),")");
+#
+# getData_dates.xcn <- c(
+#     "20170615", # dimensions-2017.csv:"20170615",1678,2489
+#     "20180423", # dimensions-2018.csv:"20180423",1678,2489
+#     "20180517", # dimensions-2018.csv:"20180517",1678,2489
+#     "20180610"  # dimensions-2018.csv:"20180610",1678,2489
+#     );
+# getData_dates.xcn <- paste0("(",paste(getData_dates.xcn,collapse="|"),")");
+#
+# ### ~~~~~~~~~~~ ####
+# getData_dates.xrm_xcn <- c(
+#     "20180622", # dimensions-2018.csv:"20180622",1679,2489
+#     "20170814", # dimensions-2017.csv:"20170814",1679,2489
+#     "20180809", # dimensions-2018.csv:"20180809",1679,2489
+#     "20181020", # dimensions-2018.csv:"20181020",1679,2489
+#     "20190723"  # dimensions-2019.csv:"20190723",1679,2489
+#     );
+# getData_dates.xrm_xcn <- paste0("(",paste(getData_dates.xrm_xcn,collapse="|"),")");
