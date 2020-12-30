@@ -23,12 +23,6 @@ stderrFile=${outputDIR}/stderr.R.`basename ${myRscript} .R`
 R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} < ${myRscript} > ${stdoutFile} 2> ${stderrFile}
 # sleep 30
 
-##################################################
-##################################################
-exit 0
-##################################################
-##################################################
-
 ### ~~~~~~~~~~ ###
 for variable in VH VV
 do
