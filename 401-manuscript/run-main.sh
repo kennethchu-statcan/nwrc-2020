@@ -21,14 +21,21 @@ myRscript=${codeDIR}/main-01.R
 stdoutFile=${outputDIR}/stdout.R.`basename ${myRscript} .R`
 stderrFile=${outputDIR}/stderr.R.`basename ${myRscript} .R`
 R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} < ${myRscript} > ${stdoutFile} 2> ${stderrFile}
-# sleep 30
+sleep 30
+
+### ~~~~~~~~~~ ###
+myRscript=${codeDIR}/main-02.R
+stdoutFile=${outputDIR}/stdout.R.`basename ${myRscript} .R`
+stderrFile=${outputDIR}/stderr.R.`basename ${myRscript} .R`
+R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} < ${myRscript} > ${stdoutFile} 2> ${stderrFile}
+sleep 30
 
 ### ~~~~~~~~~~ ###
 for variable in VH VV
 do
     for year in 2017 2018 2019
     do
-        myRscript=${codeDIR}/main-02.R
+        myRscript=${codeDIR}/main-03.R
         stdoutFile=${outputDIR}/stdout.R.`basename ${myRscript} .R`-${variable}-${year}
         stderrFile=${outputDIR}/stderr.R.`basename ${myRscript} .R`-${variable}-${year}
         R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} ${variable} ${year} < ${myRscript} > ${stdoutFile} 2> ${stderrFile}
