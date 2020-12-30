@@ -8,7 +8,6 @@ dir.out  <- normalizePath( command.arguments[4] );
 parameter.variable <- as.character( command.arguments[5] );
 parameter.year     <- as.character( command.arguments[6] );
 
-
 # add custom library using .libPaths()
 cat(paste0("\n"));
 cat(paste0("dir.data: ", dir.data,"\n\n"));
