@@ -58,8 +58,8 @@ DF.colour.scheme <- data.frame(
     );
 rownames(DF.colour.scheme) <- DF.colour.scheme[,"land_cover"];
 
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-12-18.01";
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+data.snapshot  <- "2020-12-30.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
 
 colname.pattern <- "V";
@@ -86,7 +86,7 @@ smoothing.parameter <-   0.1;
 n.harmonics         <-   7;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-12-18.01";
+data.snapshot  <- "2020-12-30.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-2");
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -258,3 +258,4 @@ cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
 stop.proc.time <- proc.time();
 cat("\n##### stop.proc.time - start.proc.time:\n");
 print(       stop.proc.time - start.proc.time    );
+

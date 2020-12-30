@@ -49,8 +49,8 @@ DF.colour.scheme <- data.frame(
     );
 rownames(DF.colour.scheme) <- DF.colour.scheme[,"land_cover"];
 
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-12-18.01";
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+data.snapshot  <- "2020-12-30.01";
 data.directory <- file.path(dir.data,data.snapshot,"micro-mission-1","Sentinel1","IW","4");
 
 colname.pattern <- "V";
@@ -71,7 +71,7 @@ visualizeData.labelled(
     colname.pattern = colname.pattern
     );
 
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # logger::log_threshold(level = logger::TRACE);
 logger::log_threshold(level = logger::ERROR);
 
@@ -169,58 +169,6 @@ for ( temp.variable in my.variables ) {
 
     }
 
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-# ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-# logger::log_threshold(level = logger::TRACE);
-logger::log_threshold(level = logger::ERROR);
-
-n.partition         <- 100;
-n.order             <-   3;
-n.basis             <-   9;
-smoothing.parameter <-   0.1;
-n.harmonics         <-   7;
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-data.snapshot  <- "2020-12-18.01";
-data.directory <- file.path(dir.data,data.snapshot,"micro-mission-2");
-
-### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-for ( temp.variable in c("VH","VV") ) {
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    DF.variable <- DF.labelled[,c("X","Y","date","land_cover",temp.variable)];
-    DF.variable[,"X_Y"] <- apply(
-        X      = DF.variable[,c('X','Y')],
-        MARGIN = 1,
-        FUN    = function(x) { return(paste(x,collapse="_")) }
-        );
-
-    cat("\nstr(DF.variable)\n");
-    print( str(DF.variable)   );
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    for ( temp.year in c("2017","2018","2019") ) {
-
-        DF.temp.year <- getData(
-            data.directory = file.path(data.directory,temp.year),
-            output.file    = paste0("data-unlabelled-",temp.variable,"-",temp.year,".RData")
-            );
-
-        DF.temp.year <- coregisterData(
-            DF.input    = DF.temp.year,
-            output.file = paste0("data-unlabelled-",temp.variable,"-",temp.year,"-coregistered.RData")
-            );
-
-        cat("\nstr(DF.temp.year)\n");
-        print( str(DF.temp.year)   );
-
-        }
-
-    }
-
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
 cat("\n##################################################\n");
@@ -243,3 +191,4 @@ cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
 stop.proc.time <- proc.time();
 cat("\n##### stop.proc.time - start.proc.time:\n");
 print(       stop.proc.time - start.proc.time    );
+
