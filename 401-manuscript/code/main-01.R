@@ -66,9 +66,15 @@ cat("\nstr(DF.labelled)\n");
 print( str(DF.labelled)   );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+diagnostics.directory <- file.path(getwd(),"data-labelled-diagnostics");
+if ( !dir.exists(diagnostics.directory) ) {
+    dir.create(path = diagnostics.directory, recursive = TRUE);
+    }
+
 visualizeData.labelled(
-    DF.input        = DF.labelled,
-    colname.pattern = colname.pattern
+    DF.input         = DF.labelled,
+    colname.pattern  = colname.pattern,
+    output.directory = diagnostics.directory
     );
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -80,6 +86,12 @@ n.order             <-   3;
 n.basis             <-   9;
 smoothing.parameter <-   0.1;
 n.harmonics         <-   7;
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+fpc.directory <- file.path(getwd(),"data-labelled-fpc");
+if ( !dir.exists(fpc.directory) ) {
+    dir.create(path = fpc.directory, recursive = TRUE);
+    }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 my.variables <- c(
@@ -119,12 +131,12 @@ for ( temp.variable in my.variables ) {
 
     saveRDS(
         object = my.fpcFeatureEngine,
-        file = paste0("fpc-",temp.variable,"-FeatureEngine.RData")
+        file   = file.path(fpc.directory,paste0("fpc-",temp.variable,"-FeatureEngine.RData"))
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     ggplot2::ggsave(
-        file   = paste0("fpc-",temp.variable,"-harmonics.png"),
+        file   = file.path(fpc.directory,paste0("fpc-",temp.variable,"-harmonics.png")),
         plot   = my.fpcFeatureEngine$plot.harmonics(),
         dpi    = 150,
         height =   4 * n.harmonics,
@@ -162,7 +174,8 @@ for ( temp.variable in my.variables ) {
     visualize.fpc.scores(
         variable         = temp.variable,
         DF.fpc.scores    = DF.fpc.scores,
-        DF.colour.scheme = DF.colour.scheme
+        DF.colour.scheme = DF.colour.scheme,
+        output.directory = fpc.directory
         );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -191,4 +204,3 @@ cat("\n##### Sys.time(): ",format(Sys.time(),"%Y-%m-%d %T %Z"),"\n");
 stop.proc.time <- proc.time();
 cat("\n##### stop.proc.time - start.proc.time:\n");
 print(       stop.proc.time - start.proc.time    );
-

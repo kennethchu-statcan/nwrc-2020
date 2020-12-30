@@ -6,7 +6,8 @@ visualize.fpc.scores <- function(
         row.names  = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
         land_cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
         colour     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
-        )
+        ),
+    output.directory = NULL
     ) {
 
     thisFunctionName <- "visualize.fpc.scores";
@@ -36,7 +37,7 @@ visualize.fpc.scores <- function(
             DF.colour.scheme = DF.colour.scheme,
             title            = NULL,
             subtitle         = paste0(variable,', ',temp.year),
-            PNG.output       = paste0("fpc-",variable,"-scoress-",temp.year,".png")
+            PNG.output       = file.path(output.directory,paste0("fpc-",variable,"-scoress-",temp.year,".png"))
             );
         }
 

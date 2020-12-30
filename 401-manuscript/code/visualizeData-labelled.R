@@ -15,22 +15,14 @@ visualizeData.labelled <- function(
     smoothing.parameter =  0.1,
     n.harmonics         =  7,
     plot.timeseries     = TRUE,
-    plot.heatmaps       = TRUE
+    plot.heatmaps       = TRUE,
+    output.directory    = NULL
     ) {
 
     thisFunctionName <- "visualizeData.labelled";
 
     cat("\n### ~~~~~~~~~~~~~~~~~~~~ ###");
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    initial.directory <- getwd();
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    temp.directory <- file.path(initial.directory,"diagnostics");
-    if ( !dir.exists(temp.directory) ) {
-        dir.create(path = temp.directory, recursive = TRUE);
-        }
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     land.covers <- DF.colour.scheme[,"land_cover"];
@@ -42,14 +34,14 @@ visualizeData.labelled <- function(
             DF.input         = DF.input,
             colname.pattern  = colname.pattern,
             DF.colour.scheme = DF.colour.scheme,
-            output.directory = temp.directory
+            output.directory = output.directory
             );
 
         visualizeData.labelled_TimeSeriesRibbonPlots(
             DF.input         = DF.input,
             colname.pattern  = colname.pattern,
             DF.colour.scheme = DF.colour.scheme,
-            output.directory = temp.directory
+            output.directory = output.directory
             );
 
         }
