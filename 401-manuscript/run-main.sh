@@ -30,8 +30,8 @@ do
         myRscript=${codeDIR}/main-02.R
         stdoutFile=${outputDIR}/stdout.R.`basename ${myRscript} .R`-${variable}-${year}
         stderrFile=${outputDIR}/stderr.R.`basename ${myRscript} .R`-${variable}-${year}
-        echo "${variable} ${year} ${stdoutFile} ${stderrFile}"
-        R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} ${variable} ${year} < ${myRscript} > ${stdoutFile} 2> ${stderrFile} &
+        R --no-save --args ${dataDIR} ${codeDIR} ${pkgDIR} ${outputDIR} ${variable} ${year} < ${myRscript} > ${stdoutFile} 2> ${stderrFile}
+        sleep 10
     done
 done
 
