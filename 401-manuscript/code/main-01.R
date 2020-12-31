@@ -30,6 +30,7 @@ code.files <- c(
     "getData-labelled-helper.R",
     "initializePlot.R",
     "reshapeData.R",
+    "visualize-fpc-approximations.R",
     "visualize-fpc-scores.R",
     "visualize-geocoordinates.R",
     "visualizeData-labelled.R"
@@ -88,6 +89,11 @@ smoothing.parameter <-   0.1;
 n.harmonics         <-   7;
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+approximations.directory <- file.path(getwd(),"data-labelled-approximations");
+if ( !dir.exists(approximations.directory) ) {
+    dir.create(path = approximations.directory, recursive = TRUE);
+    }
+
 fpc.directory <- file.path(getwd(),"data-labelled-fpc");
 if ( !dir.exists(fpc.directory) ) {
     dir.create(path = fpc.directory, recursive = TRUE);
@@ -108,7 +114,7 @@ for ( temp.variable in my.variables ) {
     DF.variable[,"X_Y"] <- apply(
         X      = DF.variable[,c('X','Y')],
         MARGIN = 1,
-        FUN    = function(x) { return(paste(x,collapse="_")) }
+        FUN    = function(x) { return( paste(x,collapse="_") ) }
         );
 
     cat("\nstr(DF.variable)\n");
@@ -169,6 +175,18 @@ for ( temp.variable in my.variables ) {
 
     cat("\nstr(DF.fpc.scores)\n");
     print( str(DF.fpc.scores)   );
+
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+    visualize.fpc.approximations(
+        featureEngine    = my.fpcFeatureEngine,
+        DF.variable      = DF.variable,
+        location         = 'X_Y',
+        date             = 'date',
+        land.cover       = 'land_cover',
+        variable         = temp.variable,
+        DF.colour.scheme = DF.colour.scheme,
+        output.directory = approximations.directory
+        );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     visualize.fpc.scores(

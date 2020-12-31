@@ -16,14 +16,6 @@ visualize.fpc.scores <- function(
     cat(paste0("\n",thisFunctionName,"() starts.\n\n"));
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    # initial.directory <- getwd();
-    #
-    # temp.directory <- file.path(initial.directory,"fpc-scores");
-    # if ( !dir.exists(temp.directory) ) {
-    #     dir.create(path = temp.directory, recursive = TRUE);
-    #     }
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
     years <- unique(DF.fpc.scores[,'year']);
 
     for ( temp.year in years ) {
