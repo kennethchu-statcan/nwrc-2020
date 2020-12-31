@@ -34,7 +34,7 @@ base::Encoding(string.authors) <- "UTF-8";
 
 description.fields <- base::list(
     Title           = "FPC Feature Engine for annual SAR time series",
-    Version         = "0.0.0.0001",
+    Version         = "0.0.0.0002",
     `Authors@R`     = string.authors,
     Description     = "This package implements functionalities to compute functional principal component (FPC) scores given a collection of SAR measurement time series.",
     Language        = "fr",
