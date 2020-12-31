@@ -47,7 +47,7 @@ then
     sleep 30
     ### ~~~~~~~~~~ ###
     cd ${outputDIR}
-    Rscript -e 'csv.directory <- "data-unlabelled-fpc-scores-csv"; if (!dir.exists(csv.directory)) { dir.create(path = csv.directory, recursive = TRUE) } temp.files <- list.files(path=".",pattern="batch.+RData$"); for (temp.file in temp.files) { print(temp.file); temp.stem <- tools::file_path_sans_ext(temp.file); DF.temp <- readRDS(temp.file); print(str(DF.temp)); write.csv(x = DF.temp, file = file.path(csv.directory,paste0(temp.stem,".csv")), row.names = FALSE) }'
+    Rscript -e 'csv.directory <- "data-unlabelled-fpc-scores-csv"; if (!dir.exists(csv.directory)) { dir.create(path = csv.directory, recursive = TRUE) }; temp.files <- list.files(path=".",pattern="batch.+RData$"); for (temp.file in temp.files) { print(temp.file); temp.stem <- tools::file_path_sans_ext(temp.file); DF.temp <- readRDS(temp.file); print(str(DF.temp)); write.csv(x = DF.temp, file = file.path(csv.directory,paste0(temp.stem,".csv")), row.names = FALSE) }' > stdout.Rscript.RData-to-csv 2> stderr.Rscript.RData-to-csv
 fi
 
 ##################################################
