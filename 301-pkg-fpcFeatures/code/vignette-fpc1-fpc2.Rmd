@@ -13,38 +13,67 @@ knitr::opts_chunk$set(
     comment = "#>"
     )
 ```
-The R package **stcCropYield** implements a number of model training procedures
-to build trained prediction models for early-season crop yield (parcel-level)
-prediction for the province of Manitoba, using parcel-level NDVI and CARS-level
-weather measurement time series as predictor variables.
+This vignette demonstrates the use of the R6 class **fpcFeatureEngine**
+in the R package **fpcFeatures**.
+An **fpcFeatureEngine** object can be used to compute, and store,
+the *functional principal components* (also referred to as *harmonics*)
+of an input (training) data set consisting of a collection
+of time series.
+A trained **fpcFeatureEngine** object can then be used to compute
+the corresponding functional principal component scores for a _new_
+collection of time series.
 
-This vignette demonstrates how to use the function
-**stcCropYield::rollingWindowForwardValidation(.)**
-to train a crop yield prediction model,
-following the *rolling window forward validation* protocol,
-using XGBoost as the underlying prediction technique.
+The finest temporal resolution allowed by **fpcFeatureEngine**
+is one measurement per day, and **fpcFeatureEngine** assumes that
+all measurements of each time series are made within the same
+calendar year.
 
-First, load the **stcCropYield** R package.
+We demonstrate these functionalities in this vignette.
+
+# 1. Preparing the demo data frame
+
+### Load the **IW4** remote sensing time series data frame.
+
+We will demonstrate the usage of **fpcFeatureEngine** using the data frame
+**IW4**, which is bundled with the R package **fpcFeatures**.
+
+First, load the **fpcFeatures** R package, and the other required packages
+for this vignette:
 ```{r setup}
 require(fpcFeatures)
 require(ggplot2)
 require(knitr)
 require(logger)
 ```
-Next, we generate a synthetic data set in the form of a single data frame
-that has the structure expected by
-**stcCropYield::rollingWindowForwardValidation(...)**:
-We examine the structure of the data frame DF.training
+
+Now that we have loaded the package **fpcFeatures**,
+we load the embedded data frame **IW4**, and examine its structure.
 ```{r IW4}
 data(IW4);
 str(IW4);
 ```
 
-Here are the first few rows of DF.training:
+The IW4 data frame contains VV time series measurements from approximately
+5500 locations (each specified by geocoordinates) for the growing seasons
+of the calendar years 2017, 2018 and 2019.
+For each location and each year, the corresponding measurement time series
+starts around early April and extends to around late October or early November,
+at an observation frequency of one measurement every 12 days.
+
+Here are the first few rows of IW4:
 ```{r headIW4}
 knitr::kable(head(IW4), align = "c")
 ```
 
+### Form the **DF.VV** data frame.
+
+In what follows, we will work with the VV variable.
+We form a new data frame **DF.VV** by extracting from IW4
+the VV measurements, the dates and the geocoordinates.
+**fpcFeatureEngine** requires its input data frame
+to have its location identifier as a single variable.
+We therefore create a custom unique location idenfitier
+by concatenating the two geocoordinates:
 ```{r}
 DF.VV <- IW4[,c('x','y','date','VV')];
 DF.VV[,'x_y'] <- base::apply(
@@ -53,6 +82,8 @@ DF.VV[,'x_y'] <- base::apply(
     FUN    = function(x) { return(base::paste(x,collapse="_")) }
     );
 ```
+
+### Split **DF.VV** _by location_ into **training** and **new** subsets.
 
 ```{r}
 locations <- base::unique(DF.VV[,'x_y']);
@@ -68,6 +99,20 @@ colnames(DF.VV.1) <- paste0("my_",colnames(DF.VV.1));
 DF.VV.2 <- DF.VV[DF.VV[,'x_y'] %in% locations.2,];
 colnames(DF.VV.2) <- paste0("your_",colnames(DF.VV.2));
 ```
+
+Here are the first few rows of **DF.VV.1**:
+```{r}
+knitr::kable(head(DF.VV.1), align = "c")
+```
+
+The first few rows of **DF.VV.2**:
+```{r}
+knitr::kable(head(DF.VV.2), align = "c")
+```
+
+# 2. Training (compute and store functional principal components based on training data)
+
+### Training an **fpcFeatureEngine** object with the training data
 
 ```{r}
 logger::log_threshold(level = logger::ERROR);
@@ -90,6 +135,10 @@ my.fpcFeatureEngine$fit();
 ```{r harmonics, fig.height = 28, fig.width = 16}
 my.fpcFeatureEngine$plot.harmonics();
 ```
+
+# 3. Compute FPC scores for new data using a trained **fpcFeatureEngine** object.
+
+### Compuint FPC scores for the new data using the trained **fpcFeatureEngine** object
 
 ```{r}
 DF.land.cover <- base::unique(IW4[,c('x','y','land_cover')])
@@ -121,6 +170,8 @@ DF.bspline.fpc <- DF.bspline.fpc[,c('your_x_y','year','land_cover',paste0('fpc_'
 
 knitr::kable(head(DF.bspline.fpc), align = "c", row.names = FALSE)
 ```
+
+# 4. Visualize FPC scores of new data.
 
 ```{r fig.width = 16, fig.height = 12.5}
 DF.colour.scheme <- data.frame(
@@ -169,6 +220,8 @@ my.ggplot <- my.ggplot + geom_point(
 
 my.ggplot
 ```
+
+# 5. Goodness-of-fit diagnostics of individual time series.
 
 ```{r}
 temp.x_y <- DF.VV.2[1,"your_x_y"]
