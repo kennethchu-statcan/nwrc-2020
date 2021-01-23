@@ -26,7 +26,10 @@ using XGBoost as the underlying prediction technique.
 
 First, load the **stcCropYield** R package.
 ```{r setup}
-library(fpcFeatures)
+require(fpcFeatures)
+require(ggplot2)
+require(knitr)
+require(logger)
 ```
 Next, we generate a synthetic data set in the form of a single data frame
 that has the structure expected by
@@ -42,26 +45,17 @@ Here are the first few rows of DF.training:
 knitr::kable(head(IW4), align = "c")
 ```
 
-```{r fit}
-DF.VV <- IW4[,c("x","y","date","VV")];
-DF.VV[,"x_y"] <- apply(
+```{r}
+DF.VV <- IW4[,c('x','y','date','VV')];
+DF.VV[,'x_y'] <- base::apply(
     X      = DF.VV[,c('x','y')],
     MARGIN = 1,
-    FUN    = function(x) { return(paste(x,collapse="_")) }
+    FUN    = function(x) { return(base::paste(x,collapse="_")) }
     );
 ```
 
 ```{r}
-DF.VV <- IW4[,c("x","y","date","VV")];
-DF.VV[,"x_y"] <- apply(
-    X      = DF.VV[,c('x','y')],
-    MARGIN = 1,
-    FUN    = function(x) { return(paste(x,collapse="_")) }
-    );
-```
-
-```{r}
-locations <- unique(DF.VV[,'x_y']);
+locations <- base::unique(DF.VV[,'x_y']);
 
 set.seed(7654321);
 is.subset.1 <- sample(x = c(TRUE,FALSE), size = length(locations), replace = TRUE);
@@ -97,6 +91,17 @@ my.fpcFeatureEngine$fit();
 my.fpcFeatureEngine$plot.harmonics();
 ```
 
+```{r}
+DF.land.cover <- base::unique(IW4[,c('x','y','land_cover')])
+DF.land.cover[,'x_y'] <- base::apply(
+    X      = DF.land.cover[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(base::paste(x,collapse="_")) }
+    );
+DF.land.cover <- DF.land.cover[,c('x_y','land_cover')]
+knitr::kable(head(DF.land.cover), align = "c", row.names = FALSE)
+```
+
 ```{r transform}
 DF.bspline.fpc <- my.fpcFeatureEngine$transform(
     newdata  = DF.VV.2,
@@ -104,41 +109,87 @@ DF.bspline.fpc <- my.fpcFeatureEngine$transform(
     date     = 'your_date',
     variable = 'your_VV'
     );
-str(DF.bspline.fpc);
+
+DF.bspline.fpc <- base::merge(
+    x    = DF.bspline.fpc,
+    y    = DF.land.cover,
+    by.x = 'your_x_y',
+    by.y = 'x_y'
+    )
+
+DF.bspline.fpc <- DF.bspline.fpc[,c('your_x_y','year','land_cover',paste0('fpc_',1:7))]
+
+knitr::kable(head(DF.bspline.fpc), align = "c", row.names = FALSE)
 ```
 
-```{r fpc1fpc2, fig.width = 16, fig.height = 16}
-plot(
-    x    = DF.bspline.fpc[,'fpc_1'],
-    y    = DF.bspline.fpc[,'fpc_2'],
-    pch  = 19,
-    cex  =  0.1,
-    xlim = 300 * c(-1,1),
-    ylim = 150 * c(-1,1),
-    asp  = 2
+```{r fig.width = 16, fig.height = 12.5}
+DF.colour.scheme <- data.frame(
+    land_cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
+    colour     = c("#000000","#E69F00","#56B4E9","#009E73","#F0E442","red"    )
+    )
+rownames(DF.colour.scheme) <- DF.colour.scheme[,"land_cover"]
+my.palette <- DF.colour.scheme[,"colour"]
+
+textsize.title <- 50
+textsize.axis  <- 35
+
+my.ggplot <- ggplot2::ggplot(data = NULL) + ggplot2::theme_bw();
+my.ggplot <- my.ggplot + ggplot2::theme(
+    title            = ggplot2::element_text(size = textsize.title, face = "bold"),
+    axis.title.x     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+    axis.title.y     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+    axis.text.x      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+    axis.text.y      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+    strip.text.y     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+    legend.title     = element_blank(),
+    legend.text      = ggplot2::element_text(size = textsize.axis),
+    panel.grid.major = ggplot2::element_line(colour = "gray", linetype = 2, size = 0.25),
+    panel.grid.minor = ggplot2::element_line(colour = "gray", linetype = 2, size = 0.25)
     );
+
+my.ggplot <- my.ggplot + ggplot2::labs(title = NULL, subtitle = NULL)
+my.ggplot <- my.ggplot + ggplot2::scale_colour_manual(values = my.palette)
+my.ggplot <- my.ggplot + ggplot2::scale_fill_manual(  values = my.palette)
+my.ggplot <- my.ggplot + guides(
+    colour = guide_legend(override.aes = list(alpha =  0.75, size = 5))
+    )
+
+my.ggplot <- my.ggplot + scale_x_continuous(limits = 300*c(-1,1), breaks = seq(-300,300,100))
+my.ggplot <- my.ggplot + scale_y_continuous(limits = 150*c(-1,1), breaks = seq(-150,150, 50))
+
+my.ggplot <- my.ggplot + ggplot2::xlab("FPC 1 score")
+my.ggplot <- my.ggplot + ggplot2::ylab("FPC 2 score")
+
+my.ggplot <- my.ggplot + geom_point(
+    data    = DF.bspline.fpc,
+    mapping = aes(x = fpc_1, y = fpc_2, colour = land_cover),
+    size    = 0.5,
+    alpha   = 0.5
+    )
+
+my.ggplot
 ```
 
 ```{r}
-temp.x_y <- DF.VV.2[1,"your_x_y"];
+temp.x_y <- DF.VV.2[1,"your_x_y"]
 print( temp.x_y );
 
 DF.temp <- IW4[c("x","y","date","VV")];
 
-DF.temp[,"year"] <- format(x = IW4[,'date'], format = "%Y");
-is.selected.year <- ("2017" == DF.temp[,'year']);
-DF.temp          <- DF.temp[is.selected.year,];
+DF.temp[,"year"] <- format(x = IW4[,'date'], format = "%Y")
+is.selected.year <- ("2017" == DF.temp[,'year'])
+DF.temp          <- DF.temp[is.selected.year,]
 
 DF.temp[,"x_y"] <- apply(
     X      = DF.temp[,c('x','y')],
     MARGIN = 1,
     FUN    = function(x) { return(paste(x,collapse="_")) }
-    );
-colnames(DF.temp) <- paste0("their_",colnames(DF.temp));
+    )
+colnames(DF.temp) <- paste0("their_",colnames(DF.temp))
 
-DF.temp <- DF.temp[temp.x_y == DF.temp[,'their_x_y'],];
-DF.temp <- DF.temp[,c("their_x_y","their_date","their_VV")];
-knitr::kable(DF.temp, align = "c", row.names = FALSE);
+DF.temp <- DF.temp[temp.x_y == DF.temp[,'their_x_y'],]
+DF.temp <- DF.temp[,c("their_x_y","their_date","their_VV")]
+knitr::kable(DF.temp, align = "c", row.names = FALSE)
 ```
 
 ```{r, fig.width = 16}
