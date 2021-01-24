@@ -29,7 +29,7 @@ visualize.fpc.scores <- function(
             DF.colour.scheme = DF.colour.scheme,
             title            = NULL,
             subtitle         = paste0(variable,', ',temp.year),
-            PNG.output       = file.path(output.directory,paste0("fpc-",variable,"-scoress-",temp.year,".png"))
+            PNG.output       = file.path(output.directory,paste0("fpc-",variable,"-scores-",temp.year,".png"))
             );
         }
 
