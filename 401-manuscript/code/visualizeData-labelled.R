@@ -111,6 +111,7 @@ visualizeData.labelled_TimeSeriesRibbonPlots <- function(
             my.palette = DF.colour.scheme[DF.colour.scheme[,"land_cover"] %in% as.character(unique(DF.temp[,"land_cover"])),"colour"]
             );
 
+        my.ggplot <- my.ggplot + xlab(label = NULL);
         my.ggplot <- my.ggplot + ylab(label = NULL);
 
         my.ggplot <- my.ggplot + scale_x_date(
@@ -119,7 +120,8 @@ visualizeData.labelled_TimeSeriesRibbonPlots <- function(
             );
 
         my.ggplot <- my.ggplot + theme(
-            axis.text.x = element_text(angle = 90, vjust = 0.5)
+            legend.position = "none",
+            axis.text.x     = element_text(angle = 90, vjust = 0.5)
             );
 
         my.ggplot <- my.ggplot + geom_ribbon(
@@ -190,9 +192,6 @@ visualizeData.labelled_plotGroupedTimeSeries <- function(
 
     require(ggplot2);
 
-    cat("\nstr(DF.input)\n");
-    print( str(DF.input)   );
-
     years            <- unique(DF.input[,"year"]);
     target.variables <- grep(x = colnames(DF.input), pattern = colname.pattern, value = TRUE);
 
@@ -216,6 +215,7 @@ visualizeData.labelled_plotGroupedTimeSeries <- function(
             my.palette = DF.colour.scheme[DF.colour.scheme[,"land_cover"] %in% as.character(unique(DF.temp[,"land_cover"])),"colour"]
             );
 
+        my.ggplot <- my.ggplot + xlab(label = NULL);
         my.ggplot <- my.ggplot + ylab(label = NULL);
 
         my.ggplot <- my.ggplot + scale_x_date(
@@ -224,7 +224,8 @@ visualizeData.labelled_plotGroupedTimeSeries <- function(
             );
 
         my.ggplot <- my.ggplot + theme(
-            axis.text.x = element_text(angle = 90, vjust = 0.5)
+            legend.position = "none",
+            axis.text.x     = element_text(angle = 90, vjust = 0.5)
             );
 
         if ( grepl(x = target.variable, pattern = "_scaled$") ) {

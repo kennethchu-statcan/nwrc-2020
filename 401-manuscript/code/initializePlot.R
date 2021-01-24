@@ -11,15 +11,16 @@ initializePlot <- function(
     my.ggplot <- ggplot2::ggplot(data = NULL) + ggplot2::theme_bw();
     my.ggplot <- my.ggplot + ggplot2::theme(
         title            = ggplot2::element_text(size = textsize.title, face = "bold"),
+        strip.text.x     = ggplot2::element_text(size = textsize.title, face = "bold"),
+        strip.text.y     = ggplot2::element_text(size = textsize.title, face = "bold"),
         axis.title.x     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
         axis.title.y     = ggplot2::element_text(size = textsize.axis,  face = "bold"),
-        axis.text.x      = ggplot2::element_text(size = textsize.axis, face = "bold"),
-        axis.text.y      = ggplot2::element_text(size = textsize.axis, face = "bold"),
-        strip.text.y     = ggplot2::element_text(size = textsize.axis, face = "bold"),
-        legend.title     = element_blank(),
+        axis.text.x      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+        axis.text.y      = ggplot2::element_text(size = textsize.axis,  face = "bold"),
+        legend.title     = ggplot2::element_blank(),
         legend.text      = ggplot2::element_text(size = textsize.axis),
-        panel.grid.major = ggplot2::element_line(colour="gray", linetype=2, size=0.25),
-        panel.grid.minor = ggplot2::element_line(colour="gray", linetype=2, size=0.25)
+        panel.grid.major = ggplot2::element_line(colour = "gray", linetype = 2, size = 0.25),
+        panel.grid.minor = ggplot2::element_line(colour = "gray", linetype = 2, size = 0.25)
         );
 
     my.ggplot <- my.ggplot + ggplot2::labs(
