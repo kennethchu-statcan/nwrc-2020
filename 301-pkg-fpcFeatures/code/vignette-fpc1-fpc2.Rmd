@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
     comment = "#>"
     )
 ```
-This vignette demonstrates the use of the R6 class **fpcFeatureEngine**
+This vignette demonstrates the usage of the R6 class **fpcFeatureEngine**
 in the R package **fpcFeatures**.
 
 More specifically, we demonstrate the following practical use case:
@@ -28,12 +28,22 @@ More specifically, we demonstrate the following practical use case:
 
 Functional principal components are also commonly referred to as **harmonics**.
 
+### **fpcFeatureEngine** assumes that:
+
+*   each time point in each input time series corresponds to a date, and
+
+*   for each given input time series,
+    all of its time points come from the same calendar year.
+
+However, for each pair of input time series for **fpcFeatureEngine**,
+their respective collections of time points need not coincide.
+
 # 1. Preparing demo data frames: **DF.training**, **DF.new**
 
 ### Load the **IW4** remote sensing time series data frame.
 
-We will demonstrate the usage of **fpcFeatureEngine** using the data frame
-**IW4**, which is bundled with the R package **fpcFeatures**.
+We will use the data frame **IW4**, which is bundled
+with the R package **fpcFeatures**.
 
 First, load the **fpcFeatures** R package, and the other required packages
 for this vignette:
@@ -44,8 +54,7 @@ require(knitr)
 require(logger)
 ```
 
-Now that we have loaded the package **fpcFeatures**,
-we load the embedded data frame **IW4**, and examine its structure.
+We can now load the embedded data frame **IW4**, and examine its structure.
 ```{r}
 data(IW4);
 str(IW4);
@@ -113,15 +122,13 @@ are required to invoke **fpcFeatureEngine**:
 *  **my_x_y**: location identifier, must be of type character
 *  **my_VV**: target variable (remote sensing measurement), must be of type numeric
 
-**fpcFeatureEngine** ignores all columns of the input time series data frame
-that are irrelevant to the functional principal component computations
-(but it does NOT reject input data frames with extra columns).
+**fpcFeatureEngine** ignores all other columns.
 
 The first few rows of **DF.new**:
 ```{r}
 knitr::kable(head(DF.new), align = "c")
 ```
-Note that **DF.new** has (of course) the same structure as **DF.training**),
+Note that **DF.new** has (of course) the same structure as **DF.training**,
 but the two data frames have different column names.
 **fpcFeatureEngine** does NOT require the training and new data frames
 to have the same column names.
