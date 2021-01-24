@@ -16,6 +16,7 @@ initializePlot <- function(
         axis.text.x      = ggplot2::element_text(size = textsize.axis, face = "bold"),
         axis.text.y      = ggplot2::element_text(size = textsize.axis, face = "bold"),
         strip.text.y     = ggplot2::element_text(size = textsize.axis, face = "bold"),
+        legend.title     = element_blank(),
         legend.text      = ggplot2::element_text(size = textsize.axis),
         panel.grid.major = ggplot2::element_line(colour="gray", linetype=2, size=0.25),
         panel.grid.minor = ggplot2::element_line(colour="gray", linetype=2, size=0.25)
