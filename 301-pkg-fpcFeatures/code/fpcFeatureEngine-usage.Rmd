@@ -164,7 +164,7 @@ _The **min.date** and **max.date** parameters in the above call to
 their default value (i.e. NULL). We explain here when to supply non-NULL
 values for either of these parameters.
 When computing FPC scores for new data -- see Section 3 below --
-**fpcFeatureEngine** requires that the range of observation dates in the
+**fpcFeatureEngine** requires that the observation date range of the
 new data encompasses that of the training data.
 This is because,
 prior to computing the FPC scores,
