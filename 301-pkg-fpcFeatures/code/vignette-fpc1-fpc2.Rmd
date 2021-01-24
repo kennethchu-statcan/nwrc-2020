@@ -1,8 +1,8 @@
 ---
-title: "FPC1 and FPC2"
+title: "fpcFeatureEngine -- usage"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{fpc1-fpc2}
+  %\VignetteIndexEntry{fpcFeatureEngine-usage}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,22 +15,20 @@ knitr::opts_chunk$set(
 ```
 This vignette demonstrates the use of the R6 class **fpcFeatureEngine**
 in the R package **fpcFeatures**.
-An **fpcFeatureEngine** object can be used to compute, and store,
-the *functional principal components* (also referred to as *harmonics*)
-of an input (training) data set consisting of a collection
-of time series.
-A trained **fpcFeatureEngine** object can then be used to compute
-the corresponding functional principal component scores for a _new_
-collection of time series.
 
-The finest temporal resolution allowed by **fpcFeatureEngine**
-is one measurement per day, and **fpcFeatureEngine** assumes that
-all measurements of each time series are made within the same
-calendar year.
+More specifically, we demonstrate the following practical use case:
 
-We demonstrate these functionalities in this vignette.
+*   Compute the functional principal components (FPC)
+    based on a training time series data set.
 
-# 1. Preparing the demo data frame
+*   Subsequently, compute the FPC **scores**,
+    with respect to the aforementioned FPC's
+    (i.e. extracted from training data),
+    but for a new collection of time series (i.e. different from training data).
+
+Functional principal components are also commonly referred to as **harmonics**.
+
+# 1. Preparing demo data frames: **DF.training**, **DF.new**
 
 ### Load the **IW4** remote sensing time series data frame.
 
@@ -48,19 +46,19 @@ require(logger)
 
 Now that we have loaded the package **fpcFeatures**,
 we load the embedded data frame **IW4**, and examine its structure.
-```{r IW4}
+```{r}
 data(IW4);
 str(IW4);
 ```
 
-The IW4 data frame contains VV time series measurements from approximately
+The **IW4** data frame contains VV time series measurements from approximately
 5500 locations (each specified by geocoordinates) for the growing seasons
 of the calendar years 2017, 2018 and 2019.
 For each location and each year, the corresponding measurement time series
 starts around early April and extends to around late October or early November,
 at an observation frequency of one measurement every 12 days.
 
-Here are the first few rows of IW4:
+Here are the first few rows of **IW4**:
 ```{r headIW4}
 knitr::kable(head(IW4), align = "c")
 ```
@@ -68,7 +66,7 @@ knitr::kable(head(IW4), align = "c")
 ### Form the **DF.VV** data frame.
 
 In what follows, we will work with the VV variable.
-We form a new data frame **DF.VV** by extracting from IW4
+We form a new data frame **DF.VV** by extracting from **IW4**
 the VV measurements, the dates and the geocoordinates.
 **fpcFeatureEngine** requires its input data frame
 to have its location identifier as a single variable.
@@ -76,49 +74,70 @@ We therefore create a custom unique location idenfitier
 by concatenating the two geocoordinates:
 ```{r}
 DF.VV <- IW4[,c('x','y','date','VV')];
-DF.VV[,'x_y'] <- base::apply(
+DF.VV[,'x_y'] <- apply(
     X      = DF.VV[,c('x','y')],
     MARGIN = 1,
-    FUN    = function(x) { return(base::paste(x,collapse="_")) }
+    FUN    = function(x) { return(paste(x,collapse="_")) }
     );
 ```
 
-### Split **DF.VV** _by location_ into **training** and **new** subsets.
+### Split **DF.VV** -- by location -- into **DF.training** and **DF.new**.
 
 ```{r}
-locations <- base::unique(DF.VV[,'x_y']);
+locations <- unique(DF.VV[,'x_y']);
 
 set.seed(7654321);
 is.subset.1 <- sample(x = c(TRUE,FALSE), size = length(locations), replace = TRUE);
 locations.1 <- locations[ is.subset.1];
 locations.2 <- locations[!is.subset.1];
 
-DF.VV.1 <- DF.VV[DF.VV[,'x_y'] %in% locations.1,];
-colnames(DF.VV.1) <- paste0("my_",colnames(DF.VV.1));
+DF.training <- DF.VV[DF.VV[,'x_y'] %in% locations.1,];
+colnames(DF.training) <- paste0("my_",colnames(DF.training));
 
-DF.VV.2 <- DF.VV[DF.VV[,'x_y'] %in% locations.2,];
-colnames(DF.VV.2) <- paste0("your_",colnames(DF.VV.2));
+DF.new <- DF.VV[DF.VV[,'x_y'] %in% locations.2,];
+colnames(DF.new) <- paste0("your_",colnames(DF.new));
 ```
 
-Here are the first few rows of **DF.VV.1**:
+Here are the first few rows of **DF.training**:
 ```{r}
-knitr::kable(head(DF.VV.1), align = "c")
+knitr::kable(head(DF.training), align = "c")
 ```
-
-The first few rows of **DF.VV.2**:
+We examine the structure of **DF.training**:
 ```{r}
-knitr::kable(head(DF.VV.2), align = "c")
+str(DF.training)
 ```
+We remark here that only the following three columns
+are required to invoke **fpcFeatureEngine**:
 
-# 2. Training (compute and store functional principal components based on training data)
+*  **my_date**: date (of remote sensing observation), must be of type Date
+*  **my_x_y**: location identifier, must be of type character
+*  **my_VV**: target variable (remote sensing measurement), must be of type numeric
 
-### Training an **fpcFeatureEngine** object with the training data
+**fpcFeatureEngine** ignores all columns of the input time series data frame
+that are irrelevant to the functional principal component computations
+(but it does NOT reject input data frames with extra columns).
 
+The first few rows of **DF.new**:
 ```{r}
-logger::log_threshold(level = logger::ERROR);
+knitr::kable(head(DF.new), align = "c")
+```
+Note that **DF.new** has (of course) the same structure as **DF.training**),
+but the two data frames have different column names.
+**fpcFeatureEngine** does NOT require the training and new data frames
+to have the same column names.
+We deliberately give different column names to **DF.training** and **DF.new**
+to highlight this.
 
+# 2. Training
+
+Recall that "training" here means:
+**compute and store functional principal components based on training data**.
+
+First, we instantiate an **fpcFeatureEngine** object,
+with the input (training) data and instantiation parameters:
+```{r}
 my.fpcFeatureEngine <- fpcFeatureEngine$new(
-    training.data       = DF.VV.1,
+    training.data       = DF.training,
     location            = 'my_x_y',
     date                = 'my_date',
     variable            = 'my_VV',
@@ -128,51 +147,128 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
     smoothing.parameter =   0.1,
     n.harmonics         =   7
     );
-
-my.fpcFeatureEngine$fit();
 ```
 
+We can now perform the training
+(i.e. computation of the functional principal components, a.k.a. the harmonics,
+based on the training data),
+simply by using the **fpcFeatureEngine$fit( )** function, as follows:
+```{r}
+logger::log_threshold(level = logger::ERROR);
+my.fpcFeatureEngine$fit();
+```
+The training is complete.
+The **log_threshold( )** function call above is just to suppress
+the printing of info messages during the fitting process.
+
+If we wish, we could examine the computed harmonics
+(functional principal components)
+using the **fpcFeatureEngine$plot.harmonics( )** function:
 ```{r harmonics, fig.height = 28, fig.width = 16}
 my.fpcFeatureEngine$plot.harmonics();
 ```
 
-# 3. Compute FPC scores for new data using a trained **fpcFeatureEngine** object.
+# 3. Compute FPC scores for new data using the trained **fpcFeatureEngine** object.
 
-### Compuint FPC scores for the new data using the trained **fpcFeatureEngine** object
-
-```{r}
-DF.land.cover <- base::unique(IW4[,c('x','y','land_cover')])
-DF.land.cover[,'x_y'] <- base::apply(
-    X      = DF.land.cover[,c('x','y')],
-    MARGIN = 1,
-    FUN    = function(x) { return(base::paste(x,collapse="_")) }
-    );
-DF.land.cover <- DF.land.cover[,c('x_y','land_cover')]
-knitr::kable(head(DF.land.cover), align = "c", row.names = FALSE)
-```
-
+We compute the functional principal component scores for the time series
+in **DF.new** using the **fpcFeatureEngine$transform( )** function:
 ```{r transform}
 DF.bspline.fpc <- my.fpcFeatureEngine$transform(
-    newdata  = DF.VV.2,
+    newdata  = DF.new,
     location = 'your_x_y',
     date     = 'your_date',
     variable = 'your_VV'
     );
+```
 
-DF.bspline.fpc <- base::merge(
+### Examining the output of **fpcFeatureEngine$transform( )**
+
+We examine the structure of the object **DF.bspline.fpc**
+returned by **fpcFeatureEngine$transform( )**:
+```{r}
+str(DF.bspline.fpc)
+```
+
+**DF.bspline.fpc** is simply a data frame,
+though with a large number of columns.
+Here are all of its column names:
+```{r}
+colnames(DF.bspline.fpc)
+```
+
+*   Each row of **DF.bspline.fpc** corresponds to a (location, year).
+    In other words, the two columns **your_x_y** and **year** together serve
+    as the primary key of the data frame **DF.bspline.fpc**.
+
+*   The integer column names are "date indexes",
+    where 1 refers to New Year's Day, 2 = January 2, and so on.
+
+*   On each row -- i.e. for each (location, year) -- the values
+    under the date indexes (those with integer column names)
+    are the values of the B-spline fitted through the original time series
+    of that (location, year).
+
+*   The values under the columns **fpc_1**, **fpc_2**, ... , **fpc_7**
+    are the functional principal component scores.
+
+Here are the first few rows of **DF.bspline.fpc**,
+with the B-spline columns suppressed:
+```{r}
+knitr::kable(head(DF.bspline.fpc[,c('your_x_y','year',paste0('fpc_',1:7))]), align = "c", row.names = FALSE)
+```
+
+# 4. Visualize FPC scores of new data.
+
+Recall that we discarded the land cover column
+when we formed the **DF.training** and **DF.new** data frames,
+since land cover is not needed by **fpcFeatureEngine**,
+i.e. land cover is not needed for computing functional principal components
+or scores.
+
+But now, for the visualization, we wish to indicate the different land covers
+with different colours. So, we attach back the land cover information.
+
+The following code segment extracts the land cover of each location
+in the original data frame **IW4**, and stores the information
+in the data frame **DF.land.cover**:
+```{r}
+DF.land.cover <- unique(IW4[,c('x','y','land_cover')])
+DF.land.cover[,'x_y'] <- apply(
+    X      = DF.land.cover[,c('x','y')],
+    MARGIN = 1,
+    FUN    = function(x) { return(paste(x,collapse="_")) }
+    );
+DF.land.cover <- DF.land.cover[,c('x_y','land_cover')]
+```
+
+The first few rows of **DF.land.cover**:
+```{r}
+knitr::kable(head(DF.land.cover), align = "c", row.names = FALSE)
+```
+
+We attach the land cover back to **DF.bspline.fpc** simply as follows:
+```{r}
+DF.bspline.fpc <- merge(
     x    = DF.bspline.fpc,
     y    = DF.land.cover,
     by.x = 'your_x_y',
     by.y = 'x_y'
     )
-
-DF.bspline.fpc <- DF.bspline.fpc[,c('your_x_y','year','land_cover',paste0('fpc_',1:7))]
-
-knitr::kable(head(DF.bspline.fpc), align = "c", row.names = FALSE)
 ```
 
-# 4. Visualize FPC scores of new data.
+We discard the B-spline columns (no longer needed for rest of this vignette)
+from **DF.bspline.fpc**, and store the resulting data frame as **DF.fpc**:
+```{r}
+DF.fpc <- DF.bspline.fpc[,c('your_x_y','year','land_cover',paste0('fpc_',1:7))]
+```
 
+The first few columns of **DF.fpc**:
+```{r}
+knitr::kable(head(DF.fpc), align = "c", row.names = FALSE)
+```
+
+The following code segment generates the scatter plot of
+**fpc_1** against **fpc_2**, indicating land cover by colour:
 ```{r fig.width = 16, fig.height = 12.5}
 DF.colour.scheme <- data.frame(
     land_cover = c("marsh",  "swamp",  "water",  "forest", "ag",     "shallow"),
@@ -212,7 +308,7 @@ my.ggplot <- my.ggplot + ggplot2::xlab("FPC 1 score")
 my.ggplot <- my.ggplot + ggplot2::ylab("FPC 2 score")
 
 my.ggplot <- my.ggplot + geom_point(
-    data    = DF.bspline.fpc,
+    data    = DF.fpc,
     mapping = aes(x = fpc_1, y = fpc_2, colour = land_cover),
     size    = 0.5,
     alpha   = 0.5
@@ -220,11 +316,20 @@ my.ggplot <- my.ggplot + geom_point(
 
 my.ggplot
 ```
+We emphasize here that:
+
+*   The functional principal component scores shown in the above scatter plot
+    were computed for the time series in **DF.new**.
+
+*   However, these scores (again, computed for **DF.new**) were computed
+    with respect to the functional principal components
+    extracted from time series in **DF.training**,
+    which was used as the training data set.
 
 # 5. Goodness-of-fit diagnostics of individual time series.
 
 ```{r}
-temp.x_y <- DF.VV.2[1,"your_x_y"]
+temp.x_y <- DF.new[1,"your_x_y"]
 print( temp.x_y );
 
 DF.temp <- IW4[c("x","y","date","VV")];
