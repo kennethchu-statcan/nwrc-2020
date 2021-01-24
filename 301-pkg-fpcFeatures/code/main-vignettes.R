@@ -18,7 +18,7 @@ require(rmarkdown);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 vignette.files <- c(
-    "vignette-fpc1-fpc2"
+    "fpcFeatureEngine-usage"
     );
 
 for ( vignette.file in vignette.files ) {

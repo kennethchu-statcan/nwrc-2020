@@ -81,9 +81,9 @@ files.R <- base::file.path( code.directory , files.R );
 IW4.RData <- base::file.path( code.directory , "IW4.RData" );
 
 list.vignettes.Rmd <- list(
-    'vignette-fpc1-fpc2' = list(
-        file  = base::file.path( code.directory , 'vignette-fpc1-fpc2.Rmd'       ),
-        asis  = base::file.path( code.directory , 'vignette-fpc1-fpc2.html.asis' )
+    'fpcFeatureEngine-usage' = list(
+        file  = base::file.path( code.directory , 'fpcFeatureEngine-usage.Rmd'       ),
+        asis  = base::file.path( code.directory , 'fpcFeatureEngine-usage.html.asis' )
         )
     );
 
