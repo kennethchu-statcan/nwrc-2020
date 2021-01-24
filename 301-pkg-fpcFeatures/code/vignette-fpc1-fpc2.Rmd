@@ -148,6 +148,8 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
     location            = 'my_x_y',
     date                = 'my_date',
     variable            = 'my_VV',
+    min.date            = NULL,
+    max.date            = NULL,
     n.partition         = 100,
     n.order             =   3,
     n.basis             =   9,
@@ -155,6 +157,30 @@ my.fpcFeatureEngine <- fpcFeatureEngine$new(
     n.harmonics         =   7
     );
 ```
+__Aside: when to supply non-NULL values for the **min.date** and **max.date** input parameters__
+<br>
+_The **min.date** and **max.date** parameters in the above call to
+**fpcFeatureEngine$new( )** could have been omitted since we merely supplied
+their default value (i.e. NULL). We explain here when to supply non-NULL
+values for either of these parameters.
+When computing FPC scores for new data -- see Section 3 below --
+**fpcFeatureEngine** requires that the range of observation dates in the
+new data encompasses that of the training data.
+This is because,
+prior to computing the FPC scores,
+with respect to FPC extracted from the training data,
+for each new data time series,
+a B-spline first needs to be fitted through that new data time series,
+and each such B-spline must be well-defined
+__over the entire observation date range of the training data__.
+Conversely, in practice, if one encounters a scenario where the training data
+observation date range does not entirely reside within that of the new data,
+then one uses the **min.date** and/or **max.date** parameter when instantiating
+**fpcFeatureEngine** in order to restrict the subsequent FPC computations
+to the observation date range of the new data._
+See Section 5, and the plot therein, for an illustration of this.
+<br>
+<br>
 
 We can now perform the training
 (i.e. computation of the functional principal components, a.k.a. the harmonics,
@@ -335,6 +361,14 @@ We emphasize here that:
 
 # 5. Goodness-of-fit diagnostics of individual time series.
 
+It is prudent to examine how well the B-spline and the FPC approximation
+are fitting a given time series.
+
+We demonstrate how to do so in this section.
+
+The following code segment extracts, and then displays,
+the 2017 VV time series of the very first-appearing location
+in **DF.new**:
 ```{r}
 temp.x_y <- DF.new[1,"your_x_y"]
 print( temp.x_y );
@@ -357,6 +391,8 @@ DF.temp <- DF.temp[,c("their_x_y","their_date","their_VV")]
 knitr::kable(DF.temp, align = "c", row.names = FALSE)
 ```
 
+We can examine the goodness-of-fit of the B-spline and FPC approximations
+as follows:
 ```{r, fig.width = 16}
 my.fpcFeatureEngine$plot.approximations(
     DF.input = DF.temp,
@@ -365,3 +401,8 @@ my.fpcFeatureEngine$plot.approximations(
     variable = "their_VV"
     )
 ```
+Here, the black dots illustrate the given time series,
+while the blue and red curves illustrate, respectively,
+the fitted B-spline and the FPC approximation.
+The two vertical dashed lines indicate the observation date range
+of the training data.
