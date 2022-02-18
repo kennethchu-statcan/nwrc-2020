@@ -16,13 +16,14 @@ start.proc.time <- proc.time();
 setwd( dir.out );
 
 cat("\n##################################################\n");
+# require(fpcFeatures);
 require(dplyr);
 require(magrittr);
 require(rlang);
-require(fpcFeatures);
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 code.files <- c(
+    "fpcFeatureEngine.R",
     "coregisterData.R",
     "geo-standardize.R",
     "getData.R",
@@ -166,7 +167,8 @@ for ( temp.variable in my.variables ) {
     print( str(DF.variable)   );
 
     ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-    my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
+  # my.fpcFeatureEngine <- fpcFeatures::fpcFeatureEngine$new(
+    my.fpcFeatureEngine <- fpcFeatureEngine$new(
         training.data       = DF.variable,
         location            = 'X_Y',
         date                = 'date',

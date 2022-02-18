@@ -78,6 +78,10 @@ visualize.fpc.scores_scatter <- function(
 
     temp.xlab <- gsub(x = toupper(x.var), pattern = "_", replacement = " ");
     temp.ylab <- gsub(x = toupper(y.var), pattern = "_", replacement = " ");
+
+    temp.xlab <- gsub(x = temp.xlab, pattern = "FPC", replacement = "CPF");
+    temp.ylab <- gsub(x = temp.ylab, pattern = "FPC", replacement = "CPF");
+
     my.ggplot <- my.ggplot + xlab( label = temp.xlab );
     my.ggplot <- my.ggplot + ylab( label = temp.ylab );
 
