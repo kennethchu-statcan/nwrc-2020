@@ -235,7 +235,7 @@ fpcFeatureEngine <- R6::R6Class(
 
             ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
             string.annee  <- "année: ";
-            string.coords <- ", coordonnées: ";
+            string.coords <- ", endroit: ";      # ", coordonnées: ";
             Encoding(string.annee)  <- "UTF-8";
             Encoding(string.coords) <- "UTF-8";
 
